@@ -1,0 +1,54 @@
+import React from 'react';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AppProvider, useApp } from './context/AppContext';
+import { Login } from './pages/Login';
+import { Dashboard } from './pages/Dashboard';
+import { CalendarPage } from './pages/Calendar';
+import { OperationalPreDelivery } from './pages/OperationalPreDelivery';
+import { Movements } from './pages/Movements';
+import { ConfirmMovements } from './pages/ConfirmMovements';
+import { TravelSheet } from './pages/TravelSheet';
+import { HistoricalTravelSheet } from './pages/HistoricalTravelSheet';
+import { ProgrammingPage } from './pages/Programming';
+import { AuditLogs } from './pages/AuditLogs';
+import { UsedReceptionPage } from './pages/UsedReception';
+import { Layout } from './components/Layout';
+import { Role } from './types';
+
+const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: Role[] }> = ({ children, allowedRoles }) => {
+  const { user } = useApp();
+  if (!user) return <Navigate to="/login" replace />;
+  if (allowedRoles && !allowedRoles.includes(user.role)) return <Navigate to="/" replace />;
+  return <Layout>{children}</Layout>;
+};
+
+const AppRoutes: React.FC = () => {
+  const { user } = useApp();
+  return (
+    <Routes>
+      <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+      <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/used-reception" element={<ProtectedRoute allowedRoles={[Role.USED_OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><UsedReceptionPage /></ProtectedRoute>} />
+      <Route path="/programming" element={<ProtectedRoute allowedRoles={[Role.PROGRAMADOR, Role.ADMIN, Role.SUPER_ADMIN]}><ProgrammingPage /></ProtectedRoute>} />
+      <Route path="/calendar" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.PROGRAMADOR]}><CalendarPage /></ProtectedRoute>} />
+      <Route path="/pdi" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><OperationalPreDelivery /></ProtectedRoute>} />
+      <Route path="/travel-sheet" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><TravelSheet /></ProtectedRoute>} />
+      <Route path="/historical-travel-sheet" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><HistoricalTravelSheet /></ProtectedRoute>} />
+      <Route path="/movements" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.USED_OPERATOR]}><Movements /></ProtectedRoute>} />
+      <Route path="/confirm-movements" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><ConfirmMovements /></ProtectedRoute>} />
+      <Route path="/audit" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.SUPER_ADMIN]}><AuditLogs /></ProtectedRoute>} />
+    </Routes>
+  );
+}
+
+const App: React.FC = () => {
+  return (
+    <AppProvider>
+      <HashRouter>
+        <AppRoutes />
+      </HashRouter>
+    </AppProvider>
+  );
+};
+
+export default App;
