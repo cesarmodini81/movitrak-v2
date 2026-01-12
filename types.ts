@@ -1,3 +1,4 @@
+
 export enum Role {
   SUPER_ADMIN = 'SUPER_ADMIN',
   ADMIN = 'ADMIN',
@@ -31,23 +32,25 @@ export interface Location {
 
 export interface Vehicle {
   vin: string;
+  plate?: string; // Patente para usados
   brand: string;
   model: string;
   year: number;
   color: string;
+  km?: number; // Kilometraje para usados
   type: 'NEW' | 'USED';
   locationId: string;
   entryDate: string; // ISO Date
   
   // PDI / Technical Status
-  preDeliveryConfirmed: boolean; // Was pdiConfirmed
+  preDeliveryConfirmed: boolean;
   preDeliveryDate?: string;
   preDeliveryUser?: string;
   pdiComment?: string;
   
   // Logistics Status
   status: 'AVAILABLE' | 'IN_TRANSIT' | 'SOLD' | 'MAINTENANCE';
-  isLocked: boolean; // True if in a Remito/Movement
+  isLocked: boolean;
   lockReason?: string;
 }
 
@@ -101,4 +104,16 @@ export interface UsedReception {
   };
   observations: string;
   companyId: string;
+  status: 'INGRESADO' | 'CONFIRMADO' | 'ANULADO';
+}
+
+// Added ChatMessage interface
+export interface ChatMessage {
+  id: string;
+  text: string;
+  senderId: string;
+  senderName: string;
+  companyId: string;
+  timestamp: string;
+  isRead: boolean;
 }

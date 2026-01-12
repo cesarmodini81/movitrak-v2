@@ -1,8 +1,10 @@
-import React, { useState, useEffect, useMemo } from 'react';
+
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { Vehicle, Movement, Company } from '../types';
 import { LOCATION_MAP } from '../constants';
-import { X, Search, MapPin, Truck, Car, Database, Info, Layers, Building2, Calendar, FileText, User, ArrowRight, ShieldAlert, ShieldCheck } from 'lucide-react';
+// Add AlertCircle to the imports
+import { X, Search, MapPin, Truck, Car, Database, Info, Layers, Building2, Calendar, FileText, User, ArrowRight, ShieldAlert, ShieldCheck, Hash, Tag, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { RemitoDocument } from './RemitoDocument';
 import { PrintPreviewModal } from './PrintPreviewModal';
@@ -13,47 +15,53 @@ interface Props {
 }
 
 export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
-  const { vehicles, movements, companies, currentCompany } = useApp();
+  const { availableVehicles, movements, companies } = useApp();
   const { t } = useTranslation();
   
-  // State
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const [suggestions, setSuggestions] = useState<Vehicle[]>([]);
   const [activeTab, setActiveTab] = useState<'LOGISTICS' | 'UNIT'>('LOGISTICS');
-  
-  // Preview States
-  const [previewRemito, setPreviewRemito] = useState<Movement | null>(null);
+  const [isFocused, setIsFocused] = useState(false);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (searchTerm.length > 2) {
-      setSuggestions(vehicles.filter(v => v.vin.toLowerCase().includes(searchTerm.toLowerCase())).slice(0, 5));
+    if (searchTerm.length > 1) {
+      const lowerTerm = searchTerm.toLowerCase();
+      const filtered = availableVehicles.filter(v => 
+        v.vin.toLowerCase().includes(lowerTerm) || 
+        (v.plate && v.plate.toLowerCase().replace(/\s/g, '').includes(lowerTerm.replace(/\s/g, ''))) ||
+        v.model.toLowerCase().includes(lowerTerm)
+      );
+      setSuggestions(filtered.slice(0, 8));
     } else {
       setSuggestions([]);
     }
-  }, [searchTerm, vehicles]);
+  }, [searchTerm, availableVehicles]);
+
+  // Click outside to close suggestions
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+        setIsFocused(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const vehicleHistory = useMemo(() => {
     if (!selectedVehicle) return [];
     return movements
       .filter(m => m.vehicleVins.includes(selectedVehicle.vin))
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [selectedVehicle, movements]);
-
-  const getFullLocationInfo = (locationId: string) => {
-    for (const comp of companies) {
-      const loc = comp.locations.find(l => l.id === locationId);
-      if (loc) return { location: loc, company: comp };
-    }
-    return null;
-  };
-
-  if (!isOpen) return null;
 
   const handleSelect = (v: Vehicle) => {
     setSelectedVehicle(v);
-    setSearchTerm(v.vin);
+    setSearchTerm(v.plate || v.vin);
     setSuggestions([]);
+    setIsFocused(false);
   };
 
   const handleClose = () => {
@@ -64,47 +72,55 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
     onClose();
   };
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-      <div className="bg-white w-full max-w-7xl rounded-3xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden no-print border border-slate-200 animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+      <div className="bg-white w-full max-w-7xl rounded-3xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-300">
         
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+        {/* Header Modificado */}
+        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
           <div className="flex items-center gap-4">
-             <div className="p-3 bg-slate-900 text-white rounded-xl shadow-lg">
-                <Search size={24} />
-             </div>
+             <div className="p-3 bg-slate-900 text-white rounded-xl shadow-lg shadow-slate-200"><Search size={24} /></div>
              <div>
-               <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Consulta Trazabilidad</h2>
-               <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Estado Central de Flota MOVITRAK</p>
+               <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Consulta Trazabilidad Centralizada</h2>
+               <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">Gestión de Stock 0KM / USADOS Selección</p>
              </div>
           </div>
-          <button 
-            onClick={handleClose} 
-            className="w-10 h-10 flex items-center justify-center hover:bg-slate-200 rounded-full transition-all text-slate-400 hover:text-slate-600"
-          >
-            <X size={20} />
-          </button>
+          <button onClick={handleClose} className="w-10 h-10 flex items-center justify-center hover:bg-red-50 hover:text-red-500 rounded-full transition-all text-slate-400"><X size={24} /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-slate-50/30">
           <div className="p-8">
-            <div className="max-w-3xl mx-auto mb-8">
-              <div className="relative group z-30">
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Buscador por VIN / Chasis</label>
-                <div className="relative">
-                  <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-                     <Database size={18} />
+            {/* Buscador Predictivo Premium */}
+            <div className="max-w-3xl mx-auto mb-10 relative" ref={suggestionsRef}>
+              <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Identificación de Unidad (VIN, Patente o Modelo)</label>
+              <div className="relative">
+                <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400">
+                  <Database size={20} />
+                </div>
+                <input 
+                  type="text"
+                  value={searchTerm}
+                  onFocus={() => setIsFocused(true)}
+                  onChange={(e) => { setSearchTerm(e.target.value); if(selectedVehicle) setSelectedVehicle(null); }}
+                  className="w-full pl-14 pr-4 py-5 bg-white border-2 border-slate-200 rounded-2xl text-xl font-bold text-slate-800 focus:outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-900/5 transition-all uppercase placeholder:text-slate-300 shadow-sm"
+                  placeholder="Ej: ABC 123 o 8AJH..."
+                  autoFocus
+                />
+                
+                {/* Fallback visual cuando no hay resultados */}
+                {isFocused && searchTerm.length > 2 && suggestions.length === 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-slate-200 rounded-2xl shadow-2xl p-6 text-center z-50">
+                    <AlertCircle size={32} className="mx-auto text-slate-300 mb-2" />
+                    <p className="text-sm font-bold text-slate-500 uppercase">No se encontraron unidades coincidentes</p>
                   </div>
-                  <input 
-                    type="text"
-                    value={searchTerm}
-                    onChange={(e) => { setSearchTerm(e.target.value); setSelectedVehicle(null); }}
-                    className="w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-xl text-lg font-bold text-slate-800 placeholder:text-slate-300 focus:outline-none focus:border-brand-500 focus:ring-4 focus:ring-brand-50 transition-all uppercase shadow-sm"
-                    placeholder="Ingrese el VIN de la unidad..."
-                    autoFocus
-                  />
-                  {suggestions.length > 0 && (
-                    <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-2xl overflow-hidden">
+                )}
+
+                {/* Lista de Sugerencias Enterprise */}
+                {isFocused && suggestions.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-slate-200 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in slide-in-from-top-2 duration-200">
+                    <div className="max-h-80 overflow-y-auto">
                       {suggestions.map(s => (
                         <button 
                           key={s.vin} 
@@ -112,185 +128,145 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
                           className="w-full text-left px-6 py-4 hover:bg-slate-50 border-b border-slate-50 last:border-0 flex justify-between items-center group transition-colors"
                         >
                           <div className="flex items-center gap-4">
-                            <div className="p-2 bg-slate-100 rounded-lg text-slate-500 group-hover:bg-brand-50 group-hover:text-brand-600 transition-colors">
-                               <Car size={20} />
+                            <div className={`p-2.5 rounded-xl font-black text-[10px] shadow-sm flex items-center justify-center min-w-[48px] ${s.type === 'USED' ? 'bg-amber-100 text-amber-700' : 'bg-brand-50 text-brand-700'}`}>
+                               {s.type === 'USED' ? 'USD' : '0KM'}
                             </div>
                             <div>
-                              <span className="font-mono font-black text-slate-900 text-base">{s.vin}</span>
-                              <span className="text-xs font-bold text-slate-400 uppercase ml-2 block">{s.brand} {s.model}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="font-mono font-black text-slate-900 text-lg tracking-wider">{s.plate || s.vin.slice(-8)}</span>
+                                {s.plate && <span className="text-[10px] font-bold text-slate-400 font-mono">({s.vin.slice(-6)})</span>}
+                              </div>
+                              <span className="text-xs font-bold text-slate-400 uppercase tracking-tight">{s.brand} {s.model} • {s.color}</span>
                             </div>
                           </div>
-                          <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 bg-slate-100 px-2 py-1 rounded">{s.status}</span>
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity bg-slate-900 text-white p-2 rounded-lg">
+                             <ArrowRight size={16} />
+                          </div>
                         </button>
                       ))}
                     </div>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
             </div>
 
             {selectedVehicle ? (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6">
-                
-                <div className="flex border-b border-slate-200 bg-white px-6 rounded-t-2xl shadow-sm">
-                  <button 
-                    onClick={() => setActiveTab('LOGISTICS')}
-                    className={`px-6 py-4 text-xs font-black uppercase tracking-widest border-b-4 transition-all flex items-center gap-2 ${activeTab === 'LOGISTICS' ? 'border-brand-600 text-brand-700' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
-                  >
-                    <Truck size={16} /> Logística Actual
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('UNIT')}
-                    className={`px-6 py-4 text-xs font-black uppercase tracking-widest border-b-4 transition-all flex items-center gap-2 ${activeTab === 'UNIT' ? 'border-brand-600 text-brand-700' : 'border-transparent text-slate-400 hover:text-slate-600'}`}
-                  >
-                    <Info size={16} /> Especificaciones
-                  </button>
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
+                {/* Tabs de Navegación */}
+                <div className="flex border-b-2 border-slate-100 bg-white px-8 rounded-t-3xl shadow-sm">
+                  <button onClick={() => setActiveTab('LOGISTICS')} className={`px-8 py-5 text-xs font-black uppercase tracking-[0.2em] border-b-4 transition-all flex items-center gap-2 ${activeTab === 'LOGISTICS' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400 hover:text-slate-600'}`}><Truck size={18} /> Resumen Logístico</button>
+                  <button onClick={() => setActiveTab('UNIT')} className={`px-8 py-5 text-xs font-black uppercase tracking-[0.2em] border-b-4 transition-all flex items-center gap-2 ${activeTab === 'UNIT' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400 hover:text-slate-600'}`}><Info size={18} /> Ficha Técnica</button>
                 </div>
 
-                <div className="bg-white p-8 rounded-b-2xl rounded-tr-2xl shadow-sm border border-slate-200 border-t-0 -mt-px">
+                {/* Dashboard de Estado de Unidad */}
+                <div className="bg-white p-10 rounded-3xl shadow-sm border border-slate-200 border-t-0 -mt-px">
                    {activeTab === 'LOGISTICS' ? (
-                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-                        <div className="space-y-1">
-                           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Disponibilidad</p>
-                           <p className={`text-xl font-black uppercase ${selectedVehicle.status === 'AVAILABLE' ? 'text-emerald-600' : 'text-amber-600'}`}>
-                              {selectedVehicle.status === 'AVAILABLE' ? 'LIBRE' : selectedVehicle.status.replace('_', ' ')}
+                     <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+                        <div className="space-y-2">
+                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Disponibilidad</p>
+                           <p className={`text-2xl font-black uppercase tracking-tighter ${selectedVehicle.status === 'AVAILABLE' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                             {selectedVehicle.status.replace('_', ' ')}
                            </p>
                         </div>
-                        
-                        <div className="space-y-1">
-                           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Ubicación Física Actual</p>
-                           <div className="flex items-center gap-3">
-                              <div className="p-2 bg-slate-900 text-white rounded-lg">
-                                 <MapPin size={18} />
-                              </div>
-                              <div>
-                                 <p className="text-lg font-black text-slate-900 uppercase leading-none">
-                                   {LOCATION_MAP[selectedVehicle.locationId] || selectedVehicle.locationId}
-                                 </p>
-                                 <p className="text-[10px] font-bold text-slate-400 uppercase mt-1">
-                                   {getFullLocationInfo(selectedVehicle.locationId)?.company.name || 'Empresa Desconocida'}
-                                 </p>
-                              </div>
+                        <div className="space-y-2">
+                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Ubicación Actual</p>
+                           <div className="flex items-center gap-2 text-slate-900 font-black uppercase text-xl tracking-tight">
+                              <MapPin size={20} className="text-slate-400" />
+                              {LOCATION_MAP[selectedVehicle.locationId] || selectedVehicle.locationId}
                            </div>
                         </div>
-
-                        <div className="space-y-1">
-                           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">VIN Registrado</p>
-                           <p className="text-xl font-mono font-black text-slate-900 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 w-fit">{selectedVehicle.vin}</p>
+                        <div className="space-y-2">
+                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Dominio / VIN</p>
+                           <div className="flex items-center gap-2">
+                             <Tag size={18} className="text-slate-400" />
+                             <p className="text-2xl font-mono font-black text-slate-900 tracking-wider">
+                                {selectedVehicle.plate || selectedVehicle.vin.slice(-8)}
+                             </p>
+                           </div>
                         </div>
-                        
-                        <div className="space-y-1">
-                           <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Bloqueo Operativo</p>
-                           <div className={`flex items-center gap-2 text-sm font-bold uppercase ${selectedVehicle.isLocked ? 'text-red-600' : 'text-slate-400'}`}>
-                              {selectedVehicle.isLocked ? <ShieldAlert size={14} /> : <ShieldCheck size={14} />}
-                              {selectedVehicle.isLocked ? `BLOQUEADO (${selectedVehicle.lockReason})` : 'SIN RESTRICCIONES'}
+                        <div className="space-y-2">
+                           <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Certificación PDI</p>
+                           <div className={`flex items-center gap-2 text-sm font-black uppercase tracking-wide px-3 py-1.5 rounded-xl w-fit ${selectedVehicle.preDeliveryConfirmed ? 'bg-emerald-50 text-emerald-700 border border-emerald-100' : 'bg-red-50 text-red-700 border border-red-100'}`}>
+                              {selectedVehicle.preDeliveryConfirmed ? <ShieldCheck size={16} /> : <ShieldAlert size={16} />}
+                              {selectedVehicle.preDeliveryConfirmed ? 'VALIDADO OK' : 'PENDIENTE'}
                            </div>
                         </div>
                      </div>
                    ) : (
-                     <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 gap-y-6">
+                     <div className="grid grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-8">
                         <div className="space-y-1">
-                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Marca</p>
-                           <p className="font-bold text-slate-900 uppercase">{selectedVehicle.brand}</p>
+                           <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Marca / Modelo</p>
+                           <p className="font-black text-slate-900 uppercase text-xl tracking-tight">{selectedVehicle.brand} {selectedVehicle.model}</p>
                         </div>
                         <div className="space-y-1">
-                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Año Modelo</p>
-                           <p className="font-bold text-slate-900 uppercase">{selectedVehicle.year}</p>
+                           <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Año Fab.</p>
+                           <p className="font-black text-slate-900 text-xl">{selectedVehicle.year}</p>
                         </div>
                         <div className="space-y-1">
-                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Color Oficial</p>
-                           <p className="font-bold text-slate-900 uppercase">{selectedVehicle.color}</p>
+                           <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Kilometraje</p>
+                           <p className="font-black text-slate-900 text-xl">{selectedVehicle.km ? `${selectedVehicle.km.toLocaleString()} KM` : '0KM - UNIDAD NUEVA'}</p>
                         </div>
                         <div className="space-y-1">
-                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Tipo de Unidad</p>
-                           <p className={`font-black text-xs uppercase ${selectedVehicle.type === 'NEW' ? 'text-brand-600' : 'text-amber-700'}`}>
-                             {selectedVehicle.type === 'NEW' ? '0KM (NUEVO)' : 'USADO SELECCION'}
-                           </p>
-                        </div>
-                        
-                        <div className="col-span-full h-px bg-slate-100 my-2"></div>
-
-                        <div className="space-y-1">
-                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Certificación PDI</p>
-                           <div className={`inline-flex items-center gap-2 font-black text-[10px] uppercase px-2 py-1 rounded-full ${selectedVehicle.preDeliveryConfirmed ? 'bg-emerald-100 text-emerald-700' : 'bg-red-50 text-red-600'}`}>
-                              {selectedVehicle.preDeliveryConfirmed ? <ShieldCheck size={12} /> : <ShieldAlert size={12} />}
-                              {selectedVehicle.preDeliveryConfirmed ? 'VALIDADA' : 'PENDIENTE'}
+                           <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Color Oficial</p>
+                           <div className="flex items-center gap-2">
+                             <div className="w-4 h-4 rounded-full border border-slate-200" style={{ backgroundColor: '#e2e8f0' }}></div>
+                             <p className="font-black text-slate-700 uppercase text-lg">{selectedVehicle.color}</p>
                            </div>
                         </div>
-                        <div className="space-y-1">
-                           <p className="text-[9px] text-slate-400 font-bold uppercase tracking-widest">Fecha Ingreso</p>
-                           <p className="font-medium text-slate-700">{new Date(selectedVehicle.entryDate).toLocaleDateString()}</p>
+                        <div className="col-span-full pt-6 border-t border-slate-100 flex items-center justify-between">
+                           <div>
+                              <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Identificador de Chasis (VIN) Completo</p>
+                              <p className="font-mono font-black text-slate-500 text-sm tracking-[0.2em] bg-slate-50 px-4 py-2 rounded-xl border border-slate-200">{selectedVehicle.vin}</p>
+                           </div>
+                           <div className="text-right">
+                              <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Fecha de Ingreso a Flota</p>
+                              <p className="font-black text-slate-800 text-sm">{new Date(selectedVehicle.entryDate).toLocaleDateString()}</p>
+                           </div>
                         </div>
                      </div>
                    )}
                 </div>
 
-                <div className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
-                   <div className="px-6 py-4 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
-                      <h3 className="font-bold text-slate-900 text-sm uppercase tracking-tight flex items-center gap-2">
-                        <Layers size={16} /> Cronología de Movimientos
-                      </h3>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Trazabilidad Total</span>
+                {/* Cronología Logística */}
+                <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                   <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                      <div className="flex items-center gap-3">
+                         <Layers size={20} className="text-slate-900" />
+                         <h3 className="font-black text-slate-900 text-sm uppercase tracking-tight">Historial de Operaciones Logísticas</h3>
+                      </div>
+                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Últimos traslados registrados</span>
                    </div>
-                   
                    <div className="overflow-x-auto">
                      <table className="w-full text-left text-xs">
-                       <thead>
-                         <tr className="bg-white text-slate-400 font-bold uppercase text-[9px] tracking-widest border-b border-slate-100">
-                           <th className="px-6 py-3">Fecha</th>
-                           <th className="px-6 py-3">ID Remito</th>
-                           <th className="px-6 py-3">Empresa / Origen</th>
-                           <th className="px-6 py-3">Ubicación Destino</th>
-                           <th className="px-6 py-3 text-center">Estado</th>
-                           <th className="px-6 py-3">Transporte</th>
+                       <thead className="bg-slate-50 text-slate-500 font-black uppercase text-[9px] tracking-widest border-b border-slate-100">
+                         <tr>
+                           <th className="px-8 py-4">Fecha Op.</th>
+                           <th className="px-8 py-4">ID Remito</th>
+                           <th className="px-8 py-4">Planta Origen</th>
+                           <th className="px-8 py-4">Planta Destino</th>
+                           <th className="px-8 py-4 text-center">Estado</th>
                          </tr>
                        </thead>
                        <tbody className="divide-y divide-slate-50">
-                         {vehicleHistory.length > 0 ? (
-                           vehicleHistory.map((m) => {
-                             const destInfo = getFullLocationInfo(m.destinationId);
-                             const originInfo = getFullLocationInfo(m.originId);
-                             
-                             return (
-                               <tr key={m.id} className="hover:bg-slate-50/80 transition-colors">
-                                 <td className="px-6 py-4 font-mono font-bold text-slate-500">
-                                   {new Date(m.date).toLocaleDateString()}
-                                 </td>
-                                 <td className="px-6 py-4">
-                                   <button 
-                                     onClick={() => setPreviewRemito(m)}
-                                     className="flex items-center gap-2 text-brand-600 hover:text-brand-800 font-mono font-black"
-                                   >
-                                     <FileText size={12} />
-                                     {m.id}
-                                   </button>
-                                 </td>
-                                 <td className="px-6 py-4">
-                                   <p className="font-black text-slate-700 uppercase">{LOCATION_MAP[m.originId] || m.originId}</p>
-                                   <p className="text-[9px] font-bold text-slate-400 uppercase">{originInfo?.company.name}</p>
-                                 </td>
-                                 <td className="px-6 py-4">
-                                   <p className="font-black text-brand-700 uppercase">{LOCATION_MAP[m.destinationId] || m.destinationId}</p>
-                                   <p className="text-[9px] font-bold text-slate-400 uppercase">{destInfo?.company.name}</p>
-                                 </td>
-                                 <td className="px-6 py-4 text-center">
-                                   <span className={`px-2 py-0.5 rounded-full font-black text-[9px] uppercase border ${m.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
-                                     {m.status}
-                                   </span>
-                                 </td>
-                                 <td className="px-6 py-4">
-                                   <div className="flex items-center gap-2 text-slate-600 font-bold uppercase">
-                                      <Truck size={12} />
-                                      {m.transporter}
-                                   </div>
-                                 </td>
-                               </tr>
-                             );
-                           })
-                         ) : (
+                         {vehicleHistory.length > 0 ? vehicleHistory.map((m) => (
+                           <tr key={m.id} className="hover:bg-slate-50 transition-colors group">
+                             <td className="px-8 py-5 font-mono font-bold text-slate-500">{new Date(m.date).toLocaleDateString()}</td>
+                             <td className="px-8 py-5 font-mono font-black text-slate-900 group-hover:text-brand-600 transition-colors">{m.id}</td>
+                             <td className="px-8 py-5 uppercase font-bold text-slate-600">{LOCATION_MAP[m.originId] || m.originId}</td>
+                             <td className="px-8 py-5 uppercase font-black text-slate-900">{LOCATION_MAP[m.destinationId] || m.destinationId}</td>
+                             <td className="px-8 py-5 text-center">
+                               <span className={`px-3 py-1 rounded-full font-black text-[9px] uppercase border ${m.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
+                                 {m.status}
+                               </span>
+                             </td>
+                           </tr>
+                         )) : (
                            <tr>
-                             <td colSpan={6} className="p-12 text-center text-slate-400 italic">
-                               No se registran transferencias inter-planta para esta unidad.
+                             <td colSpan={5} className="p-20 text-center text-slate-400 italic bg-white">
+                               <div className="flex flex-col items-center gap-4 opacity-40">
+                                  <Truck size={48} strokeWidth={1} />
+                                  <p className="text-sm font-bold uppercase tracking-widest">Sin registros de transferencias inter-planta</p>
+                               </div>
                              </td>
                            </tr>
                          )}
@@ -298,39 +274,29 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
                      </table>
                    </div>
                 </div>
-
               </div>
             ) : (
-              <div className="py-24 text-center flex flex-col items-center gap-6 opacity-60">
-                <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center text-slate-300">
-                  <Database size={40} />
+              <div className="py-24 text-center">
+                <div className="bg-slate-100/50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                   <Database size={48} className="text-slate-300" />
                 </div>
-                <div>
-                   <h3 className="text-lg font-black text-slate-900 uppercase tracking-tight">Consultar Stock Centralizado</h3>
-                   <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-1">Ingrese un VIN para obtener el historial completo y ubicación física real.</p>
-                </div>
+                <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Centro de Trazabilidad MOVITRAK</h3>
+                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mt-2 max-w-sm mx-auto">Ingrese VIN o Patente para visualizar el historial completo, estado de PDI y ubicación física de la unidad.</p>
               </div>
             )}
           </div>
         </div>
+
+        {/* Footer */}
+        <div className="p-6 border-t border-slate-100 bg-white flex justify-end shrink-0">
+           <button 
+             onClick={handleClose}
+             className="px-10 py-3.5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all active:scale-95"
+           >
+             Cerrar Consulta
+           </button>
+        </div>
       </div>
-      
-      {previewRemito && selectedVehicle && (
-        <PrintPreviewModal 
-          isOpen={!!previewRemito} 
-          onClose={() => setPreviewRemito(null)} 
-          title={`Remito Oficial #${previewRemito.id}`}
-        >
-          <RemitoDocument 
-            movement={previewRemito} 
-            company={companies.find(c => c.locations.some(l => l.id === previewRemito.originId)) || companies[0]}
-            vehicles={[selectedVehicle]}
-            origin={getFullLocationInfo(previewRemito.originId)?.location}
-            destination={getFullLocationInfo(previewRemito.destinationId)?.location}
-            driverDni="Consultar Base Choferes"
-          />
-        </PrintPreviewModal>
-      )}
     </div>
   );
 };

@@ -1,6 +1,7 @@
+
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { User, Vehicle, Movement, AuditLog, Role, Company, CalendarEvent, UsedReception } from '../types';
-import { MOCK_USERS, MOCK_COMPANIES, generateMockVehicles, MOCK_CHATS, ChatMessage } from '../constants';
+import { User, Vehicle, Movement, AuditLog, Role, Company, CalendarEvent, UsedReception, ChatMessage } from '../types';
+import { MOCK_USERS, MOCK_COMPANIES, generateMockVehicles, MOCK_CHATS, LOCATION_MAP } from '../constants';
 
 interface AppContextType {
   user: User | null;
@@ -9,6 +10,7 @@ interface AppContextType {
   vehicles: Vehicle[];
   availableVehicles: Vehicle[];
   companies: Company[];
+  allUsers: User[]; // New: Access to all users
   movements: Movement[];
   calendarEvents: CalendarEvent[];
   auditLogs: AuditLog[];
@@ -37,14 +39,19 @@ interface AppContextType {
   markChatAsRead: (companyId: string) => void;
   activeChatCompanyId: string | null;
   setActiveChatCompanyId: (id: string | null) => void;
+  // New Admin Functions
+  createCompany: (name: string) => void;
+  addNewUser: (user: User) => void;
+  updateUserRole: (userId: string, newRole: Role) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
+  const [allUsers, setAllUsers] = useState<User[]>(MOCK_USERS);
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
-  const [companies] = useState<Company[]>(MOCK_COMPANIES);
+  const [companies, setCompanies] = useState<Company[]>(MOCK_COMPANIES);
   const [movements, setMovements] = useState<Movement[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLog[]>([]);
@@ -75,11 +82,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       }
       return filtered;
     }
-    return [];
+    return vehicles;
   }, [vehicles, currentCompany, user]);
 
   const login = async (u: string, p: string): Promise<boolean> => {
-    const foundUser = MOCK_USERS.find(user => user.username === u && p === '1234');
+    // Check against dynamic allUsers state instead of static MOCK_USERS
+    const foundUser = allUsers.find(user => user.username === u && p === '1234');
     if (foundUser) {
       setUser(foundUser);
       if (foundUser.role === Role.SUPER_ADMIN) setCurrentCompany(null);
@@ -96,9 +104,53 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentCompany(null);
   };
 
+  // --- New Admin Logic ---
+
+  const addNewUser = (newUser: User) => {
+    setAllUsers(prev => [...prev, newUser]);
+    addAuditLog('USER_CREATED', `Usuario creado: ${newUser.username} (${newUser.role})`);
+  };
+
+  const updateUserRole = (userId: string, newRole: Role) => {
+    setAllUsers(prev => prev.map(u => u.id === userId ? { ...u, role: newRole } : u));
+    addAuditLog('USER_UPDATED', `Rol actualizado para ID ${userId} a ${newRole}`);
+  };
+
+  const createCompany = (name: string) => {
+    const newId = `comp_${Date.now()}`;
+    const slug = name.toLowerCase().replace(/\s+/g, '_');
+    
+    // 1. Create Locations Mock
+    const newLocations = [
+      { id: `${newId}_main`, name: `Predio ${name}`, address: 'Ubicación Central' },
+      { id: `${newId}_used`, name: `Usados ${name}`, address: 'Anexo Usados' }
+    ];
+
+    const newCompany: Company = {
+      id: newId,
+      name: name,
+      locations: newLocations
+    };
+
+    setCompanies(prev => [...prev, newCompany]);
+
+    // 2. Create Default Users for this company
+    const defaultUsers: User[] = [
+      { id: `u_${slug}_adm`, username: `admin_${slug}`, name: `Admin ${name}`, role: Role.ADMIN, companyId: newId, email: `gerencia@${slug}.com` },
+      { id: `u_${slug}_op`, username: `operador_${slug}`, name: `Operador ${name}`, role: Role.OPERATOR, companyId: newId, email: `ops@${slug}.com` },
+      { id: `u_${slug}_prog`, username: `programador_${slug}`, name: `Prog ${name}`, role: Role.PROGRAMADOR, companyId: newId, email: `prog@${slug}.com` },
+      { id: `u_${slug}_used`, username: `usados_${slug}`, name: `Usados ${name}`, role: Role.USED_OPERATOR, companyId: newId, email: `usados@${slug}.com` },
+    ];
+
+    setAllUsers(prev => [...prev, ...defaultUsers]);
+    addAuditLog('COMPANY_CREATED', `Nueva empresa creada: ${name} con 4 usuarios iniciales.`);
+  };
+
+  // --- Existing Logic ---
+
   const saveUsedReception = (reception: UsedReception) => {
     setUsedReceptions(prev => [reception, ...prev]);
-    addAuditLog('USED_RECEPTION', `Used vehicle received: ${reception.vehicleVin}`);
+    addAuditLog('USED_RECEPTION', `Ingreso unidad usada: ${reception.vehicleVin}`);
   };
 
   const addAuditLog = (action: string, details: string, severity: 'INFO' | 'WARNING' | 'ERROR' = 'INFO') => {
@@ -118,13 +170,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const removeFromTravelSheet = (vins: string[]) => {
     setTravelSheetList(prev => prev.filter(v => !vins.includes(v)));
     setHistoricalTravelSheetList(prev => [...new Set([...vins, ...prev])]);
-    addAuditLog('TRAVEL_SHEET_ARCHIVE', `Unidades archivadas en histórica: ${vins.join(', ')}`);
+    addAuditLog('TRAVEL_SHEET_ARCHIVE', `Unidades archivadas: ${vins.join(', ')}`);
   };
 
   const restoreFromHistorical = (vins: string[]) => {
     setHistoricalTravelSheetList(prev => prev.filter(v => !vins.includes(v)));
     setTravelSheetList(prev => [...new Set([...vins, ...prev])]);
-    addAuditLog('TRAVEL_SHEET_RESTORE', `Unidades restauradas a planilla activa: ${vins.join(', ')}`);
+    addAuditLog('TRAVEL_SHEET_RESTORE', `Unidades restauradas: ${vins.join(', ')}`);
   };
 
   const createMovement = (mov: Movement) => {
@@ -157,12 +209,13 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   return (
     <AppContext.Provider value={{
-      user, login, logout, vehicles, availableVehicles, companies, movements, calendarEvents, auditLogs, pdiQueue, travelSheetList, historicalTravelSheetList, usedReceptions,
+      user, login, logout, vehicles, availableVehicles, companies, allUsers, movements, calendarEvents, auditLogs, pdiQueue, travelSheetList, historicalTravelSheetList, usedReceptions,
       addToPdiQueue: (v) => setPdiQueue(p => [...p, v]), clearPdiQueue: () => setPdiQueue([]), 
       removeFromTravelSheet, restoreFromHistorical,
       addAuditLog, updateVehicle, addVehicle, scheduleEvent, createMovement, completeMovement, confirmPDI, saveUsedReception,
       currentCompany, setCurrentCompany, language, setLanguage,
-      chatMessages, sendChatMessage, markChatAsRead, activeChatCompanyId, setActiveChatCompanyId
+      chatMessages, sendChatMessage, markChatAsRead, activeChatCompanyId, setActiveChatCompanyId,
+      createCompany, addNewUser, updateUserRole
     }}>
       {children}
     </AppContext.Provider>
