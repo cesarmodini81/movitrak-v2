@@ -7,6 +7,7 @@ export enum Role {
   SELLER = 'SELLER',
   VIEWER = 'VIEWER',
   USED_OPERATOR = 'USED_OPERATOR',
+  PARTS_OPERATOR = 'PARTS_OPERATOR', // New Role
 }
 
 export interface User {
@@ -22,6 +23,7 @@ export interface Company {
   id: string;
   name: string;
   locations: Location[];
+  partsAccessCode?: string; // Custom PIN for parts module
 }
 
 export interface Location {
@@ -107,7 +109,6 @@ export interface UsedReception {
   status: 'INGRESADO' | 'CONFIRMADO' | 'ANULADO';
 }
 
-// Added ChatMessage interface
 export interface ChatMessage {
   id: string;
   text: string;
@@ -116,4 +117,46 @@ export interface ChatMessage {
   companyId: string;
   timestamp: string;
   isRead: boolean;
+}
+
+// --- PARTS MODULE INTERFACES ---
+
+export interface Part {
+  id: string;
+  code: string;
+  name: string;
+  brand: string;
+  modelCompatibility: string[];
+  locationInCar: string; // e.g. "Motor delantero", "Baúl"
+  photoUrl: string;
+  stock: Record<string, number>; // LocationID -> Quantity
+  companyId: string;
+  price: number;
+}
+
+export interface PartTransfer {
+  id: string;
+  date: string;
+  originId: string;
+  destinationId: string;
+  transporter: string;
+  driverName: string;
+  truckPlate: string;
+  items: { partCode: string; quantity: number; name: string }[];
+  status: 'PENDING' | 'COMPLETED';
+  createdBy: string;
+  companyId: string;
+}
+
+export interface PartSale {
+  id: string;
+  date: string;
+  clientName: string;
+  clientDni: string;
+  clientEmail: string;
+  clientPhone: string;
+  items: { partCode: string; quantity: number; price: number; name: string }[];
+  total: number;
+  soldBy: string;
+  companyId: string;
 }

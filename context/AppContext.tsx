@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
-import { User, Vehicle, Movement, AuditLog, Role, Company, CalendarEvent, UsedReception, ChatMessage } from '../types';
-import { MOCK_USERS, MOCK_COMPANIES, generateMockVehicles, MOCK_CHATS, LOCATION_MAP } from '../constants';
+import { User, Vehicle, Movement, AuditLog, Role, Company, CalendarEvent, UsedReception, ChatMessage, Part, PartTransfer, PartSale } from '../types';
+import { MOCK_USERS, MOCK_COMPANIES, generateMockVehicles, MOCK_CHATS, MOCK_PARTS, LOCATION_MAP } from '../constants';
 
 interface AppContextType {
   user: User | null;
@@ -10,7 +10,7 @@ interface AppContextType {
   vehicles: Vehicle[];
   availableVehicles: Vehicle[];
   companies: Company[];
-  allUsers: User[]; // New: Access to all users
+  allUsers: User[];
   movements: Movement[];
   calendarEvents: CalendarEvent[];
   auditLogs: AuditLog[];
@@ -39,10 +39,20 @@ interface AppContextType {
   markChatAsRead: (companyId: string) => void;
   activeChatCompanyId: string | null;
   setActiveChatCompanyId: (id: string | null) => void;
-  // New Admin Functions
   createCompany: (name: string) => void;
   addNewUser: (user: User) => void;
   updateUserRole: (userId: string, newRole: Role) => void;
+  
+  // --- PARTS MODULE ---
+  isPartsMode: boolean;
+  enterPartsMode: (code: string) => boolean;
+  exitPartsMode: () => void;
+  parts: Part[];
+  partTransfers: PartTransfer[];
+  partSales: PartSale[];
+  updatePartStock: (partId: string, locationId: string, quantity: number) => void;
+  createPartTransfer: (transfer: PartTransfer) => void;
+  createPartSale: (sale: PartSale) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -63,6 +73,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [language, setLanguageState] = useState(localStorage.getItem('language') || 'es');
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>(MOCK_CHATS);
   const [activeChatCompanyId, setActiveChatCompanyId] = useState<string | null>(null);
+
+  // Parts State
+  const [isPartsMode, setIsPartsMode] = useState(false);
+  const [parts, setParts] = useState<Part[]>(MOCK_PARTS);
+  const [partTransfers, setPartTransfers] = useState<PartTransfer[]>([]);
+  const [partSales, setPartSales] = useState<PartSale[]>([]);
 
   useEffect(() => {
     setVehicles(generateMockVehicles());
@@ -86,7 +102,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   }, [vehicles, currentCompany, user]);
 
   const login = async (u: string, p: string): Promise<boolean> => {
-    // Check against dynamic allUsers state instead of static MOCK_USERS
     const foundUser = allUsers.find(user => user.username === u && p === '1234');
     if (foundUser) {
       setUser(foundUser);
@@ -102,9 +117,66 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const logout = () => {
     setUser(null);
     setCurrentCompany(null);
+    setIsPartsMode(false);
   };
 
-  // --- New Admin Logic ---
+  // --- Parts Logic ---
+
+  const enterPartsMode = (code: string): boolean => {
+    if (!currentCompany && user?.role !== Role.SUPER_ADMIN) return false;
+    
+    // SuperAdmin bypass
+    if (user?.role === Role.SUPER_ADMIN) {
+        setIsPartsMode(true);
+        return true;
+    }
+
+    const validCode = currentCompany?.partsAccessCode || '6789'; // Fallback initial
+    if (code === validCode) {
+      setIsPartsMode(true);
+      return true;
+    }
+    return false;
+  };
+
+  const exitPartsMode = () => {
+    setIsPartsMode(false);
+  };
+
+  const updatePartStock = (partId: string, locationId: string, quantity: number) => {
+    setParts(prev => prev.map(p => {
+      if (p.id === partId) {
+        return {
+          ...p,
+          stock: { ...p.stock, [locationId]: (p.stock[locationId] || 0) + quantity }
+        };
+      }
+      return p;
+    }));
+  };
+
+  const createPartTransfer = (transfer: PartTransfer) => {
+    setPartTransfers(prev => [transfer, ...prev]);
+    // Deduct from origin, Add to destination (handled in component logic visually, updated here for persistence)
+    transfer.items.forEach(item => {
+        const part = parts.find(p => p.code === item.partCode);
+        if (part) {
+            updatePartStock(part.id, transfer.originId, -item.quantity);
+            updatePartStock(part.id, transfer.destinationId, item.quantity);
+        }
+    });
+    addAuditLog('PART_TRANSFER', `Transferencia Repuestos ${transfer.id} creada.`);
+  };
+
+  const createPartSale = (sale: PartSale) => {
+    setPartSales(prev => [sale, ...prev]);
+    // Deduct stock (Assuming deduction from main location or handled by location selection in Sale)
+    // For simplicity in this mock, we assume stock is deducted from the company's main location or selected loc
+    // In a real app, sale would have locationId. Here we just log it.
+    addAuditLog('PART_SALE', `Venta Repuestos ${sale.id} confirmada: $${sale.total}`);
+  };
+
+  // --- Admin Logic ---
 
   const addNewUser = (newUser: User) => {
     setAllUsers(prev => [...prev, newUser]);
@@ -120,7 +192,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newId = `comp_${Date.now()}`;
     const slug = name.toLowerCase().replace(/\s+/g, '_');
     
-    // 1. Create Locations Mock
     const newLocations = [
       { id: `${newId}_main`, name: `Predio ${name}`, address: 'Ubicación Central' },
       { id: `${newId}_used`, name: `Usados ${name}`, address: 'Anexo Usados' }
@@ -129,12 +200,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     const newCompany: Company = {
       id: newId,
       name: name,
-      locations: newLocations
+      locations: newLocations,
+      partsAccessCode: '6789'
     };
 
     setCompanies(prev => [...prev, newCompany]);
 
-    // 2. Create Default Users for this company
     const defaultUsers: User[] = [
       { id: `u_${slug}_adm`, username: `admin_${slug}`, name: `Admin ${name}`, role: Role.ADMIN, companyId: newId, email: `gerencia@${slug}.com` },
       { id: `u_${slug}_op`, username: `operador_${slug}`, name: `Operador ${name}`, role: Role.OPERATOR, companyId: newId, email: `ops@${slug}.com` },
@@ -145,8 +216,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setAllUsers(prev => [...prev, ...defaultUsers]);
     addAuditLog('COMPANY_CREATED', `Nueva empresa creada: ${name} con 4 usuarios iniciales.`);
   };
-
-  // --- Existing Logic ---
 
   const saveUsedReception = (reception: UsedReception) => {
     setUsedReceptions(prev => [reception, ...prev]);
@@ -215,7 +284,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       addAuditLog, updateVehicle, addVehicle, scheduleEvent, createMovement, completeMovement, confirmPDI, saveUsedReception,
       currentCompany, setCurrentCompany, language, setLanguage,
       chatMessages, sendChatMessage, markChatAsRead, activeChatCompanyId, setActiveChatCompanyId,
-      createCompany, addNewUser, updateUserRole
+      createCompany, addNewUser, updateUserRole,
+      isPartsMode, enterPartsMode, exitPartsMode, parts, partTransfers, partSales, updatePartStock, createPartTransfer, createPartSale
     }}>
       {children}
     </AppContext.Provider>

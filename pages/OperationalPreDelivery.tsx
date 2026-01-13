@@ -1,21 +1,46 @@
+
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from 'react-i18next';
 import { LOCATION_MAP } from '../constants';
-import { Check, ClipboardCheck, Printer, AlertCircle, Info, Trash2, CheckCircle2, ShieldCheck } from 'lucide-react';
+import { Check, Printer, AlertCircle, Info, Trash2, CheckCircle2, ShieldCheck, Calendar, MapPin, ArrowRight } from 'lucide-react';
 import { PreDeliveryDocument } from '../components/PreDeliveryDocument';
 import { PrintPreviewModal } from '../components/PrintPreviewModal';
 
 export const OperationalPreDelivery: React.FC = () => {
-  const { vehicles, confirmPDI, currentCompany, pdiQueue, clearPdiQueue } = useApp();
+  const { vehicles, confirmPDI, currentCompany, pdiQueue, clearPdiQueue, calendarEvents, companies } = useApp();
   const { t } = useTranslation();
   
   const queuedVehicles = vehicles.filter(v => pdiQueue.includes(v.vin) && v.type === 'NEW');
   const [localComments, setLocalComments] = useState<Record<string, string>>({});
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
+  // Helper to resolve location name
+  const getLocationName = (id: string) => {
+    if (LOCATION_MAP[id]) return LOCATION_MAP[id];
+    for (const c of companies) {
+      const loc = c.locations.find(l => l.id === id);
+      if (loc) return loc.name;
+    }
+    return id;
+  };
+
+  // Helper to get delivery info from Calendar Integration
+  const getDeliveryInfo = (vin: string) => {
+    const event = calendarEvents.find(e => e.vehicleVin === vin && e.status === 'PROGRAMADO');
+    if (event) {
+      return {
+        date: new Date(event.date + 'T12:00:00').toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit'}),
+        destination: getLocationName(event.destinationId),
+        hasEvent: true
+      };
+    }
+    return { date: '-', destination: '-', hasEvent: false };
+  };
+
   const handleConfirm = (vin: string) => {
     const comment = localComments[vin] || 'Sin novedades técnicas';
+    // This action pushes to travelSheetList via context
     confirmPDI(vin, comment);
     
     const toast = document.createElement('div');
@@ -77,77 +102,89 @@ export const OperationalPreDelivery: React.FC = () => {
           <table className="w-full text-left border-collapse">
             <thead className="sticky top-0 z-20">
               <tr className="bg-slate-900 text-white uppercase text-[10px] font-black tracking-[0.2em]">
-                <th className="p-6">Identificación Chasis / VIN</th>
+                <th className="p-6 text-center w-32">Fecha Entrega</th>
+                <th className="p-6 w-48">Chasis / VIN</th>
                 <th className="p-6">Unidad / Modelo</th>
-                <th className="p-6">Ingreso</th>
                 <th className="p-6">Ubicación</th>
-                <th className="p-6 w-1/3">Observaciones Técnicas</th>
-                <th className="p-6 text-center">Certificación</th>
+                <th className="p-6">Destino (Calendario)</th>
+                <th className="p-6 w-1/4">Observaciones Técnicas</th>
+                <th className="p-6 text-center w-32">PDI Confirmada</th>
               </tr>
             </thead>
             <tbody className="divide-y-2 divide-slate-50">
               {queuedVehicles.length > 0 ? (
-                queuedVehicles.map(v => (
-                  <tr key={v.vin} className={`group transition-all ${v.preDeliveryConfirmed ? 'bg-emerald-50/20' : 'hover:bg-slate-50/50'}`}>
-                    <td className="p-6">
-                      <div className="flex flex-col gap-2">
-                        <span className="font-mono font-black text-brand-700 bg-brand-50 border-2 border-brand-100 px-3 py-1.5 rounded-lg text-lg tracking-[0.1em] w-fit shadow-sm">
-                          {v.vin}
-                        </span>
-                        {v.preDeliveryConfirmed && (
-                          <span className="flex items-center gap-1.5 text-emerald-600 font-black text-[9px] uppercase tracking-widest px-1">
-                            <CheckCircle2 size={12} /> Certificado PDI OK
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="p-6">
-                      <div className="font-black text-slate-900 uppercase text-sm leading-none tracking-tight">{v.brand} {v.model}</div>
-                      <div className="text-[10px] font-bold text-slate-400 mt-2 uppercase tracking-widest">{v.color} — {v.year}</div>
-                    </td>
-                    <td className="p-6">
-                      <div className="text-slate-600 font-black text-xs font-mono bg-slate-100/50 px-3 py-1 rounded-lg w-fit">
-                        {new Date(v.entryDate).toLocaleDateString()}
-                      </div>
-                    </td>
-                    <td className="p-6">
-                      <div className="text-slate-500 font-bold text-xs uppercase tracking-tight flex items-center gap-2">
-                        {LOCATION_MAP[v.locationId] || v.locationId}
-                      </div>
-                    </td>
-                    <td className="p-6">
-                      <div className="relative group/input">
-                         <input 
-                          type="text" 
-                          placeholder="Reportar novedades del taller..."
-                          defaultValue={v.pdiComment}
-                          disabled={v.preDeliveryConfirmed}
-                          className="w-full border-2 border-slate-100 bg-slate-50 rounded-xl px-4 py-3 text-sm focus:border-brand-500 focus:bg-white focus:ring-4 focus:ring-brand-50 outline-none transition-all font-bold text-slate-700 placeholder:font-medium placeholder:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                          onChange={(e) => setLocalComments({...localComments, [v.vin]: e.target.value})}
-                        />
-                      </div>
-                    </td>
-                    <td className="p-6 text-center">
-                      {v.preDeliveryConfirmed ? (
-                        <div className="inline-flex items-center gap-2 bg-emerald-500 text-white px-6 py-3 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-emerald-100/50 cursor-default">
-                          <Check size={16} strokeWidth={3} />
-                          Validado
+                queuedVehicles.map(v => {
+                  const delivery = getDeliveryInfo(v.vin);
+                  return (
+                    <tr key={v.vin} className={`group transition-all ${v.preDeliveryConfirmed ? 'bg-emerald-50/20' : 'hover:bg-slate-50/50'}`}>
+                      <td className="p-6 text-center">
+                        <div className={`inline-flex flex-col items-center justify-center border rounded-lg px-3 py-2 w-full ${delivery.hasEvent ? 'bg-white border-slate-200' : 'bg-slate-50 border-transparent'}`}>
+                           <Calendar size={14} className="text-slate-400 mb-1" />
+                           <span className="font-black text-slate-800 text-xs">{delivery.date}</span>
                         </div>
-                      ) : (
-                        <button 
-                          onClick={() => handleConfirm(v.vin)}
-                          className="bg-white border-4 border-slate-100 text-slate-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 px-6 py-3 rounded-xl transition-all flex items-center gap-2 mx-auto font-black text-[10px] uppercase tracking-[0.2em] shadow-sm active:scale-95 group/btn"
-                        >
-                          <Check size={16} strokeWidth={3} className="group-hover/btn:scale-125 transition-transform" />
-                          Validar OK
-                        </button>
-                      )}
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td className="p-6">
+                        <div className="flex flex-col gap-1">
+                          <span className="font-mono font-black text-slate-900 text-sm tracking-wider">
+                            {v.vin}
+                          </span>
+                          {v.preDeliveryConfirmed && (
+                            <span className="flex items-center gap-1 text-emerald-600 font-bold text-[9px] uppercase tracking-wide">
+                              <CheckCircle2 size={10} /> Validado
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div className="font-black text-slate-900 uppercase text-xs leading-none tracking-tight">{v.brand} {v.model}</div>
+                        <div className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">{v.color}</div>
+                      </td>
+                      <td className="p-6">
+                        <div className="text-slate-500 font-bold text-[10px] uppercase tracking-tight flex items-center gap-2">
+                          <MapPin size={12} className="text-slate-300" />
+                          {LOCATION_MAP[v.locationId] || v.locationId}
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div className="text-brand-600 font-black text-[10px] uppercase tracking-tight flex items-center gap-2">
+                          {delivery.destination !== '-' && <ArrowRight size={12} className="text-brand-400" />}
+                          {delivery.destination}
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div className="relative group/input">
+                           <input 
+                            type="text" 
+                            placeholder="Reportar novedades..."
+                            defaultValue={v.pdiComment}
+                            disabled={v.preDeliveryConfirmed}
+                            className="w-full border-b-2 border-slate-200 bg-transparent py-2 text-xs focus:border-brand-500 outline-none transition-all font-bold text-slate-700 placeholder:font-medium placeholder:text-slate-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:border-transparent"
+                            onChange={(e) => setLocalComments({...localComments, [v.vin]: e.target.value})}
+                          />
+                        </div>
+                      </td>
+                      <td className="p-6 text-center align-middle">
+                        {v.preDeliveryConfirmed ? (
+                          <div className="w-20 py-2 bg-emerald-500 text-white rounded-lg flex items-center justify-center mx-auto shadow-sm gap-1">
+                            <Check size={14} strokeWidth={4} />
+                            <span className="text-[10px] font-black uppercase tracking-widest">OK</span>
+                          </div>
+                        ) : (
+                          <button 
+                            onClick={() => handleConfirm(v.vin)}
+                            className="w-20 py-2 bg-white border-2 border-slate-200 text-slate-400 hover:bg-emerald-500 hover:text-white hover:border-emerald-500 rounded-lg transition-all flex items-center justify-center mx-auto shadow-sm active:scale-95 text-[10px] font-black uppercase tracking-widest"
+                            title="Confirmar PDI y Enviar a Viajes"
+                          >
+                            Validar
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={6} className="p-32 text-center">
+                  <td colSpan={7} className="p-32 text-center">
                     <div className="flex flex-col items-center gap-8 animate-pulse">
                       <div className="p-12 bg-slate-50 rounded-full border-4 border-dashed border-slate-200">
                          <Info size={100} strokeWidth={1} className="text-slate-200" />
@@ -173,7 +210,12 @@ export const OperationalPreDelivery: React.FC = () => {
         title="Protocolo Oficial PDI"
       >
         {currentCompany && (
-          <PreDeliveryDocument vehicles={queuedVehicles} company={currentCompany} />
+          <PreDeliveryDocument 
+            vehicles={queuedVehicles} 
+            company={currentCompany} 
+            calendarEvents={calendarEvents}
+            companies={companies}
+          />
         )}
       </PrintPreviewModal>
     </div>

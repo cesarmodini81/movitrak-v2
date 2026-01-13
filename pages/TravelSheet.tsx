@@ -1,18 +1,26 @@
-import React, { useState, useMemo } from 'react';
+
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from 'react-i18next';
 import { LOCATION_MAP } from '../constants';
 import { 
   FileText, Printer, Trash2, CheckSquare, Square, 
-  AlertCircle, Calendar, Search, ArrowUpDown, ArrowUp, ArrowDown, MapPin 
+  AlertCircle, Calendar, Search, ArrowUpDown, ArrowUp, ArrowDown, MapPin,
+  GripVertical
 } from 'lucide-react';
 import { PrintPreviewModal } from '../components/PrintPreviewModal';
 import { Vehicle } from '../types';
 
 type SortDirection = 'asc' | 'desc';
 interface SortConfig {
-  key: keyof Vehicle | 'deliveryDate' | 'deliveryLocationName';
+  key: string;
   direction: SortDirection;
+}
+
+// Helper interface for the display data
+interface TravelSheetItem extends Vehicle {
+  deliveryDate: string;
+  deliveryLocationName: string;
 }
 
 export const TravelSheet: React.FC = () => {
@@ -22,7 +30,14 @@ export const TravelSheet: React.FC = () => {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [selectedVins, setSelectedVins] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'deliveryDate', direction: 'asc' });
+  
+  // State for the ordered list (allows Drag & Drop)
+  const [orderedItems, setOrderedItems] = useState<TravelSheetItem[]>([]);
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
+  
+  // Drag & Drop Refs
+  const dragItem = useRef<number | null>(null);
+  const dragOverItem = useRef<number | null>(null);
 
   const getLocationName = (id: string) => {
     if (LOCATION_MAP[id]) return LOCATION_MAP[id];
@@ -33,15 +48,18 @@ export const TravelSheet: React.FC = () => {
     return id;
   };
 
-  const mergedData = useMemo(() => {
+  // 1. Merge Context Data (Source of Truth - Integration Logic)
+  const sourceData = useMemo(() => {
     return vehicles
-      .filter(v => travelSheetList.includes(v.vin))
+      .filter(v => travelSheetList.includes(v.vin)) // Only confirmed PDI units
       .map(v => {
+        // Integrate Calendar Data (Priority to Event)
         const event = calendarEvents.find(e => e.vehicleVin === v.vin && e.status === 'PROGRAMADO');
         
         let deliveryDate = event?.date;
         let deliveryLocationName = event ? getLocationName(event.destinationId) : '';
 
+        // Fallback logic if no calendar event (Mock Data resilience)
         if (!deliveryDate) {
            const vinSum = v.vin.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
            const mockDate = new Date();
@@ -60,49 +78,81 @@ export const TravelSheet: React.FC = () => {
       });
   }, [vehicles, travelSheetList, calendarEvents, companies]);
 
+  // 2. Sync Source Data with Ordered State
+  useEffect(() => {
+    setOrderedItems(prev => {
+      // New items coming from PDI
+      const newItems = sourceData.filter(s => !prev.some(p => p.vin === s.vin));
+      // Existing items (keep manual order)
+      const existingItems = prev.filter(p => sourceData.some(s => s.vin === p.vin)).map(p => {
+        const fresh = sourceData.find(s => s.vin === p.vin);
+        return fresh ? { ...fresh } : p;
+      });
+      
+      return [...existingItems, ...newItems];
+    });
+  }, [sourceData]);
+
+  // 3. Filtering
   const filteredData = useMemo(() => {
-    if (!searchTerm) return mergedData;
+    if (!searchTerm) return orderedItems;
     const lowerTerm = searchTerm.toLowerCase();
-    return mergedData.filter(item => 
+    return orderedItems.filter(item => 
       item.vin.toLowerCase().includes(lowerTerm) ||
       item.brand.toLowerCase().includes(lowerTerm) ||
       item.model.toLowerCase().includes(lowerTerm) ||
       item.deliveryLocationName.toLowerCase().includes(lowerTerm) ||
       (item.pdiComment && item.pdiComment.toLowerCase().includes(lowerTerm))
     );
-  }, [mergedData, searchTerm]);
+  }, [orderedItems, searchTerm]);
 
-  const sortedData = useMemo(() => {
-    return [...filteredData].sort((a, b) => {
-      const aValue = a[sortConfig.key] || '';
-      const bValue = b[sortConfig.key] || '';
-      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+  // 4. Sorting Handlers
+  const handleSort = (key: keyof TravelSheetItem) => {
+    let direction: SortDirection = 'asc';
+    if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+
+    const sorted = [...orderedItems].sort((a, b) => {
+      const aVal = a[key]?.toString().toLowerCase() || '';
+      const bVal = b[key]?.toString().toLowerCase() || '';
+      if (aVal < bVal) return direction === 'asc' ? -1 : 1;
+      if (aVal > bVal) return direction === 'asc' ? 1 : -1;
       return 0;
     });
-  }, [filteredData, sortConfig]);
-
-  const handleSort = (key: keyof Vehicle | 'deliveryDate' | 'deliveryLocationName') => {
-    setSortConfig(current => ({
-      key,
-      direction: current.key === key && current.direction === 'asc' ? 'desc' : 'asc'
-    }));
+    setOrderedItems(sorted);
   };
 
-  const toggleSelect = (vin: string) => {
-    if (selectedVins.includes(vin)) {
-      setSelectedVins(prev => prev.filter(v => v !== vin));
-    } else {
-      setSelectedVins(prev => [...prev, vin]);
+  // 5. Drag & Drop Handlers
+  const handleDragStart = (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
+    dragItem.current = index;
+    e.dataTransfer.effectAllowed = "move";
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
+    dragOverItem.current = index;
+  };
+
+  const handleDragEnd = () => {
+    if (dragItem.current !== null && dragOverItem.current !== null && dragItem.current !== dragOverItem.current) {
+      const _items = [...orderedItems];
+      const draggedItemContent = _items.splice(dragItem.current, 1)[0];
+      _items.splice(dragOverItem.current, 0, draggedItemContent);
+      setOrderedItems(_items);
+      setSortConfig(null);
     }
+    dragItem.current = null;
+    dragOverItem.current = null;
+  };
+
+  // Selection Logic
+  const toggleSelect = (vin: string) => {
+    setSelectedVins(prev => prev.includes(vin) ? prev.filter(v => v !== vin) : [...prev, vin]);
   };
 
   const toggleSelectAll = () => {
-    if (selectedVins.length === sortedData.length) {
-      setSelectedVins([]);
-    } else {
-      setSelectedVins(sortedData.map(v => v.vin));
-    }
+    setSelectedVins(selectedVins.length === filteredData.length ? [] : filteredData.map(v => v.vin));
   };
 
   const handleBulkRemove = () => {
@@ -116,19 +166,20 @@ export const TravelSheet: React.FC = () => {
   };
 
   const SortIcon = ({ column }: { column: string }) => {
-    if (sortConfig.key !== column) return <ArrowUpDown size={14} className="opacity-30" />;
+    if (sortConfig?.key !== column) return <ArrowUpDown size={14} className="opacity-20 ml-2" />;
     return sortConfig.direction === 'asc' 
-      ? <ArrowUp size={14} className="text-brand-400" /> 
-      : <ArrowDown size={14} className="text-brand-400" />;
+      ? <ArrowUp size={14} className="text-brand-400 ml-2" /> 
+      : <ArrowDown size={14} className="text-brand-400 ml-2" />;
   };
 
+  // Printable Component
   const PrintableTable = () => (
     <div className="bg-white p-12 text-slate-900 font-sans min-h-[297mm]">
       <div className="p-8 border-b-4 border-slate-900 mb-8">
          <div className="flex justify-between items-end">
            <div>
              <h1 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2">Planilla de Viajes</h1>
-             <p className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em]">Histórica Operativa</p>
+             <p className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em]">Orden de Carga Logística</p>
            </div>
            <div className="text-right">
              <p className="text-[10px] uppercase font-bold text-slate-400">{currentCompany?.name}</p>
@@ -139,16 +190,18 @@ export const TravelSheet: React.FC = () => {
       <table className="w-full text-left text-xs border-collapse border-t-2 border-slate-900">
         <thead className="bg-slate-50 uppercase font-black">
           <tr>
+            <th className="p-3 border-b-2 border-slate-900 w-10 text-center">#</th>
             <th className="p-3 border-b-2 border-slate-900">VIN / Chasis</th>
             <th className="p-3 border-b-2 border-slate-900">Unidad</th>
             <th className="p-3 border-b-2 border-slate-900">Fecha Entrega</th>
-            <th className="p-3 border-b-2 border-slate-900">Destino</th>
-            <th className="p-3 border-b-2 border-slate-900">Obs. PDI</th>
+            <th className="p-3 border-b-2 border-slate-900">Ubicación Entrega</th>
+            <th className="p-3 border-b-2 border-slate-900">Obs. Técnicas</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-200">
-          {sortedData.map(v => (
+          {filteredData.map((v, idx) => (
             <tr key={v.vin}>
+              <td className="p-3 font-bold text-center text-slate-400">{idx + 1}</td>
               <td className="p-3 font-mono font-bold align-top">{v.vin}</td>
               <td className="p-3 align-top">
                 <div className="font-bold uppercase">{v.brand} {v.model}</div>
@@ -173,7 +226,7 @@ export const TravelSheet: React.FC = () => {
           </div>
           <div>
             <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Planilla de Viajes</h2>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Histórica Operativa (Persistente)</p>
+            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Coordinación de Entregas & Despachos</p>
           </div>
         </div>
         <div className="flex items-center gap-4 w-full md:w-auto">
@@ -211,40 +264,58 @@ export const TravelSheet: React.FC = () => {
       </div>
 
       <div className="bg-white rounded-[1.5rem] shadow-lg border border-slate-100 overflow-hidden no-print">
+        {filteredData.length > 0 && (
+           <div className="px-6 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2 text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+              <GripVertical size={14} />
+              <span>Arrastre las filas para reordenar la prioridad de carga</span>
+           </div>
+        )}
         <div className="overflow-x-auto max-h-[75vh] overflow-y-auto">
           <table className="w-full text-left">
-            <thead className="bg-slate-900 text-white uppercase text-[10px] font-black tracking-[0.2em] sticky top-0 z-20">
+            <thead className="bg-slate-900 text-white uppercase text-[10px] font-black tracking-[0.2em] sticky top-0 z-20 shadow-xl">
               <tr>
+                <th className="p-4 w-12 text-center"></th>
                 <th className="p-4 w-16 text-center">
                   <button onClick={toggleSelectAll} className="hover:text-brand-300 transition-colors">
-                     {selectedVins.length > 0 && selectedVins.length === sortedData.length ? <CheckSquare size={18} /> : <Square size={18} />}
+                     {selectedVins.length > 0 && selectedVins.length === filteredData.length ? <CheckSquare size={18} /> : <Square size={18} />}
                   </button>
                 </th>
                 <th className="p-6 cursor-pointer hover:bg-slate-800 transition-colors group" onClick={() => handleSort('vin')}>
-                  <div className="flex items-center gap-2">Identificación VIN <SortIcon column="vin" /></div>
+                  <div className="flex items-center">Identificación VIN <SortIcon column="vin" /></div>
                 </th>
                 <th className="p-6 cursor-pointer hover:bg-slate-800 transition-colors group" onClick={() => handleSort('model')}>
-                  <div className="flex items-center gap-2">Unidad / Modelo <SortIcon column="model" /></div>
+                  <div className="flex items-center">Unidad / Modelo <SortIcon column="model" /></div>
                 </th>
                 <th className="p-6 cursor-pointer hover:bg-slate-800 transition-colors group" onClick={() => handleSort('deliveryDate')}>
-                  <div className="flex items-center gap-2">Fecha de Entrega <SortIcon column="deliveryDate" /></div>
+                  <div className="flex items-center">FECHA DE ENTREGA <SortIcon column="deliveryDate" /></div>
                 </th>
                 <th className="p-6 cursor-pointer hover:bg-slate-800 transition-colors group" onClick={() => handleSort('deliveryLocationName')}>
-                  <div className="flex items-center gap-2">Ubicación de Entrega <SortIcon column="deliveryLocationName" /></div>
+                  <div className="flex items-center">UBICACIÓN DE ENTREGA <SortIcon column="deliveryLocationName" /></div>
                 </th>
-                <th className="p-6 w-1/4">Observaciones Técnicas (PDI)</th>
+                <th className="p-6 w-1/4">OBSERVACIONES TÉCNICAS (PDI)</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {sortedData.length > 0 ? (
-                sortedData.map(v => {
+              {filteredData.length > 0 ? (
+                filteredData.map((v, index) => {
                   const isSelected = selectedVins.includes(v.vin);
                   return (
                     <tr 
                       key={v.vin} 
-                      className={`transition-colors group ${isSelected ? 'bg-brand-50' : 'hover:bg-slate-50'}`}
+                      draggable={!searchTerm && !sortConfig} // Disable drag if filtering/sorting
+                      onDragStart={(e) => handleDragStart(e, index)}
+                      onDragEnter={(e) => handleDragEnter(e, index)}
+                      onDragEnd={handleDragEnd}
                       onClick={() => toggleSelect(v.vin)}
+                      className={`transition-all group border-l-4 ${
+                        isSelected 
+                          ? 'bg-brand-50 border-l-brand-500' 
+                          : 'hover:bg-slate-50 border-l-transparent'
+                      } ${!searchTerm && !sortConfig ? 'cursor-move' : 'cursor-default'}`}
                     >
+                      <td className="p-4 text-center text-slate-300">
+                         {!searchTerm && !sortConfig && <GripVertical size={16} className="mx-auto group-hover:text-slate-500" />}
+                      </td>
                       <td className="p-4 text-center cursor-pointer">
                         <div className={`transition-colors ${isSelected ? 'text-brand-600' : 'text-slate-300 group-hover:text-slate-400'}`}>
                           {isSelected ? <CheckSquare size={18} /> : <Square size={18} />}
@@ -260,7 +331,7 @@ export const TravelSheet: React.FC = () => {
                         <div className="text-[10px] font-bold text-slate-400 uppercase mt-1">{v.color} — {v.year}</div>
                       </td>
                       <td className="p-6 align-top">
-                        <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase bg-white border border-slate-200 px-3 py-1 rounded-lg w-fit">
                           <Calendar size={14} className="text-brand-500" />
                           {new Date(v.deliveryDate).toLocaleDateString()}
                         </div>
@@ -272,8 +343,8 @@ export const TravelSheet: React.FC = () => {
                         </div>
                       </td>
                       <td className="p-6 align-top">
-                        <div className="text-xs font-medium text-slate-600 italic border-l-2 border-brand-200 pl-3 truncate max-w-xs">
-                          {v.pdiComment || 'Sin observaciones registradas.'}
+                        <div className="text-xs font-medium text-slate-600 italic border-l-2 border-emerald-400 pl-3 truncate max-w-xs">
+                          {v.pdiComment || 'Validado sin observaciones.'}
                         </div>
                       </td>
                     </tr>
@@ -281,14 +352,14 @@ export const TravelSheet: React.FC = () => {
                 })
               ) : (
                 <tr>
-                  <td colSpan={6} className="p-24 text-center">
+                  <td colSpan={7} className="p-24 text-center">
                     <div className="flex flex-col items-center gap-6 opacity-40">
                       <div className="bg-slate-100 p-8 rounded-full">
                          <AlertCircle size={60} strokeWidth={1} className="text-slate-400" />
                       </div>
                       <div>
                         <p className="text-xl font-black uppercase text-slate-900 tracking-tight">Sin Resultados</p>
-                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">No se encontraron unidades con los criterios actuales.</p>
+                        <p className="text-xs font-bold text-slate-500 uppercase tracking-widest mt-2">No se encontraron unidades en Planilla de Viajes.</p>
                       </div>
                     </div>
                   </td>
@@ -302,7 +373,7 @@ export const TravelSheet: React.FC = () => {
       <PrintPreviewModal 
         isOpen={isPreviewOpen} 
         onClose={() => setIsPreviewOpen(false)} 
-        title="Planilla de Viajes Histórica"
+        title="Planilla de Viajes Operativa"
       >
         <PrintableTable />
       </PrintPreviewModal>

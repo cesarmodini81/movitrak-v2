@@ -1,18 +1,45 @@
-import React from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
-import { Car, AlertCircle, CheckCircle, Clock, Building, ArrowLeft } from 'lucide-react';
+import { Car, AlertCircle, CheckCircle, Clock, Building, ArrowLeft, X, LockKeyhole } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { Role } from '../types';
 import { SuperAdminDashboard } from './SuperAdminDashboard';
 import { ChatPopup } from '../components/ChatPopup';
+import { useNavigate } from 'react-router-dom';
 
 export const Dashboard: React.FC = () => {
-  const { vehicles, user, currentCompany, setCurrentCompany } = useApp();
+  const { vehicles, user, currentCompany, setCurrentCompany, enterPartsMode } = useApp();
   const { t } = useTranslation();
+  const navigate = useNavigate();
+
+  const [isPartsAuthOpen, setIsPartsAuthOpen] = useState(false);
+  const [partsPin, setPartsPin] = useState('');
+  const [pinError, setPinError] = useState(false);
+
+  // --- AUTOMATIC PIN MODAL FOR PARTS ROLE ---
+  useEffect(() => {
+    if (user?.role === Role.PARTS_OPERATOR) {
+        setIsPartsAuthOpen(true);
+    }
+  }, [user]);
+
+  // --- PARTS AUTH HANDLER ---
+  const handlePartsAuth = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (enterPartsMode(partsPin)) {
+      setIsPartsAuthOpen(false);
+      setPartsPin('');
+      setPinError(false);
+      navigate('/parts/search');
+    } else {
+      setPinError(true);
+      setPartsPin('');
+    }
+  };
 
   // --- SUPER ADMIN LOGIC ---
-  // If user is SuperAdmin and NO company is selected, show Global Dashboard
   if (user?.role === Role.SUPER_ADMIN && !currentCompany) {
     return (
       <>
@@ -22,7 +49,48 @@ export const Dashboard: React.FC = () => {
     );
   }
 
-  // --- STANDARD DASHBOARD LOGIC (For everyone else OR SuperAdmin viewing a specific company) ---
+  // --- PARTS OPERATOR (Show only modal backdrop if stuck) ---
+  if (user?.role === Role.PARTS_OPERATOR) {
+      return (
+        <div className="fixed inset-0 bg-slate-900 z-50 flex items-center justify-center">
+            {isPartsAuthOpen && (
+                <div className="bg-white w-full max-w-sm rounded-3xl p-8 shadow-2xl relative">
+                    <div className="flex flex-col items-center mb-6">
+                        <div className="bg-slate-100 p-4 rounded-full mb-4">
+                            <LockKeyhole size={32} className="text-slate-900" />
+                        </div>
+                        <h3 className="text-xl font-black text-slate-900 uppercase">Acceso Repuestos</h3>
+                        <p className="text-xs text-slate-500 font-bold uppercase tracking-widest mt-1">Ingrese Clave Operativa (6789)</p>
+                    </div>
+
+                    <form onSubmit={handlePartsAuth} className="space-y-4">
+                        <input 
+                        type="password" 
+                        value={partsPin}
+                        onChange={(e) => { setPartsPin(e.target.value); setPinError(false); }}
+                        maxLength={4}
+                        className="w-full text-center text-3xl font-mono font-black py-4 border-b-4 border-slate-200 focus:border-emerald-500 outline-none transition-colors"
+                        placeholder="****"
+                        autoFocus
+                        />
+                        
+                        {pinError && (
+                            <div className="bg-red-50 text-red-600 text-xs font-bold p-3 rounded-xl text-center animate-in shake">
+                            Clave incorrecta. Intente nuevamente.
+                            </div>
+                        )}
+
+                        <button type="submit" className="w-full bg-emerald-500 text-white font-black uppercase tracking-widest py-4 rounded-xl shadow-lg hover:bg-emerald-600 transition-all active:scale-95">
+                            Ingresar al Módulo
+                        </button>
+                    </form>
+                </div>
+            )}
+        </div>
+      );
+  }
+
+  // --- STANDARD DASHBOARD LOGIC (Fleet Operators) ---
 
   const statusData = [
     { name: 'Available', value: vehicles.filter(v => v.status === 'AVAILABLE').length },
@@ -34,8 +102,6 @@ export const Dashboard: React.FC = () => {
     { name: 'Pending', value: vehicles.filter(v => v.type === 'NEW' && !v.preDeliveryConfirmed).length },
     { name: 'Confirmed', value: vehicles.filter(v => v.type === 'NEW' && v.preDeliveryConfirmed).length },
   ];
-
-  const COLORS = ['#0ea5e9', '#f59e0b', '#10b981', '#ef4444'];
 
   const StatCard = ({ title, value, icon: Icon, color }: any) => (
     <div className="bg-white p-6 rounded-xl shadow-md flex items-center justify-between border-l-4" style={{ borderColor: color }}>
@@ -82,6 +148,8 @@ export const Dashboard: React.FC = () => {
         <StatCard title={t('in_transit')} value={statusData[1].value} icon={Clock} color="#f59e0b" />
         <StatCard title={t('available')} value={statusData[0].value} icon={CheckCircle} color="#10b981" />
       </div>
+
+      {/* NOTE: Parts Module Button REMOVED. Access is now Role-Based only. */}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         <div className="bg-white p-6 rounded-xl shadow-md">
@@ -133,7 +201,6 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
       
-      {/* Always render chat for regular dashboard usage */}
       <ChatPopup />
     </div>
   );

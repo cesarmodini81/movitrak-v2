@@ -25,7 +25,7 @@ export const CalendarPage: React.FC = () => {
   const { calendarEvents, movements, availableVehicles } = useApp();
   const { t } = useTranslation();
   
-  // FIXED REFERENCE DATE: JAN 10, 2026 (Para cálculo de prioridades)
+  // FIXED REFERENCE DATE: JAN 10, 2026 (Para cálculo de prioridades de los mocks)
   const REFERENCE_DATE = new Date(2026, 0, 10, 12, 0, 0);
   
   // Initialize state to Jan 2026 for Mock Data visibility
@@ -39,11 +39,11 @@ export const CalendarPage: React.FC = () => {
     const diffMs = eventDate.getTime() - REFERENCE_DATE.getTime();
     const diffHours = diffMs / (1000 * 60 * 60);
 
-    // Si faltan menos de 48hs (o ya pasó), es URGENTE
+    // Si faltan menos de 48hs (o ya pasó), es URGENTE (Rojo)
     if (diffHours < 48) return 'URGENTE';
-    // Si faltan entre 48 y 72hs, es MEDIA
+    // Si faltan entre 48 y 72hs, es MEDIA (Amarillo)
     if (diffHours <= 72) return 'MEDIA';
-    // Si faltan más de 72hs, es NORMAL
+    // Si faltan más de 72hs, es NORMAL (Verde)
     return 'NORMAL'; 
   };
 
@@ -78,6 +78,7 @@ export const CalendarPage: React.FC = () => {
     };
 
     relevantEvents.forEach(evt => {
+      // Match vehicle to get location details, filtering strict by available vehicles (company context)
       const v = availableVehicles.find(veh => veh.vin.startsWith(evt.vehicleVin));
       if (v) {
         addItem(evt.date, { 
@@ -146,7 +147,7 @@ export const CalendarPage: React.FC = () => {
       }
 
       return {
-        // FORCE LOCATION OVERRIDE for 0km Logistics as requested
+        // FORCE LOCATION OVERRIDE for 0km Logistics as requested (Predio Sauce Viejo)
         vehicle: { ...item.vehicle!, locationId: 'loc_1_pred' } as Vehicle, 
         time,
         eventId,
@@ -249,7 +250,7 @@ export const CalendarPage: React.FC = () => {
                     </div>
                   )}
                   {/* Verde > 72h */}
-                  {normalCount > 0 && urgentCount === 0 && (
+                  {normalCount > 0 && urgentCount === 0 && mediumCount === 0 && (
                     <div className="flex items-center gap-2 bg-emerald-500 text-white rounded-lg px-2 py-1 border border-emerald-600 shadow-md shadow-emerald-100 animate-in zoom-in duration-300 delay-100">
                        <span className="text-[10px] font-black">{normalCount}</span>
                        <span className="text-[8px] font-black uppercase tracking-tighter truncate">NORMAL (&gt;72h)</span>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
@@ -14,6 +15,14 @@ import { AuditLogs } from './pages/AuditLogs';
 import { UsedReceptionPage } from './pages/UsedReception';
 import { Layout } from './components/Layout';
 import { Role } from './types';
+import { StockPage } from './pages/StockPage';
+
+// Parts Pages
+import { PartsSearch } from './pages/parts/PartsSearch';
+import { PartsStock } from './pages/parts/PartsStock';
+import { PartsTransfer } from './pages/parts/PartsTransfer';
+import { PartsSales } from './pages/parts/PartsSales';
+import { PartsAudit } from './pages/parts/PartsAudit';
 
 const ProtectedRoute: React.FC<{ children: React.ReactNode; allowedRoles?: Role[] }> = ({ children, allowedRoles }) => {
   const { user } = useApp();
@@ -31,12 +40,20 @@ const AppRoutes: React.FC = () => {
       <Route path="/used-reception" element={<ProtectedRoute allowedRoles={[Role.USED_OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><UsedReceptionPage /></ProtectedRoute>} />
       <Route path="/programming" element={<ProtectedRoute allowedRoles={[Role.PROGRAMADOR, Role.ADMIN, Role.SUPER_ADMIN]}><ProgrammingPage /></ProtectedRoute>} />
       <Route path="/calendar" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.PROGRAMADOR]}><CalendarPage /></ProtectedRoute>} />
+      <Route path="/stock" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.PROGRAMADOR]}><StockPage /></ProtectedRoute>} />
       <Route path="/pdi" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><OperationalPreDelivery /></ProtectedRoute>} />
       <Route path="/travel-sheet" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><TravelSheet /></ProtectedRoute>} />
       <Route path="/historical-travel-sheet" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><HistoricalTravelSheet /></ProtectedRoute>} />
       <Route path="/movements" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.USED_OPERATOR]}><Movements /></ProtectedRoute>} />
       <Route path="/confirm-movements" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><ConfirmMovements /></ProtectedRoute>} />
       <Route path="/audit" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.SUPER_ADMIN]}><AuditLogs /></ProtectedRoute>} />
+      
+      {/* Parts Module Routes */}
+      <Route path="/parts/search" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN]}><PartsSearch /></ProtectedRoute>} />
+      <Route path="/parts/stock" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN]}><PartsStock /></ProtectedRoute>} />
+      <Route path="/parts/transfer" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN]}><PartsTransfer /></ProtectedRoute>} />
+      <Route path="/parts/sales" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN]}><PartsSales /></ProtectedRoute>} />
+      <Route path="/parts/audit" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN]}><PartsAudit /></ProtectedRoute>} />
     </Routes>
   );
 }

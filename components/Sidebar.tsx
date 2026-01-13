@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Role } from '../types';
@@ -6,7 +7,7 @@ import {
   LayoutDashboard, Calendar, FileCheck, Truck, 
   Search, ShieldAlert, Globe, ChevronDown, ChevronRight,
   ClipboardList, Map, FileText, CalendarPlus, Car, PenTool,
-  History
+  History, Settings, Package
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -18,6 +19,8 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
 
   if (!user) return null;
 
+  // Parts Operator logic handled in Layout via RepuestosSidebar
+  // This Sidebar is for Fleet operations
   const isUsedOperator = user.role === Role.USED_OPERATOR;
   const isProgramador = user.role === Role.PROGRAMADOR;
   const isOperator = user.role === Role.OPERATOR;
@@ -72,7 +75,10 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
 
         {/* --- Calendario Logístico (Visible para todos menos Usados) --- */}
         {!isUsedOperator && (
-          <NavItem to="/calendar" icon={Calendar} label={t('calendar')} />
+          <>
+            <NavItem to="/calendar" icon={Calendar} label={t('calendar')} />
+            <NavItem to="/stock" icon={Package} label="Stock Unidades" />
+          </>
         )}
 
         {/* --- Sección de Usados --- */}
@@ -126,6 +132,13 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
           <div className="mt-6">
             <div className="px-6 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Sistema</div>
             <NavItem to="/audit" icon={ShieldAlert} label={t('audit_logs')} />
+            <Link 
+              to="/parts/audit" 
+              className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/parts/audit')}`}
+            >
+              <Settings size={18} />
+              <span className="text-sm font-medium">Auditoría Repuestos</span>
+            </Link>
           </div>
         )}
       </nav>
