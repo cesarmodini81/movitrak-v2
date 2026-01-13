@@ -24,7 +24,7 @@ interface TravelSheetItem extends Vehicle {
 }
 
 export const TravelSheet: React.FC = () => {
-  const { vehicles, travelSheetList, removeFromTravelSheet, currentCompany, calendarEvents, companies } = useApp();
+  const { vehicles, removeFromTravelSheet, historicalTravelSheetList, currentCompany, calendarEvents, companies } = useApp();
   const { t } = useTranslation();
   
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -51,7 +51,19 @@ export const TravelSheet: React.FC = () => {
   // 1. Merge Context Data (Source of Truth - Integration Logic)
   const sourceData = useMemo(() => {
     return vehicles
-      .filter(v => travelSheetList.includes(v.vin)) // Only confirmed PDI units
+      .filter(v => {
+        // Exclude if explicitly archived/removed
+        if (historicalTravelSheetList.includes(v.vin)) return false;
+
+        // Visibility Rules:
+        // 1. Used Units: Always visible (no restrictions)
+        if (v.type === 'USED') return true;
+        
+        // 2. New Units: Only if PDI is confirmed
+        if (v.type === 'NEW' && v.preDeliveryConfirmed) return true;
+
+        return false;
+      }) 
       .map(v => {
         // Integrate Calendar Data (Priority to Event)
         const event = calendarEvents.find(e => e.vehicleVin === v.vin && e.status === 'PROGRAMADO');
@@ -76,12 +88,12 @@ export const TravelSheet: React.FC = () => {
           deliveryLocationName
         };
       });
-  }, [vehicles, travelSheetList, calendarEvents, companies]);
+  }, [vehicles, historicalTravelSheetList, calendarEvents, companies]);
 
   // 2. Sync Source Data with Ordered State
   useEffect(() => {
     setOrderedItems(prev => {
-      // New items coming from PDI
+      // New items coming from PDI or Reception
       const newItems = sourceData.filter(s => !prev.some(p => p.vin === s.vin));
       // Existing items (keep manual order)
       const existingItems = prev.filter(p => sourceData.some(s => s.vin === p.vin)).map(p => {
@@ -202,14 +214,17 @@ export const TravelSheet: React.FC = () => {
           {filteredData.map((v, idx) => (
             <tr key={v.vin}>
               <td className="p-3 font-bold text-center text-slate-400">{idx + 1}</td>
-              <td className="p-3 font-mono font-bold align-top">{v.vin}</td>
+              <td className="p-3 font-mono font-bold align-top">
+                {v.vin}
+                {v.type === 'USED' && <span className="ml-2 text-[9px] bg-amber-100 text-amber-800 px-1 rounded">USADO</span>}
+              </td>
               <td className="p-3 align-top">
                 <div className="font-bold uppercase">{v.brand} {v.model}</div>
                 <div className="text-[10px] text-slate-500 uppercase">{v.color}</div>
               </td>
               <td className="p-3 align-top font-mono">{new Date(v.deliveryDate).toLocaleDateString()}</td>
               <td className="p-3 align-top uppercase font-bold text-xs">{v.deliveryLocationName}</td>
-              <td className="p-3 align-top italic text-slate-600">{v.pdiComment || '---'}</td>
+              <td className="p-3 align-top italic text-slate-600">{v.pdiComment || (v.type === 'USED' ? 'Unidad Usada' : 'Validado sin observaciones.')}</td>
             </tr>
           ))}
         </tbody>
@@ -325,6 +340,11 @@ export const TravelSheet: React.FC = () => {
                         <span className="font-mono font-black text-slate-800 text-sm tracking-wider bg-slate-100 px-2 py-1 rounded border border-slate-200">
                           {v.vin}
                         </span>
+                        {v.type === 'USED' && (
+                          <span className="ml-2 inline-block px-1.5 py-0.5 bg-amber-100 text-amber-800 text-[9px] font-black uppercase rounded tracking-wider align-middle border border-amber-200">
+                            USD
+                          </span>
+                        )}
                       </td>
                       <td className="p-6 align-top">
                         <div className="font-bold text-slate-900 uppercase text-xs">{v.brand} {v.model}</div>
@@ -344,7 +364,7 @@ export const TravelSheet: React.FC = () => {
                       </td>
                       <td className="p-6 align-top">
                         <div className="text-xs font-medium text-slate-600 italic border-l-2 border-emerald-400 pl-3 truncate max-w-xs">
-                          {v.pdiComment || 'Validado sin observaciones.'}
+                          {v.pdiComment || (v.type === 'USED' ? 'Unidad Usada - Peritaje OK' : 'Validado sin observaciones.')}
                         </div>
                       </td>
                     </tr>

@@ -131,6 +131,8 @@ export const Movements: React.FC = () => {
       destinationId: destination,
       transporter,
       driverName,
+      truckPlate,
+      trailerPlate,
       vehicleVins: selectedVins,
       status: 'PENDING',
       createdBy: 'sys_oper',

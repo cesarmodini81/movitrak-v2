@@ -73,6 +73,8 @@ export interface Movement {
   destinationId: string;
   transporter: string;
   driverName?: string;
+  truckPlate?: string;
+  trailerPlate?: string;
   vehicleVins: string[];
   status: 'PENDING' | 'COMPLETED' | 'CANCELLED';
   createdBy: string;

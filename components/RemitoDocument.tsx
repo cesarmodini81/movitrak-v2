@@ -142,11 +142,11 @@ export const RemitoDocument: React.FC<Props> = ({
                   <div className="border-t border-dashed border-slate-300 pt-2 flex justify-between items-center">
                      <div className="text-center flex-1 border-r border-slate-200">
                         <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Patente Camión</p>
-                        <p className="text-xs font-mono font-black mt-0.5 text-slate-900">{truckPlate || '---'}</p>
+                        <p className="text-xs font-mono font-black mt-0.5 text-slate-900">{truckPlate || movement.truckPlate || '---'}</p>
                      </div>
                      <div className="text-center flex-1">
                         <p className="text-[8px] font-black text-slate-500 uppercase tracking-widest">Acoplado</p>
-                        <p className="text-xs font-mono font-black mt-0.5 text-slate-900">{trailerPlate || '---'}</p>
+                        <p className="text-xs font-mono font-black mt-0.5 text-slate-900">{trailerPlate || movement.trailerPlate || '---'}</p>
                      </div>
                   </div>
                </div>
