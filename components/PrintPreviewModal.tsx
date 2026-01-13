@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { X, Printer, Eye } from 'lucide-react';
 
@@ -17,8 +18,46 @@ export const PrintPreviewModal: React.FC<Props> = ({ isOpen, onClose, title, chi
 
   return (
     <div className="fixed inset-0 z-[200] flex flex-col bg-slate-900/95 backdrop-blur-sm animate-in fade-in duration-200">
-      {/* Toolbar - Hidden on Print */}
-      <div className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-white/10 shrink-0 print:hidden">
+      
+      {/* Global Print Isolation Styles */}
+      <style>{`
+        @media print {
+          /* Hide everything in the body by default */
+          body * {
+            visibility: hidden;
+          }
+          
+          /* Unhide the print container and its children */
+          #print-preview-container, #print-preview-container * {
+            visibility: visible;
+          }
+
+          /* Position the print container at the top-left of the page */
+          #print-preview-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: white;
+          }
+
+          /* Ensure body background is white */
+          body {
+            background: white !important;
+            overflow: visible !important;
+          }
+
+          /* Hide the toolbar specifically (redundant but safe) */
+          .no-print-toolbar {
+            display: none !important;
+          }
+        }
+      `}</style>
+
+      {/* Toolbar - Screen Only */}
+      <div className="flex items-center justify-between px-6 py-4 bg-slate-900 border-b border-white/10 shrink-0 no-print-toolbar">
         <div className="flex items-center gap-3">
           <div className="p-2 bg-white/10 rounded-lg text-white">
             <Eye size={20} />
@@ -46,11 +85,11 @@ export const PrintPreviewModal: React.FC<Props> = ({ isOpen, onClose, title, chi
         </div>
       </div>
 
-      {/* Document Canvas */}
-      <div className="flex-1 overflow-y-auto overflow-x-hidden p-8 flex justify-center bg-slate-800/50 print:p-0 print:bg-white print:overflow-visible">
-        <div className="relative print:w-full print:h-full print:absolute print:inset-0 print:z-[9999]">
+      {/* Document Canvas - Screen: Scrollable | Print: Full Page */}
+      <div className="flex-1 overflow-y-auto overflow-x-hidden p-8 flex justify-center bg-slate-800/50 print:bg-white print:overflow-visible print:p-0">
+        <div id="print-preview-container" className="relative print:w-full">
           {/* Paper Shadow Effect (Screen Only) */}
-          <div className="bg-white shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] print:shadow-none min-h-[297mm] w-auto inline-block mx-auto">
+          <div className="bg-white shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] print:shadow-none w-auto inline-block mx-auto transition-transform">
             {children}
           </div>
         </div>

@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from 'react-i18next';
 import { LOCATION_MAP } from '../constants';
@@ -13,6 +13,7 @@ export const OperationalPreDelivery: React.FC = () => {
   
   const queuedVehicles = vehicles.filter(v => pdiQueue.includes(v.vin) && v.type === 'NEW');
   const [localComments, setLocalComments] = useState<Record<string, string>>({});
+  
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // Helper to resolve location name
@@ -86,6 +87,7 @@ export const OperationalPreDelivery: React.FC = () => {
              <AlertCircle size={14} className="text-slate-400" />
              {queuedVehicles.length} Unidades
            </div>
+           
            <button 
              onClick={() => setIsPreviewOpen(true)}
              disabled={queuedVehicles.length === 0}
@@ -206,8 +208,8 @@ export const OperationalPreDelivery: React.FC = () => {
 
       <PrintPreviewModal 
         isOpen={isPreviewOpen} 
-        onClose={() => setIsPreviewOpen(false)} 
-        title="Protocolo Oficial PDI"
+        onClose={() => setIsPreviewOpen(false)}
+        title="Planilla PDI Oficial"
       >
         {currentCompany && (
           <PreDeliveryDocument 

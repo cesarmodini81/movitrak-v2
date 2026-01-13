@@ -35,13 +35,13 @@ export const PreDeliveryDocument: React.FC<Props> = ({ vehicles, company, calend
   };
 
   return (
-    <div className="w-full h-full bg-slate-100 flex justify-center print:bg-white print:m-0 print:p-0">
-      <style dangerouslySetInnerHTML={{__html: `
+    <div className="w-full bg-white text-slate-900 font-sans">
+      <style>{`
+        @page {
+          size: A4 landscape;
+          margin: 10mm 15mm;
+        }
         @media print {
-          @page {
-            size: A4 landscape;
-            margin: 0; /* Managed by container padding */
-          }
           html, body {
             width: 100%;
             height: 100%;
@@ -51,33 +51,19 @@ export const PreDeliveryDocument: React.FC<Props> = ({ vehicles, company, calend
             -webkit-print-color-adjust: exact;
             print-color-adjust: exact;
           }
-          /* Hide everything outside the print root */
-          body > *:not(#root) { display: none !important; }
           
-          #print-content-root {
-            width: 297mm !important;
-            height: 210mm !important; /* Force A4 Landscape height */
-            padding: 10mm 15mm !important;
-            margin: 0 auto !important;
-            box-shadow: none !important;
-            border: none !important;
-            overflow: hidden !important;
-            page-break-after: always;
-            position: absolute;
-            top: 0;
-            left: 0;
-          }
+          .page-break { page-break-after: always; }
           
-          /* Ensure table rows don't break awkwardly if list is long */
+          /* Table optimizations */
+          table { width: 100%; border-collapse: collapse; }
           tr { page-break-inside: avoid; }
+          td, th { word-break: break-word; }
         }
-      `}} />
+      `}</style>
 
-      {/* Paper Representation (Screen & Print) */}
-      <div 
-        id="print-content-root" 
-        className="bg-white w-[297mm] min-h-[210mm] p-[10mm] shadow-xl print:shadow-none relative flex flex-col font-sans text-slate-900 mx-auto my-8 print:my-0"
-      >
+      {/* Paper Representation */}
+      <div className="w-[297mm] min-h-[210mm] mx-auto p-[10mm] relative flex flex-col font-sans text-slate-900">
+        
         {/* Watermark */}
         <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-0 overflow-hidden opacity-[0.04]">
            <div className="transform -rotate-12 text-[150px] font-black uppercase tracking-widest whitespace-nowrap text-slate-900 select-none">
@@ -90,19 +76,19 @@ export const PreDeliveryDocument: React.FC<Props> = ({ vehicles, company, calend
           {/* Header */}
           <div className="flex justify-between items-center border-b-[2px] border-slate-900 pb-3 mb-3 shrink-0">
             <div className="flex items-center gap-3">
-               <div className="p-2 bg-slate-900 text-white rounded print:text-black print:border-[2px] print:border-black print:bg-transparent">
+               <div className="p-2 border-[2px] border-slate-900 rounded bg-transparent text-slate-900">
                   <ShieldCheck size={24} strokeWidth={2.5} />
                </div>
                <div>
                  <h1 className="text-xl font-black uppercase tracking-tight leading-none text-slate-900">
                    Planilla Técnica PDI
                  </h1>
-                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mt-0.5 print:text-slate-700">Protocolo de Pre-Entrega 0KM</p>
+                 <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.3em] mt-0.5">Protocolo de Pre-Entrega 0KM</p>
                </div>
             </div>
             <div className="text-right">
                <p className="text-lg font-black uppercase text-slate-900 leading-none">{company.name}</p>
-               <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-1 flex items-center justify-end gap-2 print:text-slate-700">
+               <div className="text-[9px] font-bold uppercase tracking-widest text-slate-500 mt-1 flex items-center justify-end gap-2">
                   <span>Emisión:</span>
                   <span className="font-mono text-slate-900">{new Date().toLocaleDateString()}</span>
                </div>
@@ -112,44 +98,44 @@ export const PreDeliveryDocument: React.FC<Props> = ({ vehicles, company, calend
           {/* Table Container */}
           <div className="flex-1">
             <table className="w-full border-collapse border-[1px] border-slate-900 text-[9pt] table-fixed">
-              <thead className="bg-slate-900 text-white uppercase text-[8pt] font-black tracking-[0.1em] text-left print:bg-slate-200 print:text-black print:border-b-2 print:border-black">
+              <thead className="bg-slate-200 text-black uppercase text-[8pt] font-black tracking-[0.1em] text-left border-b-2 border-slate-900">
                 <tr>
-                  <th className="p-1.5 border-r border-white/20 w-[5%] text-center print:border-black">#</th>
-                  <th className="p-1.5 border-r border-white/20 w-[8%] text-center print:border-black">Fecha</th>
-                  <th className="p-1.5 border-r border-white/20 w-[15%] text-center print:border-black">VIN / Chasis</th>
-                  <th className="p-1.5 border-r border-white/20 w-[20%] print:border-black">Unidad / Modelo</th>
-                  <th className="p-1.5 border-r border-white/20 w-[12%] print:border-black">Ubicación</th>
-                  <th className="p-1.5 border-r border-white/20 w-[12%] print:border-black">Destino</th>
-                  <th className="p-1.5 border-r border-white/20 w-[22%] print:border-black">Observaciones Técnicas</th>
+                  <th className="p-1.5 border-r border-slate-900 w-[5%] text-center">#</th>
+                  <th className="p-1.5 border-r border-slate-900 w-[8%] text-center">Fecha</th>
+                  <th className="p-1.5 border-r border-slate-900 w-[15%] text-center">VIN / Chasis</th>
+                  <th className="p-1.5 border-r border-slate-900 w-[20%]">Unidad / Modelo</th>
+                  <th className="p-1.5 border-r border-slate-900 w-[12%]">Ubicación</th>
+                  <th className="p-1.5 border-r border-slate-900 w-[12%]">Destino</th>
+                  <th className="p-1.5 border-r border-slate-900 w-[22%]">Observaciones Técnicas</th>
                   <th className="p-1.5 w-[6%] text-center">V° B°</th>
                 </tr>
               </thead>
-              <tbody className="divide-y-[1px] divide-slate-300">
+              <tbody className="divide-y-[1px] divide-slate-400">
                 {vehicles.length > 0 ? vehicles.map((v, idx) => {
                   const delivery = getDeliveryInfo(v.vin);
                   return (
-                    <tr key={v.vin} className="break-inside-avoid">
-                      <td className="p-1.5 border-x-[1px] border-slate-900 text-center font-bold text-slate-500">{idx + 1}</td>
-                      <td className="p-1.5 border-r border-slate-300 font-mono font-bold text-center align-top">{delivery.date}</td>
-                      <td className="p-1.5 border-r border-slate-300 font-mono font-black tracking-widest text-center align-top bg-slate-50 print:bg-transparent">
+                    <tr key={v.vin}>
+                      <td className="p-1.5 border-x-[1px] border-slate-900 text-center font-bold text-slate-600">{idx + 1}</td>
+                      <td className="p-1.5 border-r border-slate-400 font-mono font-bold text-center align-top">{delivery.date}</td>
+                      <td className="p-1.5 border-r border-slate-400 font-mono font-black tracking-widest text-center align-top">
                         {v.vin}
                       </td>
-                      <td className="p-1.5 border-r border-slate-300 align-top">
+                      <td className="p-1.5 border-r border-slate-400 align-top">
                         <div className="font-black uppercase text-[10px] leading-tight text-slate-900">{v.brand} {v.model}</div>
-                        <div className="text-[8px] font-bold text-slate-500 uppercase">{v.color}</div>
+                        <div className="text-[8px] font-bold text-slate-600 uppercase">{v.color}</div>
                       </td>
-                      <td className="p-1.5 border-r border-slate-300 align-top">
-                        <div className="font-bold text-[8px] uppercase tracking-tight truncate text-slate-700">
+                      <td className="p-1.5 border-r border-slate-400 align-top">
+                        <div className="font-bold text-[8px] uppercase tracking-tight truncate text-slate-800">
                            {getLocationName(v.locationId)}
                         </div>
                       </td>
-                      <td className="p-1.5 border-r border-slate-300 align-top">
+                      <td className="p-1.5 border-r border-slate-400 align-top">
                         <div className="font-bold text-[8px] uppercase tracking-tight truncate text-slate-900">
                            {delivery.destination}
                         </div>
                       </td>
-                      <td className="p-1.5 border-r border-slate-300 relative min-h-[30px] align-top">
-                         <span className="text-[9px] font-medium text-slate-800 italic leading-tight block uppercase">
+                      <td className="p-1.5 border-r border-slate-400 relative min-h-[30px] align-top">
+                         <span className="text-[9px] font-medium text-slate-900 italic leading-tight block uppercase">
                            {v.pdiComment || '---'}
                          </span>
                       </td>
@@ -174,12 +160,12 @@ export const PreDeliveryDocument: React.FC<Props> = ({ vehicles, company, calend
                 {vehicles.length > 0 && vehicles.length < 12 && Array.from({ length: 12 - vehicles.length }).map((_, i) => (
                   <tr key={`fill-${i}`} className="h-6">
                     <td className="border-x-[1px] border-slate-900"></td>
-                    <td className="border-r border-slate-300"></td>
-                    <td className="border-r border-slate-300"></td>
-                    <td className="border-r border-slate-300"></td>
-                    <td className="border-r border-slate-300"></td>
-                    <td className="border-r border-slate-300"></td>
-                    <td className="border-r border-slate-300"></td>
+                    <td className="border-r border-slate-400"></td>
+                    <td className="border-r border-slate-400"></td>
+                    <td className="border-r border-slate-400"></td>
+                    <td className="border-r border-slate-400"></td>
+                    <td className="border-r border-slate-400"></td>
+                    <td className="border-r border-slate-400"></td>
                     <td className="border-x-[1px] border-slate-900"></td>
                   </tr>
                 ))}
