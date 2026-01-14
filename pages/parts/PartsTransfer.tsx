@@ -60,30 +60,30 @@ export const PartsTransfer: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
+    <div className="max-w-4xl mx-auto space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex items-center gap-4">
-        <div className="p-4 bg-slate-900 text-white rounded-2xl shadow-xl">
-           <ArrowRightLeft size={32} />
+        <div className="p-3 lg:p-4 bg-slate-900 text-white rounded-2xl shadow-xl">
+           <ArrowRightLeft size={28} className="lg:w-8 lg:h-8" />
         </div>
         <div>
-           <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase leading-none">Transferencia de Repuestos</h2>
-           <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mt-2">Emisión de Remito Inter-Planta</p>
+           <h2 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight uppercase leading-none">Transferencia de Repuestos</h2>
+           <p className="text-slate-400 text-xs lg:text-sm font-bold uppercase tracking-widest mt-2">Emisión de Remito Inter-Planta</p>
         </div>
       </div>
 
       {!isSubmitted ? (
-        <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-10 space-y-8">
-           <div className="grid grid-cols-2 gap-8">
+        <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 p-6 lg:p-10 space-y-6 lg:space-y-8">
+           <div className="grid grid-cols-2 gap-6 lg:gap-8">
               <div className="space-y-2">
                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Origen</label>
-                 <select value={origin} onChange={(e) => setOrigin(e.target.value)} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold">
+                 <select value={origin} onChange={(e) => setOrigin(e.target.value)} className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm lg:text-base">
                     <option value="">Seleccionar...</option>
                     {locations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                  </select>
               </div>
               <div className="space-y-2">
                  <label className="text-[10px] font-black uppercase tracking-widest text-slate-400">Destino</label>
-                 <select value={destination} onChange={(e) => setDestination(e.target.value)} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold">
+                 <select value={destination} onChange={(e) => setDestination(e.target.value)} className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-xl font-bold text-sm lg:text-base">
                     <option value="">Seleccionar...</option>
                     {locations.filter(l => l.id !== origin).map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                  </select>
@@ -91,18 +91,18 @@ export const PartsTransfer: React.FC = () => {
            </div>
 
            <div className="grid grid-cols-3 gap-4">
-              <input type="text" placeholder="Transportista" value={transporter} onChange={e => setTransporter(e.target.value)} className="p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100" />
-              <input type="text" placeholder="Chofer" value={driver} onChange={e => setDriver(e.target.value)} className="p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100" />
-              <input type="text" placeholder="Patente" value={plate} onChange={e => setPlate(e.target.value)} className="p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 uppercase" />
+              <input type="text" placeholder="Transportista" value={transporter} onChange={e => setTransporter(e.target.value)} className="p-3 lg:p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 text-sm lg:text-base" />
+              <input type="text" placeholder="Chofer" value={driver} onChange={e => setDriver(e.target.value)} className="p-3 lg:p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 text-sm lg:text-base" />
+              <input type="text" placeholder="Patente" value={plate} onChange={e => setPlate(e.target.value)} className="p-3 lg:p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 uppercase text-sm lg:text-base" />
            </div>
 
-           <div className="border-t-2 border-dashed border-slate-100 pt-8">
+           <div className="border-t-2 border-dashed border-slate-100 pt-6 lg:pt-8">
               <form onSubmit={handleAddItem} className="flex gap-4 mb-6">
-                 <input list="parts-list" placeholder="Código Repuesto" value={itemCode} onChange={e => setItemCode(e.target.value)} className="flex-1 p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100" />
+                 <input list="parts-list" placeholder="Código Repuesto" value={itemCode} onChange={e => setItemCode(e.target.value)} className="flex-1 p-3 lg:p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 text-sm lg:text-base" />
                  <datalist id="parts-list">
                     {companyParts.map(p => <option key={p.id} value={p.code}>{p.name}</option>)}
                  </datalist>
-                 <input type="number" min="1" value={itemQty} onChange={e => setItemQty(parseInt(e.target.value))} className="w-24 p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100" />
+                 <input type="number" min="1" value={itemQty} onChange={e => setItemQty(parseInt(e.target.value))} className="w-20 lg:w-24 p-3 lg:p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 text-sm lg:text-base" />
                  <button type="submit" className="bg-slate-900 text-white px-6 rounded-xl font-bold uppercase text-xs">Agregar</button>
               </form>
 
@@ -118,7 +118,7 @@ export const PartsTransfer: React.FC = () => {
               )}
            </div>
 
-           <button onClick={handleSubmit} disabled={selectedItems.length === 0} className="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-indigo-700 transition-all">
+           <button onClick={handleSubmit} disabled={selectedItems.length === 0} className="w-full bg-indigo-600 text-white py-4 lg:py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl hover:bg-indigo-700 transition-all">
               Confirmar Transferencia
            </button>
         </div>

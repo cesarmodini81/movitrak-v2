@@ -104,19 +104,19 @@ export const Dashboard: React.FC = () => {
   ];
 
   const StatCard = ({ title, value, icon: Icon, color }: any) => (
-    <div className="bg-white p-6 rounded-xl shadow-md flex items-center justify-between border-l-4" style={{ borderColor: color }}>
+    <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md flex items-center justify-between border-l-4" style={{ borderColor: color }}>
       <div>
-        <p className="text-slate-500 text-sm font-semibold uppercase">{title}</p>
-        <p className="text-3xl font-bold text-slate-800 mt-1">{value}</p>
+        <p className="text-slate-500 text-xs lg:text-sm font-semibold uppercase">{title}</p>
+        <p className="text-2xl lg:text-3xl font-bold text-slate-800 mt-1">{value}</p>
       </div>
-      <div className={`p-3 rounded-full opacity-20`} style={{ backgroundColor: color, color: color }}>
-        <Icon size={32} style={{ color: color, opacity: 1 }} />
+      <div className={`p-2 lg:p-3 rounded-full opacity-20`} style={{ backgroundColor: color, color: color }}>
+        <Icon size={28} className="lg:w-8 lg:h-8" style={{ color: color, opacity: 1 }} />
       </div>
     </div>
   );
 
   return (
-    <div className="space-y-8 relative">
+    <div className="space-y-6 lg:space-y-8 relative">
       
       {/* Super Admin Back Button */}
       {user?.role === Role.SUPER_ADMIN && (
@@ -139,21 +139,19 @@ export const Dashboard: React.FC = () => {
       )}
 
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold text-slate-800">{t('dashboard')}</h2>
+        <h2 className="text-xl lg:text-2xl font-bold text-slate-800">{t('dashboard')}</h2>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
         <StatCard title={t('total_fleet')} value={vehicles.length} icon={Car} color="#0284c7" />
         <StatCard title={t('pending_pdi')} value={pdiData[0].value} icon={AlertCircle} color="#ef4444" />
         <StatCard title={t('in_transit')} value={statusData[1].value} icon={Clock} color="#f59e0b" />
         <StatCard title={t('available')} value={statusData[0].value} icon={CheckCircle} color="#10b981" />
       </div>
 
-      {/* NOTE: Parts Module Button REMOVED. Access is now Role-Based only. */}
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Estado de Flota</h3>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+        <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md">
+          <h3 className="text-base lg:text-lg font-bold text-slate-800 mb-6">Estado de Flota</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={statusData}>
@@ -167,8 +165,8 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow-md">
-          <h3 className="text-lg font-bold text-slate-800 mb-6">Progreso PDI (Nuevas)</h3>
+        <div className="bg-white p-4 lg:p-6 rounded-xl shadow-md">
+          <h3 className="text-base lg:text-lg font-bold text-slate-800 mb-6">Progreso PDI (Nuevas)</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>

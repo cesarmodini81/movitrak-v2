@@ -19,7 +19,7 @@ export const Layout: React.FC<{ children: React.ReactNode }> = ({ children }) =>
       )}
       
       <TopBar />
-      <main className="ml-64 pt-16 min-h-screen p-8 transition-all">
+      <main className="ml-64 pt-16 min-h-screen p-4 lg:p-8 transition-all">
         <div className="max-w-7xl mx-auto animate-in fade-in duration-500 slide-in-from-bottom-4">
           {children}
         </div>

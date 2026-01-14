@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useApp } from '../context/AppContext';
 import { UsedReception, Vehicle } from '../types';
@@ -71,80 +72,80 @@ export const UsedReceptionPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-20 animate-in fade-in duration-500">
-      <div className="bg-white border-t-8 border-slate-900 p-8 rounded-b-3xl shadow-xl space-y-8">
+    <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8 pb-20 animate-in fade-in duration-500">
+      <div className="bg-white border-t-8 border-slate-900 p-6 lg:p-8 rounded-b-3xl shadow-xl space-y-6 lg:space-y-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-100 pb-6">
            <div className="flex items-center gap-5">
-              <div className="p-4 bg-slate-900 text-white rounded-2xl shadow-lg"><ClipboardList size={32} /></div>
+              <div className="p-3 lg:p-4 bg-slate-900 text-white rounded-2xl shadow-lg"><ClipboardList size={28} className="lg:w-8 lg:h-8" /></div>
               <div>
-                <h1 className="text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none">Acta de Recepción Usado</h1>
+                <h1 className="text-xl lg:text-2xl font-black text-slate-900 uppercase tracking-tighter leading-none">Acta de Recepción Usado</h1>
                 <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-2">{currentCompany?.name} • Peritaje Técnico</p>
               </div>
            </div>
-           <div className="bg-slate-50 p-4 rounded-2xl border border-slate-200 flex flex-col items-end min-w-[180px]">
+           <div className="bg-slate-50 p-3 lg:p-4 rounded-2xl border border-slate-200 flex flex-col items-end min-w-[180px]">
               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2"><Hash size={12} /> ID Registro</span>
-              <p className="text-2xl font-mono font-black text-slate-900">{reception.id}</p>
+              <p className="text-xl lg:text-2xl font-mono font-black text-slate-900">{reception.id}</p>
            </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-          <div className="lg:col-span-8 space-y-10">
-            <section className="space-y-6">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+          <div className="lg:col-span-8 space-y-6 lg:space-y-10">
+            <section className="space-y-4 lg:space-y-6">
                <div className="flex items-center gap-3 border-l-4 border-slate-900 pl-4 py-1">
                   <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">I. Datos Técnicos de la Unidad</h3>
                </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                   <div className="space-y-2">
                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Chasis / VIN (17 caracteres)</label>
-                     <input type="text" value={vehicleData.vin} onChange={(e) => setVehicleData({...vehicleData, vin: e.target.value.toUpperCase()})} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none font-mono font-bold tracking-widest uppercase" placeholder="8AJ..." disabled={formState !== 'IDLE'} />
+                     <input type="text" value={vehicleData.vin} onChange={(e) => setVehicleData({...vehicleData, vin: e.target.value.toUpperCase()})} className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none font-mono font-bold tracking-widest uppercase text-sm lg:text-base" placeholder="8AJ..." disabled={formState !== 'IDLE'} />
                   </div>
                   <div className="space-y-2">
                      <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Patente / Dominio</label>
-                     <input type="text" value={reception.plate} onChange={(e) => setReception({...reception, plate: e.target.value.toUpperCase()})} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none font-mono font-black text-center tracking-widest" placeholder="AAA 000" disabled={formState !== 'IDLE'} />
+                     <input type="text" value={reception.plate} onChange={(e) => setReception({...reception, plate: e.target.value.toUpperCase()})} className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none font-mono font-black text-center tracking-widest text-sm lg:text-base" placeholder="AAA 000" disabled={formState !== 'IDLE'} />
                   </div>
                   <div className="grid grid-cols-2 gap-4 col-span-full">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Marca</label>
-                      <select value={vehicleData.brand} onChange={(e) => setVehicleData({...vehicleData, brand: e.target.value, model: MODELS[e.target.value]?.[0] || ''})} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold" disabled={formState !== 'IDLE'}>
+                      <select value={vehicleData.brand} onChange={(e) => setVehicleData({...vehicleData, brand: e.target.value, model: MODELS[e.target.value]?.[0] || ''})} className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" disabled={formState !== 'IDLE'}>
                         {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
                       </select>
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Modelo</label>
-                      <select value={vehicleData.model} onChange={(e) => setVehicleData({...vehicleData, model: e.target.value})} className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold" disabled={formState !== 'IDLE'}>
+                      <select value={vehicleData.model} onChange={(e) => setVehicleData({...vehicleData, model: e.target.value})} className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" disabled={formState !== 'IDLE'}>
                         {MODELS[vehicleData.brand || 'Toyota']?.map(m => <option key={m} value={m}>{m}</option>)}
                       </select>
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-4 col-span-full">
-                    <input type="number" value={vehicleData.year} onChange={(e) => setVehicleData({...vehicleData, year: parseInt(e.target.value)})} className="p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold" placeholder="Año" disabled={formState !== 'IDLE'} />
-                    <select value={vehicleData.color} onChange={(e) => setVehicleData({...vehicleData, color: e.target.value})} className="p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold" disabled={formState !== 'IDLE'}>
+                    <input type="number" value={vehicleData.year} onChange={(e) => setVehicleData({...vehicleData, year: parseInt(e.target.value)})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" placeholder="Año" disabled={formState !== 'IDLE'} />
+                    <select value={vehicleData.color} onChange={(e) => setVehicleData({...vehicleData, color: e.target.value})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" disabled={formState !== 'IDLE'}>
                        {COLORS.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
-                    <input type="number" value={reception.kmReception} onChange={(e) => setReception({...reception, kmReception: parseInt(e.target.value)})} className="p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold" placeholder="Kilometraje" disabled={formState !== 'IDLE'} />
+                    <input type="number" value={reception.kmReception} onChange={(e) => setReception({...reception, kmReception: parseInt(e.target.value)})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" placeholder="Kilometraje" disabled={formState !== 'IDLE'} />
                   </div>
                </div>
             </section>
 
-            <section className="space-y-6">
+            <section className="space-y-4 lg:space-y-6">
                <div className="flex items-center gap-3 border-l-4 border-slate-900 pl-4 py-1">
                   <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">II. Titular Registral</h3>
                </div>
-               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <input type="text" value={reception.clientName} onChange={(e) => setReception({...reception, clientName: e.target.value})} className="p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold col-span-full" placeholder="Nombre y Apellido Titular *" disabled={formState !== 'IDLE'} />
-                  <input type="text" value={reception.clientDni} onChange={(e) => setReception({...reception, clientDni: e.target.value})} className="p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold" placeholder="DNI / CUIT" disabled={formState !== 'IDLE'} />
-                  <input type="text" value={reception.clientPhone} onChange={(e) => setReception({...reception, clientPhone: e.target.value})} className="p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold" placeholder="Teléfono" disabled={formState !== 'IDLE'} />
+               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
+                  <input type="text" value={reception.clientName} onChange={(e) => setReception({...reception, clientName: e.target.value})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold col-span-full text-sm lg:text-base" placeholder="Nombre y Apellido Titular *" disabled={formState !== 'IDLE'} />
+                  <input type="text" value={reception.clientDni} onChange={(e) => setReception({...reception, clientDni: e.target.value})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" placeholder="DNI / CUIT" disabled={formState !== 'IDLE'} />
+                  <input type="text" value={reception.clientPhone} onChange={(e) => setReception({...reception, clientPhone: e.target.value})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" placeholder="Teléfono" disabled={formState !== 'IDLE'} />
                </div>
             </section>
 
             <section className="space-y-4">
               <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">III. Estado de Recepción y Novedades</label>
-              <textarea value={reception.observations} onChange={(e) => setReception({...reception, observations: e.target.value})} className="w-full h-32 p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-medium outline-none focus:bg-white focus:border-slate-900 transition-all resize-none" placeholder="Reporte de peritaje inicial..." disabled={formState !== 'IDLE'} />
+              <textarea value={reception.observations} onChange={(e) => setReception({...reception, observations: e.target.value})} className="w-full h-24 lg:h-32 p-4 lg:p-6 bg-slate-50 border-2 border-slate-100 rounded-3xl font-medium outline-none focus:bg-white focus:border-slate-900 transition-all resize-none text-sm lg:text-base" placeholder="Reporte de peritaje inicial..." disabled={formState !== 'IDLE'} />
             </section>
           </div>
 
-          <div className="lg:col-span-4 space-y-8">
-            <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] shadow-2xl space-y-6">
+          <div className="lg:col-span-4 space-y-6 lg:space-y-8">
+            <div className="bg-slate-900 text-white p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] shadow-2xl space-y-6">
                <h3 className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] border-b border-white/10 pb-4">Operatoria Comercial</h3>
                <div className="space-y-4">
                   <div className="space-y-1">
@@ -162,11 +163,11 @@ export const UsedReceptionPage: React.FC = () => {
                </div>
             </div>
 
-            <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] p-8 space-y-4 shadow-sm">
+            <div className="bg-white border-2 border-slate-100 rounded-[2.5rem] p-6 lg:p-8 space-y-4 shadow-sm">
                {formState === 'IDLE' ? (
                  <>
-                   <button onClick={() => handleSave('INGRESADO')} className="w-full bg-slate-100 text-slate-600 py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-200 transition-all"><Save size={18} /> Guardar Acta</button>
-                   <button onClick={() => handleSave('CONFIRMADO')} className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"><CheckCircle2 size={20} /> Confirmar Alta</button>
+                   <button onClick={() => handleSave('INGRESADO')} className="w-full bg-slate-100 text-slate-600 py-3 lg:py-4 rounded-2xl font-black text-xs uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-slate-200 transition-all"><Save size={18} /> Guardar Acta</button>
+                   <button onClick={() => handleSave('CONFIRMADO')} className="w-full bg-slate-900 text-white py-4 lg:py-5 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl hover:scale-[1.02] active:scale-95 transition-all flex items-center justify-center gap-3"><CheckCircle2 size={20} /> Confirmar Alta</button>
                  </>
                ) : (
                  <div className="space-y-4">

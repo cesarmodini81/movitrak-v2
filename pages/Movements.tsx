@@ -194,49 +194,49 @@ export const Movements: React.FC = () => {
   );
 
   return (
-    <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 pb-20">
+    <div className="space-y-6 lg:space-y-8 animate-in slide-in-from-bottom-4 duration-500 pb-20">
       
       {/* UI Elements */}
       <div className="flex items-center gap-4 no-print">
-        <div className="p-4 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-200">
-          <ClipboardList size={28} />
+        <div className="p-3 lg:p-4 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-200">
+          <ClipboardList size={24} className="lg:w-7 lg:h-7" />
         </div>
         <div>
-          <h2 className="text-2xl font-black text-slate-900 tracking-tight uppercase italic">Emisión de Traslado Inter-Planta</h2>
-          <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em]">Protocolo de Despacho Logístico MOVITRAK</p>
+          <h2 className="text-xl lg:text-2xl font-black text-slate-900 tracking-tight uppercase italic">Emisión de Traslado Inter-Planta</h2>
+          <p className="text-slate-400 text-[9px] lg:text-[10px] font-bold uppercase tracking-[0.3em]">Protocolo de Despacho Logístico MOVITRAK</p>
         </div>
       </div>
 
       {!successMovement ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 no-print">
-          <div className="lg:col-span-8 space-y-10">
-            <div className="enterprise-card p-10 bg-white rounded-[2.5rem] border-2 border-slate-100 shadow-sm">
-              <div className="flex items-center gap-3 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 no-print">
+          <div className="lg:col-span-8 space-y-6 lg:space-y-10">
+            <div className="enterprise-card p-6 lg:p-10 bg-white rounded-[2rem] lg:rounded-[2.5rem] border-2 border-slate-100 shadow-sm">
+              <div className="flex items-center gap-3 mb-6 lg:mb-8">
                  <div className="w-1.5 h-6 bg-slate-900 rounded-full"></div>
                  <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">I. Ruta de Tráfico</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <div className="space-y-3">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
+                <div className="space-y-2 lg:space-y-3">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                      <MapPin size={12} className="text-slate-400" /> Planta / Sucursal de Origen
                   </label>
                   <select 
                     value={origin}
                     onChange={(e) => { setOrigin(e.target.value); setSelectedVins([]); }}
-                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none text-sm font-black text-slate-800 transition-all cursor-pointer appearance-none"
+                    className="w-full px-4 py-3 lg:px-5 lg:py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none text-sm font-black text-slate-800 transition-all cursor-pointer appearance-none"
                   >
                     <option value="">-- Seleccionar Planta --</option>
                     {companyLocations.map(l => <option key={l.id} value={l.id}>📍 {l.name}</option>)}
                   </select>
                 </div>
-                <div className="space-y-3">
+                <div className="space-y-2 lg:space-y-3">
                   <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest ml-1 flex items-center gap-2">
                      <Truck size={12} className="text-slate-400" /> Sucursal Destino Final
                   </label>
                   <select 
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
-                    className="w-full px-5 py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none text-sm font-black text-slate-800 transition-all cursor-pointer appearance-none"
+                    className="w-full px-4 py-3 lg:px-5 lg:py-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none text-sm font-black text-slate-800 transition-all cursor-pointer appearance-none"
                   >
                     <option value="">-- Seleccionar Arribo --</option>
                     {companyLocations.filter(l => l.id !== origin).map(l => <option key={l.id} value={l.id}>🚩 {l.name}</option>)}
@@ -245,15 +245,15 @@ export const Movements: React.FC = () => {
               </div>
             </div>
 
-            <div className="enterprise-card p-10 bg-white rounded-[2.5rem] border-2 border-slate-100 shadow-sm">
-              <div className="flex items-center justify-between mb-8">
+            <div className="enterprise-card p-6 lg:p-10 bg-white rounded-[2rem] lg:rounded-[2.5rem] border-2 border-slate-100 shadow-sm">
+              <div className="flex items-center justify-between mb-6 lg:mb-8">
                  <div className="flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-slate-900 rounded-full"></div>
                     <h3 className="text-xs font-black text-slate-900 uppercase tracking-widest">II. Manifiesto de Unidades</h3>
                  </div>
               </div>
 
-              <div className="relative mb-10">
+              <div className="relative mb-8 lg:mb-10">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300">
                    <Search size={24} />
                 </div>
@@ -262,7 +262,7 @@ export const Movements: React.FC = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Escanee VIN o ingrese Patente..."
-                  className="w-full pl-16 pr-4 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none text-lg font-bold text-slate-800 transition-all"
+                  className="w-full pl-16 pr-4 py-4 lg:py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none text-lg font-bold text-slate-800 transition-all"
                 />
                 
                 {suggestions.length > 0 && (
@@ -280,7 +280,7 @@ export const Movements: React.FC = () => {
                 )}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
                 {selectedVins.map(vin => {
                   const v = availableVehicles.find(av => av.vin === vin);
                   return (
@@ -301,8 +301,8 @@ export const Movements: React.FC = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-4 space-y-8 no-print">
-            <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] shadow-2xl">
+          <div className="lg:col-span-4 space-y-6 lg:space-y-8 no-print">
+            <div className="bg-slate-900 text-white p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] shadow-2xl">
                <div className="flex items-center gap-3 mb-6">
                   <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
                   <h3 className="text-xs font-black uppercase tracking-widest">III. Logística</h3>
@@ -320,27 +320,27 @@ export const Movements: React.FC = () => {
                            <PlusCircle size={14} />
                         </button>
                      </div>
-                     <select value={transporter} onChange={(e) => setTransporter(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white font-bold outline-none">
+                     <select value={transporter} onChange={(e) => setTransporter(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white font-bold outline-none text-sm">
                         <option value="" className="text-slate-900">-- Seleccionar --</option>
                         {availableTransporters.map(t => <option key={t} value={t} className="text-slate-900">{t}</option>)}
                      </select>
                   </div>
                   <div className="space-y-2">
                      <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest">Datos del Chofer</label>
-                     <input type="text" placeholder="Nombre Chofer" value={driverName} onChange={(e) => setDriverName(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white outline-none mb-2" />
-                     <input type="text" placeholder="DNI Chofer" value={driverDni} onChange={(e) => setDriverDni(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white outline-none" />
+                     <input type="text" placeholder="Nombre Chofer" value={driverName} onChange={(e) => setDriverName(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white outline-none mb-2 text-sm" />
+                     <input type="text" placeholder="DNI Chofer" value={driverDni} onChange={(e) => setDriverDni(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white outline-none text-sm" />
                   </div>
                   <div className="space-y-2">
                      <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest">Patentes Camión / Acoplado</label>
                      <div className="grid grid-cols-2 gap-2">
-                        <input type="text" placeholder="Tractor" value={truckPlate} onChange={(e) => setTruckPlate(e.target.value.toUpperCase())} className="px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white outline-none uppercase text-center" />
-                        <input type="text" placeholder="Acoplado" value={trailerPlate} onChange={(e) => setTrailerPlate(e.target.value.toUpperCase())} className="px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white outline-none uppercase text-center" />
+                        <input type="text" placeholder="Tractor" value={truckPlate} onChange={(e) => setTruckPlate(e.target.value.toUpperCase())} className="px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white outline-none uppercase text-center text-sm" />
+                        <input type="text" placeholder="Acoplado" value={trailerPlate} onChange={(e) => setTrailerPlate(e.target.value.toUpperCase())} className="px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white outline-none uppercase text-center text-sm" />
                      </div>
                   </div>
                </div>
             </div>
 
-            <div className="bg-white p-8 rounded-[2.5rem] border-2 border-slate-100 shadow-sm">
+            <div className="bg-white p-6 lg:p-8 rounded-[2rem] lg:rounded-[2.5rem] border-2 border-slate-100 shadow-sm">
                <textarea value={generalObservations} onChange={(e) => setGeneralObservations(e.target.value)} placeholder="Observaciones Generales..." className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl text-xs font-bold text-slate-600 focus:bg-white focus:border-slate-300 transition-all resize-none h-24 mb-6" />
 
                {showPdiWarning && (
@@ -353,7 +353,7 @@ export const Movements: React.FC = () => {
                <button 
                  onClick={handleEmitRemito}
                  disabled={selectedVins.length === 0 || !origin || !destination || !transporter}
-                 className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-50"
+                 className="w-full py-4 lg:py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-50"
                >
                  Emitir Remito Oficial
                </button>

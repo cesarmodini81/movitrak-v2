@@ -75,48 +75,48 @@ export const PartsSales: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-500 pb-20">
+    <div className="max-w-6xl mx-auto space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-20">
       <div className="flex items-center gap-4">
-        <div className="p-4 bg-emerald-600 text-white rounded-2xl shadow-xl shadow-emerald-200">
-           <ShoppingCart size={32} />
+        <div className="p-3 lg:p-4 bg-emerald-600 text-white rounded-2xl shadow-xl shadow-emerald-200">
+           <ShoppingCart size={28} className="lg:w-8 lg:h-8" />
         </div>
         <div>
-           <h2 className="text-3xl font-black text-slate-900 tracking-tight uppercase leading-none">Mostrador de Ventas</h2>
-           <p className="text-slate-400 text-sm font-bold uppercase tracking-widest mt-2">Facturación y Despacho</p>
+           <h2 className="text-2xl lg:text-3xl font-black text-slate-900 tracking-tight uppercase leading-none">Mostrador de Ventas</h2>
+           <p className="text-slate-400 text-xs lg:text-sm font-bold uppercase tracking-widest mt-2">Facturación y Despacho</p>
         </div>
       </div>
 
       {!isDone ? (
-         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
             <div className="lg:col-span-2 space-y-6">
                {/* Client Data */}
-               <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+               <div className="bg-white p-6 lg:p-8 rounded-[2rem] shadow-sm border border-slate-100">
                   <h3 className="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-2 text-slate-400">
                     <User size={14} /> Datos del Cliente
                   </h3>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                      <div className="col-span-1 md:col-span-2">
-                        <input type="text" placeholder="Nombre y Apellido *" value={client.name} onChange={e => setClient({...client, name: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors" />
+                        <input type="text" placeholder="Nombre y Apellido *" value={client.name} onChange={e => setClient({...client, name: e.target.value})} className="w-full p-3 lg:p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors text-sm lg:text-base" />
                      </div>
-                     <input type="text" placeholder="DNI / CUIT" value={client.dni} onChange={e => setClient({...client, dni: e.target.value})} className="p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors" />
-                     <input type="text" placeholder="Teléfono" value={client.phone} onChange={e => setClient({...client, phone: e.target.value})} className="p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors" />
+                     <input type="text" placeholder="DNI / CUIT" value={client.dni} onChange={e => setClient({...client, dni: e.target.value})} className="p-3 lg:p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors text-sm lg:text-base" />
+                     <input type="text" placeholder="Teléfono" value={client.phone} onChange={e => setClient({...client, phone: e.target.value})} className="p-3 lg:p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors text-sm lg:text-base" />
                      <div className="col-span-1 md:col-span-2">
-                        <input type="email" placeholder="Email" value={client.email} onChange={e => setClient({...client, email: e.target.value})} className="w-full p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors" />
+                        <input type="email" placeholder="Email" value={client.email} onChange={e => setClient({...client, email: e.target.value})} className="w-full p-3 lg:p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors text-sm lg:text-base" />
                      </div>
                   </div>
                </div>
 
                {/* Items */}
-               <div className="bg-white p-8 rounded-[2rem] shadow-sm border border-slate-100">
+               <div className="bg-white p-6 lg:p-8 rounded-[2rem] shadow-sm border border-slate-100">
                   <h3 className="text-xs font-black uppercase tracking-widest mb-6 flex items-center gap-2 text-slate-400">
                     <ShoppingCart size={14} /> Detalle de Compra
                   </h3>
                   <form onSubmit={addItem} className="flex gap-4 mb-6">
                      <div className="flex-1 relative">
-                        <input list="parts-list" placeholder="Buscar Repuesto por Código..." value={currentCode} onChange={e => setCurrentCode(e.target.value)} className="w-full p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors" autoFocus />
+                        <input list="parts-list" placeholder="Buscar Repuesto por Código..." value={currentCode} onChange={e => setCurrentCode(e.target.value)} className="w-full p-3 lg:p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors text-sm lg:text-base" autoFocus />
                         <datalist id="parts-list">{companyParts.map(p => <option key={p.id} value={p.code}>{p.name} - ${p.price}</option>)}</datalist>
                      </div>
-                     <input type="number" min="1" value={currentQty} onChange={e => setCurrentQty(parseInt(e.target.value))} className="w-24 p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors" />
+                     <input type="number" min="1" value={currentQty} onChange={e => setCurrentQty(parseInt(e.target.value))} className="w-20 lg:w-24 p-3 lg:p-4 bg-slate-50 rounded-xl font-bold border-2 border-slate-100 outline-none focus:border-emerald-500 focus:bg-white transition-colors text-sm lg:text-base" />
                      <button type="submit" className="bg-emerald-600 text-white w-14 rounded-xl flex items-center justify-center hover:bg-emerald-700 transition-colors shadow-lg shadow-emerald-200"><Plus size={24} /></button>
                   </form>
                   
@@ -145,7 +145,7 @@ export const PartsSales: React.FC = () => {
 
             {/* Total / Checkout */}
             <div className="lg:col-span-1">
-               <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] shadow-2xl sticky top-24">
+               <div className="bg-slate-900 text-white p-6 lg:p-8 rounded-[2.5rem] shadow-2xl sticky top-24">
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 border-b border-slate-700 pb-4">Resumen</p>
                   
                   <div className="flex justify-between items-center mb-2">
@@ -159,7 +159,7 @@ export const PartsSales: React.FC = () => {
 
                   <div className="mb-8 pt-6 border-t border-slate-700">
                      <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Total Final</p>
-                     <p className="text-4xl font-black text-white tracking-tight">${(total * 1.21).toLocaleString()}</p>
+                     <p className="text-3xl lg:text-4xl font-black text-white tracking-tight">${(total * 1.21).toLocaleString()}</p>
                   </div>
 
                   <button 

@@ -79,21 +79,21 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
       <div className="bg-white w-full max-w-7xl rounded-3xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden border border-slate-200 animate-in zoom-in-95 duration-300">
         
         {/* Header Modificado */}
-        <div className="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
+        <div className="p-4 lg:p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">
           <div className="flex items-center gap-4">
-             <div className="p-3 bg-slate-900 text-white rounded-xl shadow-lg shadow-slate-200"><Search size={24} /></div>
+             <div className="p-2 lg:p-3 bg-slate-900 text-white rounded-xl shadow-lg shadow-slate-200"><Search size={24} className="lg:w-6 lg:h-6" /></div>
              <div>
-               <h2 className="text-xl font-black text-slate-900 tracking-tight uppercase">Consulta Trazabilidad Centralizada</h2>
-               <p className="text-slate-400 text-[10px] font-bold uppercase tracking-[0.2em]">Gestión de Stock 0KM / USADOS Selección</p>
+               <h2 className="text-lg lg:text-xl font-black text-slate-900 tracking-tight uppercase">Consulta Trazabilidad Centralizada</h2>
+               <p className="text-slate-400 text-[9px] lg:text-[10px] font-bold uppercase tracking-[0.2em]">Gestión de Stock 0KM / USADOS Selección</p>
              </div>
           </div>
           <button onClick={handleClose} className="w-10 h-10 flex items-center justify-center hover:bg-red-50 hover:text-red-500 rounded-full transition-all text-slate-400"><X size={24} /></button>
         </div>
 
         <div className="flex-1 overflow-y-auto bg-slate-50/30">
-          <div className="p-8">
+          <div className="p-6 lg:p-8">
             {/* Buscador Predictivo Premium */}
-            <div className="max-w-3xl mx-auto mb-10 relative" ref={suggestionsRef}>
+            <div className="max-w-3xl mx-auto mb-8 lg:mb-10 relative" ref={suggestionsRef}>
               <label className="block text-[10px] font-black text-slate-500 uppercase tracking-widest mb-3 ml-1">Identificación de Unidad (VIN, Patente o Modelo)</label>
               <div className="relative">
                 <div className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400">
@@ -104,7 +104,7 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
                   value={searchTerm}
                   onFocus={() => setIsFocused(true)}
                   onChange={(e) => { setSearchTerm(e.target.value); if(selectedVehicle) setSelectedVehicle(null); }}
-                  className="w-full pl-14 pr-4 py-5 bg-white border-2 border-slate-200 rounded-2xl text-xl font-bold text-slate-800 focus:outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-900/5 transition-all uppercase placeholder:text-slate-300 shadow-sm"
+                  className="w-full pl-14 pr-4 py-4 lg:py-5 bg-white border-2 border-slate-200 rounded-2xl text-lg lg:text-xl font-bold text-slate-800 focus:outline-none focus:border-slate-900 focus:ring-4 focus:ring-slate-900/5 transition-all uppercase placeholder:text-slate-300 shadow-sm"
                   placeholder="Ej: ABC 123 o 8AJH..."
                   autoFocus
                 />
@@ -151,26 +151,26 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
             </div>
 
             {selectedVehicle ? (
-              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-8">
+              <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 space-y-6 lg:space-y-8">
                 {/* Tabs de Navegación */}
-                <div className="flex border-b-2 border-slate-100 bg-white px-8 rounded-t-3xl shadow-sm">
-                  <button onClick={() => setActiveTab('LOGISTICS')} className={`px-8 py-5 text-xs font-black uppercase tracking-[0.2em] border-b-4 transition-all flex items-center gap-2 ${activeTab === 'LOGISTICS' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400 hover:text-slate-600'}`}><Truck size={18} /> Resumen Logístico</button>
-                  <button onClick={() => setActiveTab('UNIT')} className={`px-8 py-5 text-xs font-black uppercase tracking-[0.2em] border-b-4 transition-all flex items-center gap-2 ${activeTab === 'UNIT' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400 hover:text-slate-600'}`}><Info size={18} /> Ficha Técnica</button>
+                <div className="flex border-b-2 border-slate-100 bg-white px-6 lg:px-8 rounded-t-3xl shadow-sm">
+                  <button onClick={() => setActiveTab('LOGISTICS')} className={`px-6 py-4 lg:px-8 lg:py-5 text-xs font-black uppercase tracking-[0.2em] border-b-4 transition-all flex items-center gap-2 ${activeTab === 'LOGISTICS' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400 hover:text-slate-600'}`}><Truck size={18} /> Resumen Logístico</button>
+                  <button onClick={() => setActiveTab('UNIT')} className={`px-6 py-4 lg:px-8 lg:py-5 text-xs font-black uppercase tracking-[0.2em] border-b-4 transition-all flex items-center gap-2 ${activeTab === 'UNIT' ? 'border-slate-900 text-slate-900' : 'border-transparent text-slate-400 hover:text-slate-600'}`}><Info size={18} /> Ficha Técnica</button>
                 </div>
 
                 {/* Dashboard de Estado de Unidad */}
-                <div className="bg-white p-10 rounded-3xl shadow-sm border border-slate-200 border-t-0 -mt-px">
+                <div className="bg-white p-6 lg:p-10 rounded-3xl shadow-sm border border-slate-200 border-t-0 -mt-px">
                    {activeTab === 'LOGISTICS' ? (
-                     <div className="grid grid-cols-1 md:grid-cols-4 gap-12">
+                     <div className="grid grid-cols-1 md:grid-cols-4 gap-8 lg:gap-12">
                         <div className="space-y-2">
                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Disponibilidad</p>
-                           <p className={`text-2xl font-black uppercase tracking-tighter ${selectedVehicle.status === 'AVAILABLE' ? 'text-emerald-600' : 'text-amber-600'}`}>
+                           <p className={`text-xl lg:text-2xl font-black uppercase tracking-tighter ${selectedVehicle.status === 'AVAILABLE' ? 'text-emerald-600' : 'text-amber-600'}`}>
                              {selectedVehicle.status.replace('_', ' ')}
                            </p>
                         </div>
                         <div className="space-y-2">
                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Ubicación Actual</p>
-                           <div className="flex items-center gap-2 text-slate-900 font-black uppercase text-xl tracking-tight">
+                           <div className="flex items-center gap-2 text-slate-900 font-black uppercase text-lg lg:text-xl tracking-tight">
                               <MapPin size={20} className="text-slate-400" />
                               {LOCATION_MAP[selectedVehicle.locationId] || selectedVehicle.locationId}
                            </div>
@@ -179,7 +179,7 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
                            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Dominio / VIN</p>
                            <div className="flex items-center gap-2">
                              <Tag size={18} className="text-slate-400" />
-                             <p className="text-2xl font-mono font-black text-slate-900 tracking-wider">
+                             <p className="text-xl lg:text-2xl font-mono font-black text-slate-900 tracking-wider">
                                 {selectedVehicle.plate || selectedVehicle.vin.slice(-8)}
                              </p>
                            </div>
@@ -193,18 +193,18 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
                         </div>
                      </div>
                    ) : (
-                     <div className="grid grid-cols-2 md:grid-cols-4 gap-x-12 gap-y-8">
+                     <div className="grid grid-cols-2 md:grid-cols-4 gap-x-8 lg:gap-x-12 gap-y-6 lg:gap-y-8">
                         <div className="space-y-1">
                            <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Marca / Modelo</p>
-                           <p className="font-black text-slate-900 uppercase text-xl tracking-tight">{selectedVehicle.brand} {selectedVehicle.model}</p>
+                           <p className="font-black text-slate-900 uppercase text-lg lg:text-xl tracking-tight">{selectedVehicle.brand} {selectedVehicle.model}</p>
                         </div>
                         <div className="space-y-1">
                            <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Año Fab.</p>
-                           <p className="font-black text-slate-900 text-xl">{selectedVehicle.year}</p>
+                           <p className="font-black text-slate-900 text-lg lg:text-xl">{selectedVehicle.year}</p>
                         </div>
                         <div className="space-y-1">
                            <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Kilometraje</p>
-                           <p className="font-black text-slate-900 text-xl">{selectedVehicle.km ? `${selectedVehicle.km.toLocaleString()} KM` : '0KM - UNIDAD NUEVA'}</p>
+                           <p className="font-black text-slate-900 text-lg lg:text-xl">{selectedVehicle.km ? `${selectedVehicle.km.toLocaleString()} KM` : '0KM - UNIDAD NUEVA'}</p>
                         </div>
                         <div className="space-y-1">
                            <p className="text-[9px] text-slate-400 font-black uppercase tracking-widest mb-1">Color Oficial</p>
@@ -229,7 +229,7 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
                 {/* Cronología Logística */}
                 <div className="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
-                   <div className="px-8 py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
+                   <div className="px-6 py-4 lg:px-8 lg:py-5 border-b border-slate-100 bg-slate-50/50 flex justify-between items-center">
                       <div className="flex items-center gap-3">
                          <Layers size={20} className="text-slate-900" />
                          <h3 className="font-black text-slate-900 text-sm uppercase tracking-tight">Historial de Operaciones Logísticas</h3>
@@ -240,21 +240,21 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
                      <table className="w-full text-left text-xs">
                        <thead className="bg-slate-50 text-slate-500 font-black uppercase text-[9px] tracking-widest border-b border-slate-100">
                          <tr>
-                           <th className="px-8 py-4">Fecha Op.</th>
-                           <th className="px-8 py-4">ID Remito</th>
-                           <th className="px-8 py-4">Planta Origen</th>
-                           <th className="px-8 py-4">Planta Destino</th>
-                           <th className="px-8 py-4 text-center">Estado</th>
+                           <th className="px-6 py-3 lg:px-8 lg:py-4">Fecha Op.</th>
+                           <th className="px-6 py-3 lg:px-8 lg:py-4">ID Remito</th>
+                           <th className="px-6 py-3 lg:px-8 lg:py-4">Planta Origen</th>
+                           <th className="px-6 py-3 lg:px-8 lg:py-4">Planta Destino</th>
+                           <th className="px-6 py-3 lg:px-8 lg:py-4 text-center">Estado</th>
                          </tr>
                        </thead>
                        <tbody className="divide-y divide-slate-50">
                          {vehicleHistory.length > 0 ? vehicleHistory.map((m) => (
                            <tr key={m.id} className="hover:bg-slate-50 transition-colors group">
-                             <td className="px-8 py-5 font-mono font-bold text-slate-500">{new Date(m.date).toLocaleDateString()}</td>
-                             <td className="px-8 py-5 font-mono font-black text-slate-900 group-hover:text-brand-600 transition-colors">{m.id}</td>
-                             <td className="px-8 py-5 uppercase font-bold text-slate-600">{LOCATION_MAP[m.originId] || m.originId}</td>
-                             <td className="px-8 py-5 uppercase font-black text-slate-900">{LOCATION_MAP[m.destinationId] || m.destinationId}</td>
-                             <td className="px-8 py-5 text-center">
+                             <td className="px-6 py-4 lg:px-8 lg:py-5 font-mono font-bold text-slate-500">{new Date(m.date).toLocaleDateString()}</td>
+                             <td className="px-6 py-4 lg:px-8 lg:py-5 font-mono font-black text-slate-900 group-hover:text-brand-600 transition-colors">{m.id}</td>
+                             <td className="px-6 py-4 lg:px-8 lg:py-5 uppercase font-bold text-slate-600">{LOCATION_MAP[m.originId] || m.originId}</td>
+                             <td className="px-6 py-4 lg:px-8 lg:py-5 uppercase font-black text-slate-900">{LOCATION_MAP[m.destinationId] || m.destinationId}</td>
+                             <td className="px-6 py-4 lg:px-8 lg:py-5 text-center">
                                <span className={`px-3 py-1 rounded-full font-black text-[9px] uppercase border ${m.status === 'COMPLETED' ? 'bg-emerald-50 text-emerald-700 border-emerald-100' : 'bg-amber-50 text-amber-700 border-amber-100'}`}>
                                  {m.status}
                                </span>
@@ -288,10 +288,10 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Footer */}
-        <div className="p-6 border-t border-slate-100 bg-white flex justify-end shrink-0">
+        <div className="p-4 lg:p-6 border-t border-slate-100 bg-white flex justify-end shrink-0">
            <button 
              onClick={handleClose}
-             className="px-10 py-3.5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all active:scale-95"
+             className="px-8 py-3 lg:px-10 lg:py-3.5 bg-slate-900 text-white rounded-xl font-black text-xs uppercase tracking-widest shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all active:scale-95"
            >
              Cerrar Consulta
            </button>
