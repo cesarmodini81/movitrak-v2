@@ -2,6 +2,7 @@
 import React from 'react';
 import { Movement, Vehicle, Company, Location } from '../types';
 import { LOCATION_MAP } from '../constants';
+import { MapPin, Truck, Calendar, Hash, User, FileText } from 'lucide-react';
 
 interface Props {
   movement: Movement;
@@ -28,17 +29,13 @@ export const RemitoDocument: React.FC<Props> = ({
 }) => {
   const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=100x100&bgcolor=ffffff&data=${movement.id}`;
   
-  // Adjusted for A4 fit - typically 20 rows fit comfortably with headers/footers in 1 page
-  const MIN_ROWS = 20; 
-  const emptyRows = Math.max(0, MIN_ROWS - vehicles.length);
-
   return (
-    <div className="bg-white text-black font-sans w-full h-full">
+    <div className="w-full h-full bg-white text-slate-900 font-sans selection:bg-none">
       <style>{`
         @media print {
           @page {
             size: A4 portrait;
-            margin: 5mm;
+            margin: 5mm 8mm;
           }
           html, body {
             margin: 0;
@@ -51,224 +48,218 @@ export const RemitoDocument: React.FC<Props> = ({
           }
           .remito-container {
             width: 100%;
-            height: 100%; /* Important for flex justify-between */
+            height: 100%;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
           }
-          .content-wrapper {
-            flex-grow: 1;
-          }
-          /* Table Borders */
-          table { border-collapse: collapse; width: 100%; table-layout: fixed; }
-          th, td { border: 1px solid #000; padding: 2px 4px; font-size: 8pt; }
+          /* Clean Table Styles */
+          table { width: 100%; border-collapse: collapse; }
+          th { font-weight: 800; text-transform: uppercase; color: #475569; border-bottom: 2px solid #e2e8f0; }
+          td { border-bottom: 1px solid #f1f5f9; padding: 4px 6px; font-size: 9pt; vertical-align: top; }
+          tr:last-child td { border-bottom: none; }
           
-          /* Utility overrides for strict black printing */
-          .border-black { border-color: #000000 !important; }
-          .text-black { color: #000000 !important; }
-          .bg-gray-200 { background-color: #e5e7eb !important; }
+          /* Utility overrides for print */
+          .text-blue-600 { color: #2563eb !important; }
+          .border-blue-600 { border-color: #2563eb !important; }
+          .bg-blue-50 { background-color: #eff6ff !important; }
+          
+          .text-emerald-600 { color: #059669 !important; }
+          .border-emerald-600 { border-color: #059669 !important; }
+          .bg-emerald-50 { background-color: #ecfdf5 !important; }
+          
+          .bg-slate-900 { background-color: #0f172a !important; color: white !important; }
+          .bg-slate-100 { background-color: #f1f5f9 !important; }
         }
       `}</style>
 
-      <div className="remito-container p-2">
+      <div className="remito-container">
         
-        {/* === CONTENT WRAPPER (Header + Data + Table) === */}
-        <div className="content-wrapper">
-          
+        {/* === TOP SECTION === */}
+        <div>
           {/* HEADER */}
-          <header className="flex border-b-2 border-black pb-1 mb-2 h-[110px]">
-            {/* Left: Company */}
-            <div className="w-[45%] pr-2 border-r border-black relative flex flex-col justify-center">
-              <h1 className="text-2xl font-black uppercase tracking-tighter mb-0 leading-none">{company.name} S.A.</h1>
-              <p className="text-[8px] font-bold uppercase tracking-wider mb-2">Logística & Distribución Automotriz</p>
-              
-              <div className="text-[7px] font-medium uppercase space-y-0.5 leading-tight">
-                <p><strong>Domicilio Legal:</strong> Ruta Nac. 11 KM 456 - Sauce Viejo (SF)</p>
-                <p><strong>Tel:</strong> 0800-888-6284 | <strong>IVA:</strong> RESPONSABLE INSCRIPTO</p>
-                <p><strong>C.U.I.T:</strong> 30-71458922-1</p>
+          <header className="flex justify-between items-start border-b border-slate-200 pb-4 mb-4">
+            {/* Company Info */}
+            <div className="w-[45%]">
+              <h1 className="text-3xl font-black tracking-tighter text-slate-900 uppercase leading-none">{company.name} S.A.</h1>
+              <p className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mt-1">Logística & Distribución Automotriz</p>
+              <div className="mt-3 text-[8px] text-slate-600 space-y-0.5 leading-tight font-medium">
+                <p>Ruta Nac. 11 KM 456 - Sauce Viejo (SF)</p>
+                <p>IVA RESPONSABLE INSCRIPTO</p>
+                <p>C.U.I.T: 30-71458922-1</p>
               </div>
             </div>
 
-            {/* Center: R Box */}
-            <div className="w-[10%] flex flex-col items-center justify-start pt-1 relative">
-               <div className="w-[40px] h-[40px] border-2 border-black flex flex-col items-center justify-center bg-white z-10">
-                  <span className="text-3xl font-black leading-none mt-0.5">R</span>
-                  <span className="text-[5px] font-bold">COD. 91</span>
+            {/* R Box */}
+            <div className="flex flex-col items-center justify-center">
+               <div className="w-14 h-14 border-2 border-slate-900 rounded-lg flex flex-col items-center justify-center bg-slate-50">
+                  <span className="text-4xl font-black leading-none mt-1">R</span>
+                  <span className="text-[6px] font-bold">COD. 91</span>
                </div>
-               <div className="absolute top-[20px] bottom-[-5px] w-[1px] bg-black -z-0"></div>
             </div>
 
-            {/* Right: Document Data */}
-            <div className="w-[45%] pl-4 flex flex-col justify-between py-1">
-               <div>
-                  <h2 className="text-xl font-black uppercase tracking-tight text-right leading-none">REMITO</h2>
-                  <p className="text-[7px] font-bold uppercase text-right mb-1">DOCUMENTO NO VÁLIDO COMO FACTURA</p>
-               </div>
+            {/* Document Details */}
+            <div className="w-[45%] text-right">
+               <h2 className="text-2xl font-black text-slate-900 uppercase tracking-tight">REMITO</h2>
+               <p className="text-[8px] font-bold text-slate-400 uppercase mb-2">Documento no válido como factura</p>
                
-               <div className="space-y-0.5">
-                  <div className="flex justify-between items-baseline">
-                     <span className="text-[9px] font-bold uppercase">N° Comp:</span>
-                     <span className="text-lg font-mono font-bold">{movement.id}</span>
+               <div className="inline-block text-right bg-slate-50 p-2 rounded-lg border border-slate-100">
+                  <div className="flex justify-end items-baseline gap-2 mb-1">
+                     <span className="text-[9px] font-bold text-slate-500 uppercase">N° Comprobante</span>
+                     <span className="text-lg font-mono font-black text-slate-900">{movement.id}</span>
                   </div>
-                  <div className="flex justify-between items-baseline border-b border-dotted border-black">
-                     <span className="text-[9px] font-bold uppercase">Fecha Emisión:</span>
-                     <span className="text-xs font-mono font-bold">{new Date(movement.date).toLocaleDateString('es-AR')}</span>
-                  </div>
-                  <div className="flex justify-between items-baseline border-b border-dotted border-black">
-                     <span className="text-[9px] font-bold uppercase">Ingresos Brutos:</span>
-                     <span className="text-[9px] font-mono font-bold">CM-921-845120</span>
-                  </div>
-                  <div className="flex justify-between items-baseline">
-                     <span className="text-[9px] font-bold uppercase">Inicio Actividad:</span>
-                     <span className="text-[9px] font-mono font-bold">01/03/2010</span>
+                  <div className="flex justify-end items-center gap-2">
+                     <span className="text-[9px] font-bold text-slate-500 uppercase">Fecha Emisión</span>
+                     <span className="text-sm font-bold text-slate-900">{new Date(movement.date).toLocaleDateString('es-AR')}</span>
                   </div>
                </div>
             </div>
           </header>
 
-          {/* INFO BOXES GRID */}
-          <div className="border border-black mb-2 flex h-[85px]">
-            {/* Left: Ruta */}
-            <div className="w-1/2 border-r border-black flex flex-col">
-               <div className="bg-gray-200 border-b border-black px-2 py-0.5">
-                  <p className="text-[8px] font-black uppercase tracking-widest">DATOS DEL TRASLADO</p>
-               </div>
-               <div className="p-1.5 space-y-1 flex-1">
+          {/* LOGISTICS GRID */}
+          <div className="grid grid-cols-2 gap-6 mb-6">
+            {/* RUTA (Blue Accent) */}
+            <div className="border-l-4 border-blue-600 bg-blue-50/50 p-3 rounded-r-xl">
+               <h3 className="text-[9px] font-black text-blue-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <MapPin size={12} strokeWidth={2.5} /> Ruta de Tráfico
+               </h3>
+               <div className="space-y-3">
                   <div>
-                     <p className="text-[6px] font-bold uppercase text-gray-500 mb-0">ORIGEN</p>
-                     <p className="text-[9px] font-bold uppercase truncate leading-none">{origin?.name || LOCATION_MAP[movement.originId] || movement.originId}</p>
-                     <p className="text-[7px] uppercase text-gray-600 truncate">{origin?.address || 'Planta Logística'}</p>
+                     <p className="text-[8px] font-bold text-slate-400 uppercase">Origen</p>
+                     <p className="text-xs font-bold text-slate-900 uppercase truncate leading-tight">
+                        {origin?.name || LOCATION_MAP[movement.originId] || movement.originId}
+                     </p>
+                     <p className="text-[8px] text-slate-500 truncate">{origin?.address || 'Planta Logística'}</p>
                   </div>
-                  <div className="border-t border-dotted border-gray-400 mt-1 pt-1">
-                     <p className="text-[6px] font-bold uppercase text-gray-500 mb-0">DESTINO</p>
-                     <p className="text-[9px] font-bold uppercase truncate leading-none">{destination?.name || LOCATION_MAP[movement.destinationId] || movement.destinationId}</p>
-                     <p className="text-[7px] uppercase text-gray-600 truncate">{destination?.address || 'Sucursal Destino'}</p>
+                  <div className="border-t border-blue-200/50 pt-2">
+                     <p className="text-[8px] font-bold text-slate-400 uppercase">Destino</p>
+                     <p className="text-xs font-bold text-slate-900 uppercase truncate leading-tight">
+                        {destination?.name || LOCATION_MAP[movement.destinationId] || movement.destinationId}
+                     </p>
+                     <p className="text-[8px] text-slate-500 truncate">{destination?.address || 'Sucursal Destino'}</p>
                   </div>
                </div>
             </div>
 
-            {/* Right: Transporte */}
-            <div className="w-1/2 flex flex-col">
-               <div className="bg-gray-200 border-b border-black px-2 py-0.5">
-                  <p className="text-[8px] font-black uppercase tracking-widest">TRANSPORTE</p>
-               </div>
-               <div className="p-1.5 flex-1 flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-end mb-0.5">
-                       <span className="text-[8px] font-bold uppercase w-16">Empresa:</span>
-                       <span className="text-[9px] font-bold uppercase flex-1 border-b border-black leading-none">{movement.transporter || 'PROPIO'}</span>
-                    </div>
-                    <div className="flex justify-between items-end mb-0.5">
-                       <span className="text-[8px] font-bold uppercase w-16">Chofer:</span>
-                       <span className="text-[9px] font-bold uppercase flex-1 border-b border-black truncate leading-none">{movement.driverName || '-'}</span>
-                    </div>
-                    <div className="flex justify-between items-end">
-                       <span className="text-[8px] font-bold uppercase w-16">DNI:</span>
-                       <span className="text-[9px] font-mono font-bold flex-1 border-b border-black leading-none">{driverDni || '-'}</span>
-                    </div>
+            {/* TRANSPORTE (Green Accent) */}
+            <div className="border-l-4 border-emerald-600 bg-emerald-50/50 p-3 rounded-r-xl">
+               <h3 className="text-[9px] font-black text-emerald-600 uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <Truck size={12} strokeWidth={2.5} /> Logística & Transporte
+               </h3>
+               <div className="grid grid-cols-2 gap-3">
+                  <div className="col-span-2">
+                     <p className="text-[8px] font-bold text-slate-400 uppercase">Empresa Carrier</p>
+                     <p className="text-xs font-bold text-slate-900 uppercase truncate">{movement.transporter || 'Logística Propia'}</p>
                   </div>
-                  
-                  <div className="flex gap-1 mt-1">
-                     <div className="flex-1 border border-black p-0.5 text-center">
-                        <p className="text-[5px] font-bold uppercase">DOM. TRACTOR</p>
-                        <p className="text-[9px] font-mono font-bold">{truckPlate || '-'}</p>
-                     </div>
-                     <div className="flex-1 border border-black p-0.5 text-center">
-                        <p className="text-[5px] font-bold uppercase">DOM. ACOPLADO</p>
-                        <p className="text-[9px] font-mono font-bold">{trailerPlate || '-'}</p>
-                     </div>
+                  <div>
+                     <p className="text-[8px] font-bold text-slate-400 uppercase">Conductor</p>
+                     <p className="text-[10px] font-bold text-slate-900 uppercase truncate">{movement.driverName || '-'}</p>
+                  </div>
+                  <div>
+                     <p className="text-[8px] font-bold text-slate-400 uppercase">DNI</p>
+                     <p className="text-[10px] font-mono font-bold text-slate-900">{driverDni || '-'}</p>
+                  </div>
+                  <div>
+                     <p className="text-[8px] font-bold text-slate-400 uppercase">Patente Tractor</p>
+                     <p className="text-[10px] font-mono font-bold text-slate-900 bg-white border border-emerald-100 rounded px-1 w-fit">
+                        {truckPlate || '-'}
+                     </p>
+                  </div>
+                  <div>
+                     <p className="text-[8px] font-bold text-slate-400 uppercase">Patente Acoplado</p>
+                     <p className="text-[10px] font-mono font-bold text-slate-900 bg-white border border-emerald-100 rounded px-1 w-fit">
+                        {trailerPlate || '-'}
+                     </p>
                   </div>
                </div>
             </div>
           </div>
 
           {/* TABLE */}
-          <table className="w-full text-[8pt] mb-2">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="w-[5%] text-center font-black py-1">#</th>
-                <th className="w-[20%] text-left font-black py-1">VIN / CHASIS</th>
-                <th className="w-[35%] text-left font-black py-1">UNIDAD (MARCA - MODELO)</th>
-                <th className="w-[15%] text-center font-black py-1">COLOR</th>
-                <th className="w-[25%] text-left font-black py-1">OBSERVACIONES</th>
-              </tr>
-            </thead>
-            <tbody>
-              {vehicles.map((v, i) => (
-                <tr key={v.vin} className="h-[22px]">
-                  <td className="text-center font-bold">{i + 1}</td>
-                  <td className="font-mono font-bold text-[9px] uppercase tracking-wider">{v.vin}</td>
-                  <td className="font-bold text-[8px] uppercase">
-                    {v.brand} {v.model} {v.type === 'NEW' ? '0KM' : 'USD'}
-                  </td>
-                  <td className="text-center text-[7px] uppercase font-bold">{v.color}</td>
-                  <td className="text-[7px] uppercase italic leading-tight truncate">
-                    {unitObservations?.[v.vin] || '-'}
-                  </td>
+          <div className="mb-4">
+            <table className="w-full text-left">
+              <thead>
+                <tr className="bg-slate-50">
+                  <th className="py-2 px-2 w-[5%] text-center">#</th>
+                  <th className="py-2 px-2 w-[20%]">Identificación (VIN)</th>
+                  <th className="py-2 px-2 w-[30%]">Unidad (Marca - Modelo)</th>
+                  <th className="py-2 px-2 w-[15%]">Color</th>
+                  <th className="py-2 px-2 w-[30%]">Observaciones Técnicas</th>
                 </tr>
-              ))}
-              {/* Fill Empty Rows */}
-              {Array.from({ length: emptyRows }).map((_, i) => (
-                <tr key={`empty-${i}`} className="h-[22px]">
-                  <td className="text-center">&nbsp;</td>
-                  <td>&nbsp;</td>
-                  <td>&nbsp;</td>
-                  <td>&nbsp;</td>
-                  <td>&nbsp;</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {vehicles.map((v, i) => (
+                  <tr key={v.vin}>
+                    <td className="text-center font-bold text-slate-400">{i + 1}</td>
+                    <td className="font-mono font-bold text-slate-900">{v.vin}</td>
+                    <td>
+                      <div className="font-bold text-slate-800 uppercase text-[10px] leading-tight">
+                        {v.brand} {v.model}
+                      </div>
+                      <div className="text-[8px] font-bold text-slate-500 uppercase">{v.type === 'NEW' ? '0KM' : 'USADO'} — {v.year}</div>
+                    </td>
+                    <td className="font-bold text-slate-600 text-[10px] uppercase">{v.color}</td>
+                    <td className="text-[9px] font-medium text-slate-500 italic leading-tight">
+                      {unitObservations?.[v.vin] || '-'}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* === BOTTOM SECTION === */}
-        <div className="mt-1">
+        <div>
           {/* OBSERVACIONES BOX */}
-          <div className="border border-black p-1.5 mb-2 h-[45px]">
-            <p className="text-[7px] font-black uppercase underline mb-0.5">OBSERVACIONES GENERALES:</p>
-            <p className="text-[8px] uppercase font-medium leading-tight">
-              {movement.observations || 'EL TRANSPORTISTA DECLARA HABER RECIBIDO LAS UNIDADES EN CONFORMIDAD.'}
+          <div className="bg-slate-50 border border-slate-200 rounded-xl p-3 mb-6 min-h-[60px]">
+            <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2">
+               <FileText size={10} /> Observaciones Generales
+            </p>
+            <p className="text-[10px] text-slate-700 font-medium leading-snug">
+              {movement.observations || 'Sin observaciones adicionales declaradas en la emisión.'}
             </p>
           </div>
 
           {/* SIGNATURES */}
-          <div className="grid grid-cols-3 gap-2 mb-2 h-[70px]">
-            <div className="border border-black relative p-1">
-               <p className="text-[6px] font-bold uppercase absolute top-1 left-1">EMISIÓN</p>
-               <div className="absolute bottom-5 left-2 right-2 border-b border-black border-dotted"></div>
-               <p className="text-[6px] font-bold text-center absolute bottom-1 w-full uppercase">Firma Nation S.A.</p>
+          <div className="grid grid-cols-3 gap-8 mb-6 h-[80px] items-end">
+            <div className="border-t border-slate-300 pt-2 text-center">
+               <p className="text-[9px] font-black text-slate-900 uppercase">Gestión Logística</p>
+               <p className="text-[8px] text-slate-500 uppercase">Firma y Aclaración</p>
             </div>
-            <div className="border border-black relative p-1">
-               <p className="text-[6px] font-bold uppercase absolute top-1 left-1">TRANSPORTISTA</p>
-               <div className="absolute bottom-5 left-2 right-2 border-b border-black border-dotted"></div>
-               <p className="text-[6px] font-bold text-center absolute bottom-1 w-full uppercase">Firma / DNI</p>
+            <div className="border-t border-slate-300 pt-2 text-center">
+               <p className="text-[9px] font-black text-slate-900 uppercase">Transportista</p>
+               <p className="text-[8px] text-slate-500 uppercase">Conformidad de Carga</p>
             </div>
-            <div className="border border-black relative p-1">
-               <p className="text-[6px] font-bold uppercase absolute top-1 left-1">RECEPCIÓN</p>
-               <div className="absolute bottom-5 left-2 right-2 border-b border-black border-dotted"></div>
-               <p className="text-[6px] font-bold text-center absolute bottom-1 w-full uppercase">Firma / Sello</p>
+            <div className="border-t border-slate-300 pt-2 text-center">
+               <p className="text-[9px] font-black text-slate-900 uppercase">Recepción Sucursal</p>
+               <p className="text-[8px] text-slate-500 uppercase">Control de Arribo</p>
             </div>
           </div>
 
           {/* FOOTER */}
-          <footer className="flex items-end justify-between border-t-2 border-black pt-1">
-            <div className="flex items-center gap-2">
-               <div className="border border-black p-0.5">
-                  <img src={qrUrl} alt="QR" className="w-[45px] h-[45px]" />
+          <footer className="flex items-end justify-between border-t-2 border-slate-900 pt-3">
+            <div className="flex items-center gap-3">
+               <div className="bg-white p-1 border border-slate-200 rounded">
+                  <img src={qrUrl} alt="QR" className="w-[50px] h-[50px]" />
                </div>
                <div>
-                  <p className="text-[9px] font-black italic uppercase">NATION S.A. LOGISTICS</p>
-                  <p className="text-[6px] font-bold text-gray-500 uppercase tracking-widest">Sistema MOVITRAK v2.0</p>
-                  <p className="text-[5px] text-gray-500 mt-0.5 max-w-[300px] leading-tight text-justify uppercase">
-                    Documento de control interno. Código Penal Art. 292/296.
-                    Las unidades viajan por cuenta y riesgo del transportista.
+                  <p className="text-[10px] font-black text-slate-900 uppercase tracking-wide">NATION S.A. LOGISTICS SYSTEM</p>
+                  <p className="text-[7px] font-bold text-slate-500 uppercase tracking-widest mt-0.5">
+                    Control de Seguridad & Trazabilidad
+                  </p>
+                  <p className="text-[6px] text-slate-400 mt-1 max-w-[350px] leading-tight uppercase">
+                    La tenencia de este documento implica responsabilidad sobre la carga descrita. 
+                    Código Penal Art. 292/296. Documento generado electrónicamente.
                   </p>
                </div>
             </div>
             <div className="text-right">
-               <p className="text-[9px] font-black uppercase">CAI N°: 224587789541</p>
-               <p className="text-[9px] font-black uppercase">VTO: 31/12/2030</p>
-               <p className="text-[7px] font-bold text-gray-600 mt-0.5">ORIGINAL: BLANCO</p>
+               <p className="text-[9px] font-black text-slate-900 uppercase">CAI N°: 224587789541</p>
+               <p className="text-[9px] font-bold text-slate-500 uppercase">Vencimiento: 31/12/2030</p>
+               <div className="mt-1 px-2 py-0.5 bg-slate-900 text-white text-[7px] font-black uppercase rounded inline-block tracking-widest">
+                  Original: Cliente
+               </div>
             </div>
           </footer>
         </div>
