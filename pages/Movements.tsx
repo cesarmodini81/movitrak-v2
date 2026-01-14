@@ -3,10 +3,9 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from 'react-i18next';
 import { LOCATION_MAP } from '../constants';
-import { ArrowRight, Truck, Plus, X, ClipboardList, MapPin, Info, Tag, Search, Database, CheckCircle, Printer, ArrowLeft, Download, FileText as FileIcon, Loader2 } from 'lucide-react';
+import { Truck, Plus, X, ClipboardList, MapPin, Info, Search, CheckCircle, Printer, ArrowLeft } from 'lucide-react';
 import { Movement, Vehicle } from '../types';
 import { RemitoDocument } from '../components/RemitoDocument';
-import { pdf } from '@react-pdf/renderer';
 
 const STORAGE_KEYS = {
   ORIGIN: 'mov_origin',
@@ -56,7 +55,6 @@ export const Movements: React.FC = () => {
 
   const [showPdiWarning, setShowPdiWarning] = useState(false);
   const [successMovement, setSuccessMovement] = useState<Movement | null>(null);
-  const [isGeneratingPDF, setIsGeneratingPDF] = useState(false);
 
   const companyLocations = useMemo(() => currentCompany?.locations || [], [currentCompany]);
 
@@ -100,22 +98,6 @@ export const Movements: React.FC = () => {
     }
   }, [searchTerm, availableVehicles, origin, selectedVins]);
 
-  const showStatusToast = (message: string, type: 'info' | 'success' | 'error') => {
-    const toast = document.createElement('div');
-    const colors = {
-      info: 'bg-slate-900 border-blue-500',
-      success: 'bg-emerald-600 border-emerald-400',
-      error: 'bg-red-600 border-red-400'
-    };
-    toast.className = `fixed top-8 right-8 ${colors[type]} text-white border-b-4 px-6 py-4 rounded-xl shadow-2xl z-[200] animate-in slide-in-from-right duration-300 flex items-center gap-3`;
-    toast.innerHTML = `
-      ${type === 'info' ? '<svg class="animate-spin w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" stroke-opacity="0.25"></circle><path d="M12 2a10 10 0 0 1 10 10"></path></svg>' : ''}
-      <span class="font-bold text-sm uppercase tracking-wide">${message}</span>
-    `;
-    document.body.appendChild(toast);
-    return toast;
-  };
-
   const handleAddVehicle = (vehicle: Vehicle) => {
     if (!origin) setOrigin(vehicle.locationId);
     setSelectedVins([...selectedVins, vehicle.vin]);
@@ -148,61 +130,13 @@ export const Movements: React.FC = () => {
       trailerPlate,
       vehicleVins: selectedVins,
       status: 'PENDING',
-      createdBy: 'sys_oper',
+      createdBy: currentCompany?.name || 'sys_oper',
       observations: generalObservations,
     };
     createMovement(newMovement);
     setSuccessMovement(newMovement);
     setShowPdiWarning(false);
     handleClearStorage();
-  };
-
-  const handleDownloadPDF = async () => {
-    if (!successMovement || !currentCompany) return;
-    
-    setIsGeneratingPDF(true);
-    const infoToast = showStatusToast('Generando Documento Oficial...', 'info');
-
-    try {
-      const remitoVehicles = availableVehicles.filter(v => successMovement.vehicleVins.includes(v.vin));
-      const originLoc = currentCompany.locations.find(l => l.id === successMovement.originId);
-      const destLoc = currentCompany.locations.find(l => l.id === successMovement.destinationId);
-
-      const blob = await pdf(
-        <RemitoDocument 
-          movement={successMovement}
-          company={currentCompany}
-          vehicles={remitoVehicles}
-          origin={originLoc}
-          destination={destLoc}
-          driverDni={driverDni}
-          truckPlate={truckPlate}
-          trailerPlate={trailerPlate}
-          unitObservations={unitObservations}
-        />
-      ).toBlob();
-
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `Remito_${successMovement.id}.pdf`;
-      link.click();
-      URL.revokeObjectURL(url);
-
-      infoToast.remove();
-      showStatusToast('Descarga Iniciada', 'success');
-      setTimeout(() => {
-        const successToasts = document.querySelectorAll('.bg-emerald-600');
-        successToasts.forEach(t => setTimeout(() => t.remove(), 3000));
-      }, 100);
-
-    } catch (error) {
-      console.error('PDF Generation Error:', error);
-      infoToast.remove();
-      showStatusToast('Error al generar PDF', 'error');
-    } finally {
-      setIsGeneratingPDF(false);
-    }
   };
 
   const handleClearStorage = () => {
@@ -216,10 +150,26 @@ export const Movements: React.FC = () => {
     setSuccessMovement(null);
   };
 
+  const remitoVehicles = useMemo(() => 
+    successMovement ? availableVehicles.filter(v => successMovement.vehicleVins.includes(v.vin)) : [],
+    [successMovement, availableVehicles]
+  );
+  
+  const originLoc = useMemo(() => 
+    successMovement && currentCompany ? currentCompany.locations.find(l => l.id === successMovement.originId) : undefined,
+    [successMovement, currentCompany]
+  );
+  
+  const destLoc = useMemo(() => 
+    successMovement && currentCompany ? currentCompany.locations.find(l => l.id === successMovement.destinationId) : undefined,
+    [successMovement, currentCompany]
+  );
+
   return (
     <div className="space-y-8 animate-in slide-in-from-bottom-4 duration-500 pb-20">
       
-      <div className="flex items-center gap-4">
+      {/* UI Elements */}
+      <div className="flex items-center gap-4 no-print">
         <div className="p-4 bg-slate-900 text-white rounded-2xl shadow-xl shadow-slate-200">
           <ClipboardList size={28} />
         </div>
@@ -230,7 +180,7 @@ export const Movements: React.FC = () => {
       </div>
 
       {!successMovement ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 no-print">
           <div className="lg:col-span-8 space-y-10">
             <div className="enterprise-card p-10 bg-white rounded-[2.5rem] border-2 border-slate-100 shadow-sm">
               <div className="flex items-center gap-3 mb-8">
@@ -323,7 +273,7 @@ export const Movements: React.FC = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-4 space-y-8">
+          <div className="lg:col-span-4 space-y-8 no-print">
             <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] shadow-2xl">
                <div className="flex items-center gap-3 mb-6">
                   <div className="w-1.5 h-6 bg-emerald-500 rounded-full"></div>
@@ -374,7 +324,7 @@ export const Movements: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="max-w-2xl mx-auto text-center py-20 animate-in zoom-in-95">
+        <div className="max-w-2xl mx-auto text-center py-20 animate-in zoom-in-95 no-print">
            <div className="bg-white rounded-[3rem] shadow-2xl p-16 border border-slate-100">
               <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-8">
                  <CheckCircle size={54} className="text-emerald-600" />
@@ -382,17 +332,12 @@ export const Movements: React.FC = () => {
               <h2 className="text-3xl font-black text-slate-900 uppercase tracking-tighter mb-2">Remito Nº {successMovement.id}</h2>
               <p className="text-sm font-bold text-slate-400 uppercase tracking-widest mb-12">Emitido correctamente por {successMovement.createdBy}</p>
               
-              <div className="flex flex-col gap-4">
+              <div className="flex flex-col gap-4 px-10">
                 <button 
-                  onClick={handleDownloadPDF}
-                  disabled={isGeneratingPDF}
-                  className="w-full py-5 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-[0.2em] shadow-xl hover:bg-slate-800 active:scale-95 flex items-center justify-center gap-3 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
+                  onClick={() => window.print()}
+                  className="bg-blue-900 hover:bg-blue-950 text-white font-black py-5 px-8 rounded-2xl shadow-xl text-xl uppercase tracking-[0.05em] flex items-center justify-center gap-3 transition-all active:scale-95"
                 >
-                  {isGeneratingPDF ? (
-                    <><Loader2 size={20} className="animate-spin" /> Generando Documento...</>
-                  ) : (
-                    <><Download size={20} /> Descargar Remito Oficial</>
-                  )}
+                  <Printer size={28} /> IMPRIMIR REMITO OFICIAL
                 </button>
 
                  <button onClick={handleReset} className="w-full py-5 bg-white border-2 border-slate-100 text-slate-400 rounded-2xl font-black text-xs uppercase tracking-[0.2em] hover:bg-slate-50 transition-all flex items-center justify-center gap-3">
@@ -400,6 +345,23 @@ export const Movements: React.FC = () => {
                  </button>
               </div>
            </div>
+        </div>
+      )}
+
+      {/* Hidden Remito Container for Native Print */}
+      {successMovement && (
+        <div className="hidden print:block">
+          <RemitoDocument 
+            movement={successMovement}
+            company={currentCompany!}
+            vehicles={remitoVehicles}
+            origin={originLoc}
+            destination={destLoc}
+            driverDni={driverDni}
+            truckPlate={truckPlate}
+            trailerPlate={trailerPlate}
+            unitObservations={unitObservations}
+          />
         </div>
       )}
     </div>
