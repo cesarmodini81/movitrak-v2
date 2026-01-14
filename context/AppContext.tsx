@@ -28,6 +28,7 @@ interface AppContextType {
   scheduleEvent: (event: CalendarEvent) => void;
   createMovement: (mov: Movement) => void;
   completeMovement: (id: string) => void;
+  cancelMovements: (ids: string[], reason: string) => void;
   confirmPDI: (vin: string, comment: string) => void;
   saveUsedReception: (reception: UsedReception) => void;
   currentCompany: Company | null;
@@ -264,6 +265,29 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     }
   };
 
+  const cancelMovements = (ids: string[], reason: string) => {
+    const canceledByInfo = { username: user?.username || 'sys', timestamp: new Date().toISOString() };
+    
+    setMovements(prev => prev.map(m => {
+      if (ids.includes(m.id)) {
+        // Unlock vehicles
+        m.vehicleVins.forEach(vin => {
+           updateVehicle(vin, { status: 'AVAILABLE', isLocked: false, lockReason: undefined });
+        });
+        
+        return { 
+          ...m, 
+          status: 'ANULADO' as any, // Cast to any to allow strict typed status bypass
+          razonAnulacion: reason,
+          anuladoPor: canceledByInfo
+        };
+      }
+      return m;
+    }));
+
+    addAuditLog('MOVEMENT_CANCELLED', `Movimientos anulados: ${ids.join(', ')}. Motivo: ${reason}`, 'WARNING');
+  };
+
   const sendChatMessage = (text: string, companyId: string) => {
     const newMessage: ChatMessage = { id: `msg_${Date.now()}`, text, senderId: user!.id, senderName: user!.name, companyId, timestamp: new Date().toISOString(), isRead: false };
     setChatMessages(prev => [...prev, newMessage]);
@@ -284,7 +308,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       user, login, logout, vehicles, availableVehicles, companies, allUsers, movements, calendarEvents, auditLogs, pdiQueue, travelSheetList, historicalTravelSheetList, usedReceptions,
       addToPdiQueue: (v) => setPdiQueue(p => [...p, v]), clearPdiQueue: () => setPdiQueue([]), 
       removeFromTravelSheet, restoreFromHistorical,
-      addAuditLog, updateVehicle, addVehicle, scheduleEvent, createMovement, completeMovement, confirmPDI, saveUsedReception,
+      addAuditLog, updateVehicle, addVehicle, scheduleEvent, createMovement, completeMovement, cancelMovements, confirmPDI, saveUsedReception,
       currentCompany, setCurrentCompany, language, setLanguage,
       chatMessages, sendChatMessage, markChatAsRead, activeChatCompanyId, setActiveChatCompanyId,
       createCompany, addNewUser, updateUserRole,

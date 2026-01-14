@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Calendar, FileCheck, Truck, 
   Search, ShieldAlert, Globe, ChevronDown, ChevronRight,
   ClipboardList, Map, FileText, CalendarPlus, Car, PenTool,
-  History, Package
+  History, Package, Ban
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -115,6 +115,7 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
                 <div className="bg-slate-900/50 py-1">
                   <NavItem to="/movements" icon={ClipboardList} label={t('transfer_vehicles')} />
                   <NavItem to="/confirm-movements" icon={Truck} label={t('confirm_movement')} />
+                  <NavItem to="/movements/cancelar" icon={Ban} label="Cancelar Movimientos" />
                 </div>
               )}
             </div>

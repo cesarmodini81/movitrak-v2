@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AppProvider, useApp } from './context/AppContext';
 import { Login } from './pages/Login';
@@ -8,6 +8,7 @@ import { CalendarPage } from './pages/Calendar';
 import { OperationalPreDelivery } from './pages/OperationalPreDelivery';
 import { Movements } from './pages/Movements';
 import { ConfirmMovements } from './pages/ConfirmMovements';
+import { CancelarMovimientos } from './pages/CancelarMovimientos';
 import { TravelSheet } from './pages/TravelSheet';
 import { HistoricalTravelSheet } from './pages/HistoricalTravelSheet';
 import { ProgrammingPage } from './pages/Programming';
@@ -50,6 +51,7 @@ const AppRoutes: React.FC = () => {
       <Route path="/historical-travel-sheet" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><HistoricalTravelSheet /></ProtectedRoute>} />
       <Route path="/movements" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.USED_OPERATOR]}><Movements /></ProtectedRoute>} />
       <Route path="/confirm-movements" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><ConfirmMovements /></ProtectedRoute>} />
+      <Route path="/movements/cancelar" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><CancelarMovimientos /></ProtectedRoute>} />
       <Route path="/audit" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.SUPER_ADMIN]}><AuditLogs /></ProtectedRoute>} />
       
       {/* Parts Module Routes */}
