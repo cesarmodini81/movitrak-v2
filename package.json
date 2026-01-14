@@ -16,7 +16,7 @@
     "lucide-react": "^0.562.0",
     "react-i18next": "^16.5.1",
     "i18next": "^25.7.4",
-    "react-to-print": "^2.14.15"
+    "@react-pdf/renderer": "4.2.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
