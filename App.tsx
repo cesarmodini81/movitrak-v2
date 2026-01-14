@@ -37,6 +37,10 @@ const AppRoutes: React.FC = () => {
     <Routes>
       <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      
+      {/* Alias para Repuestos */}
+      <Route path="/repuestos" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><Dashboard /></ProtectedRoute>} />
+      
       <Route path="/used-reception" element={<ProtectedRoute allowedRoles={[Role.USED_OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><UsedReceptionPage /></ProtectedRoute>} />
       <Route path="/programming" element={<ProtectedRoute allowedRoles={[Role.PROGRAMADOR, Role.ADMIN, Role.SUPER_ADMIN]}><ProgrammingPage /></ProtectedRoute>} />
       <Route path="/calendar" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.PROGRAMADOR]}><CalendarPage /></ProtectedRoute>} />
@@ -49,11 +53,11 @@ const AppRoutes: React.FC = () => {
       <Route path="/audit" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.SUPER_ADMIN]}><AuditLogs /></ProtectedRoute>} />
       
       {/* Parts Module Routes */}
-      <Route path="/parts/search" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN]}><PartsSearch /></ProtectedRoute>} />
-      <Route path="/parts/stock" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN]}><PartsStock /></ProtectedRoute>} />
-      <Route path="/parts/transfer" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN]}><PartsTransfer /></ProtectedRoute>} />
-      <Route path="/parts/sales" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN]}><PartsSales /></ProtectedRoute>} />
-      <Route path="/parts/audit" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN]}><PartsAudit /></ProtectedRoute>} />
+      <Route path="/parts/search" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsSearch /></ProtectedRoute>} />
+      <Route path="/parts/stock" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsStock /></ProtectedRoute>} />
+      <Route path="/parts/transfer" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsTransfer /></ProtectedRoute>} />
+      <Route path="/parts/sales" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsSales /></ProtectedRoute>} />
+      <Route path="/parts/audit" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsAudit /></ProtectedRoute>} />
     </Routes>
   );
 }

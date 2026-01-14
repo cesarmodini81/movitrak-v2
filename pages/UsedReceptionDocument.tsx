@@ -15,40 +15,27 @@ export const UsedReceptionDocument: React.FC<Props> = ({ reception, vehicle, com
   const opLabel = OPERATION_TYPES.find(o => o.id === reception.operationType)?.label || reception.operationType;
 
   return (
-    <div id="print-root" className="w-full bg-white print:block">
+    <div className="w-full bg-white">
       <style>{`
         @page {
           size: A4 portrait;
           margin: 10mm;
         }
         @media print {
-          html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-            height: auto;
-            overflow: visible;
+          /* Document internal layout fixes */
+          .document-container {
+             width: 100% !important;
+             border-width: 2px !important;
           }
-          body > * { display: none !important; }
-          #print-root {
-            display: block !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          #print-root * { visibility: visible !important; }
         }
       `}</style>
 
-      <div className="font-sans text-slate-900 w-[190mm] mx-auto border-[3px] border-slate-900 p-6 min-h-[277mm] relative flex flex-col justify-between">
+      <div className="document-container font-sans text-slate-900 w-[190mm] mx-auto border-[3px] border-slate-900 p-6 min-h-[277mm] relative flex flex-col justify-between bg-white">
         
         {/* Header Correlativo */}
         <div className="flex justify-between items-start border-b-[3px] border-slate-900 pb-4 mb-6">
            <div className="flex items-center gap-4">
-              <div className="p-3 bg-slate-900 text-white rounded-xl print:text-black print:bg-white print:border print:border-black">
+              <div className="p-3 bg-slate-900 text-white rounded-xl">
                  <ShieldCheck size={32} />
               </div>
               <div>
@@ -65,7 +52,7 @@ export const UsedReceptionDocument: React.FC<Props> = ({ reception, vehicle, com
 
         <div className="flex-1">
             {/* Sección 1: Datos del Operador y Ubicación */}
-            <div className="grid grid-cols-2 gap-8 mb-6 bg-slate-50 p-4 border border-slate-200 print:bg-transparent print:border-slate-400">
+            <div className="grid grid-cols-2 gap-8 mb-6 bg-slate-50 p-4 border border-slate-200">
                <div>
                   <p className="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-2">
                      <UserIcon size={10} /> Operador Responsable
@@ -85,7 +72,7 @@ export const UsedReceptionDocument: React.FC<Props> = ({ reception, vehicle, com
                
                {/* Datos Unidad */}
                <section>
-                  <div className="bg-slate-900 text-white px-3 py-1 flex justify-between items-center mb-3 print:bg-black print:text-white">
+                  <div className="bg-slate-900 text-white px-3 py-1 flex justify-between items-center mb-3">
                      <h3 className="text-[9px] font-black uppercase tracking-widest">I. Especificaciones del Vehículo</h3>
                      <span className="text-[8px] font-bold text-slate-300 italic">Estado: {reception.condition}</span>
                   </div>
@@ -124,7 +111,7 @@ export const UsedReceptionDocument: React.FC<Props> = ({ reception, vehicle, com
 
                {/* Datos Propietario */}
                <section>
-                  <div className="bg-slate-900 text-white px-3 py-1 flex justify-between items-center mb-3 print:bg-black print:text-white">
+                  <div className="bg-slate-900 text-white px-3 py-1 flex justify-between items-center mb-3">
                      <h3 className="text-[9px] font-black uppercase tracking-widest">II. Titular Registral</h3>
                      <span className="text-[8px] font-bold text-slate-300 italic">Op: {opLabel}</span>
                   </div>
@@ -150,7 +137,7 @@ export const UsedReceptionDocument: React.FC<Props> = ({ reception, vehicle, com
 
                {/* Observaciones Legales */}
                <section>
-                  <div className="bg-slate-100 border-l-[4px] border-slate-900 p-3 print:bg-white print:border-black">
+                  <div className="bg-slate-100 border-l-[4px] border-slate-900 p-3">
                      <h3 className="text-[8px] font-black text-slate-900 uppercase tracking-widest mb-1">III. Observaciones</h3>
                      <p className="text-[10px] text-slate-600 font-medium italic min-h-[60px] leading-relaxed">
                         {reception.observations || 'Sin observaciones declaradas.'}
@@ -170,13 +157,13 @@ export const UsedReceptionDocument: React.FC<Props> = ({ reception, vehicle, com
         <div className="mt-8 pt-4 border-t border-slate-200">
            <div className="grid grid-cols-2 gap-20">
               <div className="text-center">
-                 <div className="border-t border-slate-400 pt-2 print:border-black">
+                 <div className="border-t border-slate-400 pt-2">
                     <p className="text-[8px] font-black text-slate-900 uppercase tracking-widest">Firma del Titular / Cliente</p>
                     <p className="text-[7px] text-slate-400 uppercase mt-0.5">Aclaración y DNI</p>
                  </div>
               </div>
               <div className="text-center">
-                 <div className="border-t border-slate-400 pt-2 print:border-black">
+                 <div className="border-t border-slate-400 pt-2">
                     <p className="text-[8px] font-black text-slate-900 uppercase tracking-widest">Firma Operador {company.name}</p>
                     <p className="text-[7px] text-slate-400 uppercase mt-0.5">Responsable de Recepción</p>
                  </div>

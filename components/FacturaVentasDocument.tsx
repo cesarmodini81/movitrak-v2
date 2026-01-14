@@ -9,35 +9,15 @@ interface Props {
 
 export const FacturaVentasDocument: React.FC<Props> = ({ sale, company }) => {
   return (
-    <div id="print-root" className="w-full bg-white print:block">
+    <div className="w-full bg-white">
       <style>{`
         @page {
           size: A4 portrait;
           margin: 10mm 15mm;
         }
-        @media print {
-          html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-            height: auto;
-            overflow: visible;
-          }
-          body > * { display: none !important; }
-          #print-root {
-            display: block !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          #print-root * { visibility: visible !important; }
-        }
       `}</style>
 
-      <div className="w-[180mm] mx-auto font-sans text-slate-900 min-h-[270mm] flex flex-col justify-between">
+      <div className="w-[180mm] mx-auto font-sans text-slate-900 min-h-[270mm] flex flex-col justify-between p-2 bg-white">
         <div>
             <div className="border-b-[4px] border-slate-900 pb-4 mb-6 flex justify-between">
                <div>
@@ -51,7 +31,7 @@ export const FacturaVentasDocument: React.FC<Props> = ({ sale, company }) => {
                </div>
             </div>
 
-            <div className="bg-slate-50 p-4 mb-6 border border-slate-200 print:bg-white print:border-black rounded-lg">
+            <div className="bg-slate-50 p-4 mb-6 border border-slate-200 rounded-lg">
                <p className="text-[8px] font-black uppercase text-slate-400 mb-1">Datos del Cliente</p>
                <h2 className="text-lg font-black uppercase">{sale.clientName}</h2>
                <div className="flex gap-4 mt-1 text-xs">
@@ -62,7 +42,7 @@ export const FacturaVentasDocument: React.FC<Props> = ({ sale, company }) => {
             </div>
 
             <table className="w-full text-left text-xs mb-8 border-collapse">
-               <thead className="bg-slate-900 text-white uppercase font-black text-[9px] print:bg-black print:text-white">
+               <thead className="bg-slate-900 text-white uppercase font-black text-[9px]">
                   <tr>
                       <th className="p-2">Cod.</th>
                       <th className="p-2">Descripción</th>

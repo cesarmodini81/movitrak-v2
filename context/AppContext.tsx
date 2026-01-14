@@ -109,6 +109,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       else if (foundUser.companyId) {
         setCurrentCompany(companies.find(c => c.id === foundUser.companyId) || null);
       }
+      
+      // Activa modo repuestos si el rol es PARTS_OPERATOR
+      if (foundUser.role === Role.PARTS_OPERATOR) {
+        setIsPartsMode(true);
+      } else {
+        setIsPartsMode(false);
+      }
+      
       return true;
     }
     return false;
@@ -131,7 +139,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         return true;
     }
 
-    const validCode = currentCompany?.partsAccessCode || '6789'; // Fallback initial
+    const validCode = currentCompany?.partsAccessCode || '6789'; 
     if (code === validCode) {
       setIsPartsMode(true);
       return true;
@@ -157,7 +165,6 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const createPartTransfer = (transfer: PartTransfer) => {
     setPartTransfers(prev => [transfer, ...prev]);
-    // Deduct from origin, Add to destination (handled in component logic visually, updated here for persistence)
     transfer.items.forEach(item => {
         const part = parts.find(p => p.code === item.partCode);
         if (part) {
@@ -170,13 +177,8 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const createPartSale = (sale: PartSale) => {
     setPartSales(prev => [sale, ...prev]);
-    // Deduct stock (Assuming deduction from main location or handled by location selection in Sale)
-    // For simplicity in this mock, we assume stock is deducted from the company's main location or selected loc
-    // In a real app, sale would have locationId. Here we just log it.
     addAuditLog('PART_SALE', `Venta Repuestos ${sale.id} confirmada: $${sale.total}`);
   };
-
-  // --- Admin Logic ---
 
   const addNewUser = (newUser: User) => {
     setAllUsers(prev => [...prev, newUser]);
@@ -211,10 +213,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       { id: `u_${slug}_op`, username: `operador_${slug}`, name: `Operador ${name}`, role: Role.OPERATOR, companyId: newId, email: `ops@${slug}.com` },
       { id: `u_${slug}_prog`, username: `programador_${slug}`, name: `Prog ${name}`, role: Role.PROGRAMADOR, companyId: newId, email: `prog@${slug}.com` },
       { id: `u_${slug}_used`, username: `usados_${slug}`, name: `Usados ${name}`, role: Role.USED_OPERATOR, companyId: newId, email: `usados@${slug}.com` },
+      { id: `u_${slug}_parts`, username: `repuestos_${slug}`, name: `Repuestos ${name}`, role: Role.PARTS_OPERATOR, companyId: newId, email: `repuestos@${slug}.com` },
     ];
 
     setAllUsers(prev => [...prev, ...defaultUsers]);
-    addAuditLog('COMPANY_CREATED', `Nueva empresa creada: ${name} con 4 usuarios iniciales.`);
+    addAuditLog('COMPANY_CREATED', `Nueva empresa creada: ${name} con usuarios operativos.`);
   };
 
   const saveUsedReception = (reception: UsedReception) => {

@@ -33,8 +33,9 @@ export const PartsSearch: React.FC = () => {
     setSuggestions([]);
   };
 
-  const totalStock = selectedPart 
-    ? Object.values(selectedPart.stock).reduce((a, b) => a + b, 0)
+  // Explicitly cast Object.values to number[] to fix "unknown" type errors in reduce
+  const totalStock: number = selectedPart 
+    ? (Object.values(selectedPart.stock) as number[]).reduce((a: number, b: number) => a + b, 0)
     : 0;
 
   return (

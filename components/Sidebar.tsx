@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Calendar, FileCheck, Truck, 
   Search, ShieldAlert, Globe, ChevronDown, ChevronRight,
   ClipboardList, Map, FileText, CalendarPlus, Car, PenTool,
-  History, Settings, Package
+  History, Package
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -19,8 +19,6 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
 
   if (!user) return null;
 
-  // Parts Operator logic handled in Layout via RepuestosSidebar
-  // This Sidebar is for Fleet operations
   const isUsedOperator = user.role === Role.USED_OPERATOR;
   const isProgramador = user.role === Role.PROGRAMADOR;
   const isOperator = user.role === Role.OPERATOR;
@@ -49,7 +47,7 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
         </div>
         <div>
           <h1 className="text-lg font-bold tracking-tight">MOVITRAK</h1>
-          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none">Logistics Hub</p>
+          <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest leading-none">Fleet Manager</p>
         </div>
       </div>
 
@@ -65,7 +63,6 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
           <span className="text-sm font-medium">{t('vehicle_query')}</span>
         </button>
 
-        {/* --- Sección de Programación y Previsión --- */}
         {(isProgramador || isAdmin) && (
           <div className="mt-6">
             <div className="px-6 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Planificación</div>
@@ -73,7 +70,6 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
           </div>
         )}
 
-        {/* --- Calendario Logístico (Visible para todos menos Usados) --- */}
         {!isUsedOperator && (
           <>
             <NavItem to="/calendar" icon={Calendar} label={t('calendar')} />
@@ -81,7 +77,6 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
           </>
         )}
 
-        {/* --- Sección de Usados --- */}
         {isUsedOperator && (
           <div className="mt-6">
             <div className="px-6 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Usados</div>
@@ -90,7 +85,6 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
           </div>
         )}
 
-        {/* --- Sección Operativa (PDI y Viajes) --- */}
         {(isOperator || isAdmin) && (
           <div className="mt-6">
             <div className="px-6 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Operativo</div>
@@ -127,18 +121,10 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
           </div>
         )}
 
-        {/* --- Configuración de Sistema --- */}
         {isAdmin && (
           <div className="mt-6">
             <div className="px-6 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Sistema</div>
             <NavItem to="/audit" icon={ShieldAlert} label={t('audit_logs')} />
-            <Link 
-              to="/parts/audit" 
-              className={`flex items-center gap-3 px-6 py-3 transition-all ${isActive('/parts/audit')}`}
-            >
-              <Settings size={18} />
-              <span className="text-sm font-medium">Auditoría Repuestos</span>
-            </Link>
           </div>
         )}
       </nav>

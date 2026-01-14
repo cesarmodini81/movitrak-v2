@@ -46,7 +46,8 @@ export const PartsStock: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-slate-100">
                {companyParts.map(part => {
-                  const total = Object.values(part.stock).reduce((a,b) => a+b, 0);
+                  // Explicitly cast Object.values to number[] to fix reduce type error
+                  const total = (Object.values(part.stock) as number[]).reduce((a: number, b: number) => a + b, 0);
                   return (
                     <tr key={part.id} className="hover:bg-slate-50 transition-colors">
                        <td className="p-6 font-mono font-black text-xs text-slate-500">{part.code}</td>

@@ -1,4 +1,3 @@
-
 import { Role, User, Company, Vehicle, CalendarEvent, Movement, ChatMessage, Part } from './types';
 
 // --- LOCATION MAPPING ---
@@ -74,110 +73,18 @@ export const MOCK_COMPANIES: Company[] = [
 ];
 
 export const MOCK_USERS: User[] = [
-  // --- NIVEL GLOBAL ---
-  { 
-    id: 'u1', 
-    username: 'superadmin', 
-    name: 'César Modini', 
-    role: Role.SUPER_ADMIN, 
-    email: 'cesar.m@movitrak.global' 
-  },
-
-  // --- NATION S.A. (comp_1) ---
-  { 
-    id: 'u_nat_1', 
-    username: 'operador_nation', 
-    name: 'José Nation', 
-    role: Role.OPERATOR, 
-    companyId: 'comp_1', 
-    email: 'jose.m@nation.com.ar' 
-  },
-  { 
-    id: 'u_nat_2', 
-    username: 'admin_nation', 
-    name: 'German Nation', 
-    role: Role.ADMIN, 
-    companyId: 'comp_1', 
-    email: 'german.r@nation.com.ar' 
-  },
-  { 
-    id: 'u_nat_3', 
-    username: 'programador_nation', 
-    name: 'Jona Técnico Nation', 
-    role: Role.PROGRAMADOR, 
-    companyId: 'comp_1', 
-    email: 'j.tecnico@nation.com.ar' 
-  },
-  { 
-    id: 'u_nat_4', 
-    username: 'usados_nation', 
-    name: 'Pablo Usados Nation', 
-    role: Role.USED_OPERATOR, 
-    companyId: 'comp_1', 
-    email: 'p.usados@nation.com.ar' 
-  },
-  // REPUESTOS NATION
-  { 
-    id: 'u_nat_5', 
-    username: 'repuestos_nation', 
-    name: 'Roberto Repuestos', 
-    role: Role.PARTS_OPERATOR, 
-    companyId: 'comp_1', 
-    email: 'repuestos@nation.com.ar' 
-  },
-
-  // --- ESCOBAR AUTOMOTORES (comp_2) ---
-  { 
-    id: 'u_esc_1', 
-    username: 'operador_escobar', 
-    name: 'Joaquin Escobar', 
-    role: Role.OPERATOR, 
-    companyId: 'comp_2', 
-    email: 'joako.f@escobar.com.ar' 
-  },
-  { 
-    id: 'u_esc_2', 
-    username: 'admin_escobar', 
-    name: 'Pablo Escobar', 
-    role: Role.ADMIN, 
-    companyId: 'comp_2', 
-    email: 'p.gerencia@escobar.com.ar' 
-  },
-  { 
-    id: 'u_esc_3', 
-    username: 'programador_escobar', 
-    name: 'Ana Técnico Escobar', 
-    role: Role.PROGRAMADOR, 
-    companyId: 'comp_2', 
-    email: 'a.tecnico@escobar.com.ar' 
-  },
-  { 
-    id: 'u_esc_4', 
-    username: 'usados_escobar', 
-    name: 'Fabian Usados Escobar', 
-    role: Role.USED_OPERATOR, 
-    companyId: 'comp_2', 
-    email: 'f.usados@escobar.com.ar' 
-  },
-  // REPUESTOS ESCOBAR
-  { 
-    id: 'u_esc_5', 
-    username: 'repuestos_escobar', 
-    name: 'Carlos Repuestos', 
-    role: Role.PARTS_OPERATOR, 
-    companyId: 'comp_2', 
-    email: 'repuestos@escobar.com.ar' 
-  },
-
-  // Fallback para neófitos
-  { 
-    id: 'u_def', 
-    username: 'operador', 
-    name: 'Invitado Operativo', 
-    role: Role.OPERATOR, 
-    companyId: 'comp_1', 
-    email: 'demo@movitrak.com' 
-  },
+  { id: 'u1', username: 'superadmin', name: 'César Modini', role: Role.SUPER_ADMIN, email: 'cesar.m@movitrak.global' },
+  { id: 'u_nat_1', username: 'operador_nation', name: 'José Nation', role: Role.OPERATOR, companyId: 'comp_1', email: 'jose.m@nation.com.ar' },
+  { id: 'u_nat_2', username: 'admin_nation', name: 'German Nation', role: Role.ADMIN, companyId: 'comp_1', email: 'german.r@nation.com.ar' },
+  { id: 'u_nat_3', username: 'programador_nation', name: 'Jona Técnico Nation', role: Role.PROGRAMADOR, companyId: 'comp_1', email: 'j.tecnico@nation.com.ar' },
+  { id: 'u_nat_4', username: 'usados_nation', name: 'Pablo Usados Nation', role: Role.USED_OPERATOR, companyId: 'comp_1', email: 'p.usados@nation.com.ar' },
+  { id: 'u_nat_5', username: 'repuestos_nation', name: 'Roberto Repuestos', role: Role.PARTS_OPERATOR, companyId: 'comp_1', email: 'repuestos@nation.com.ar' },
+  { id: 'u_esc_1', username: 'operador_escobar', name: 'Joaquin Escobar', role: Role.OPERATOR, companyId: 'comp_2', email: 'joako.f@escobar.com.ar' },
+  { id: 'u_esc_2', username: 'admin_escobar', name: 'Pablo Escobar', role: Role.ADMIN, companyId: 'comp_2', email: 'p.gerencia@escobar.com.ar' },
+  { id: 'u_esc_3', username: 'programador_escobar', name: 'Ana Técnico Escobar', role: Role.PROGRAMADOR, companyId: 'comp_2', email: 'a.tecnico@escobar.com.ar' },
+  { id: 'u_esc_4', username: 'usados_escobar', name: 'Fabian Usados Escobar', role: Role.USED_OPERATOR, companyId: 'comp_2', email: 'f.usados@escobar.com.ar' },
+  { id: 'u_esc_5', username: 'repuestos_escobar', name: 'Carlos Repuestos', role: Role.PARTS_OPERATOR, companyId: 'comp_2', email: 'repuestos@escobar.com.ar' },
+  { id: 'u_def', username: 'operador', name: 'Invitado Operativo', role: Role.OPERATOR, companyId: 'comp_1', email: 'demo@movitrak.com' },
 ];
 
 export const BRANDS = ['Toyota', 'Ford', 'Volkswagen', 'Peugeot', 'Fiat', 'Chevrolet', 'Honda', 'Hyundai', 'Jeep', 'Renault', 'Audi', 'BMW', 'Mercedes-Benz'];
@@ -198,161 +105,26 @@ export const MODELS: Record<string, string[]> = {
 };
 export const COLORS = ['Blanco', 'Plata', 'Gris Oscuro', 'Negro', 'Rojo', 'Azul', 'Beige', 'Gris Plata', 'Blanco Perlado', 'Champagne'];
 
-const generateRandomPlate = () => {
-  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const digits = '0123456789';
-  // 60% New Format (AA 000 AA), 40% Old Format (AAA 000)
-  if (Math.random() > 0.4) {
-    return `${letters[Math.floor(Math.random()*26)]}${letters[Math.floor(Math.random()*26)]} ${digits[Math.floor(Math.random()*10)]}${digits[Math.floor(Math.random()*10)]}${digits[Math.floor(Math.random()*10)]} ${letters[Math.floor(Math.random()*26)]}${letters[Math.floor(Math.random()*26)]}`;
-  } else {
-    return `${letters[Math.floor(Math.random()*26)]}${letters[Math.floor(Math.random()*26)]}${letters[Math.floor(Math.random()*26)]} ${digits[Math.floor(Math.random()*10)]}${digits[Math.floor(Math.random()*10)]}${digits[Math.floor(Math.random()*10)]}`;
-  }
-};
-
 export const generateMockVehicles = (): Vehicle[] => {
   const vehicles: Vehicle[] = [];
   const baseDate = new Date();
-  
-  // 0KM: 100 units split between companies (50 Nation, 50 Escobar)
   for (let i = 0; i < 100; i++) {
     const isNation = i % 2 === 0;
     const brand = isNation ? 'Toyota' : 'Ford'; 
     const model = MODELS[brand][Math.floor(Math.random() * (MODELS[brand]?.length || 1))];
-    const entryDate = new Date(baseDate);
-    entryDate.setDate(baseDate.getDate() - Math.floor(Math.random() * 15));
-    // Even indices: Nation (loc_1), Odd indices: Escobar (loc_2)
     const locationId = isNation ? 'loc_1_pred' : 'loc_2_main';
-
     vehicles.push({
       vin: `8AJH${10000 + i}ARX${Math.floor(Math.random()*90)+10}`,
-      brand,
-      model,
-      year: 2024,
-      color: COLORS[Math.floor(Math.random() * 8)],
-      type: 'NEW',
-      locationId: locationId, 
-      entryDate: entryDate.toISOString(),
-      preDeliveryConfirmed: i % 3 === 0, // Some already confirmed 
-      status: 'AVAILABLE',
-      isLocked: false,
-    });
-  }
-
-  // --- USED: NATION S.A. (20+ Units) ---
-  
-  // 1. Specific Request: VW Gol Trend 2020 Blanco
-  vehicles.push({
-    vin: 'USADO001',
-    plate: 'AD 452 KO', // Patente 2020 aprox.
-    brand: 'Volkswagen',
-    model: 'Gol Trend',
-    year: 2020,
-    color: 'Blanco',
-    km: 85000,
-    type: 'USED',
-    locationId: 'loc_1_used_sf', 
-    entryDate: new Date(baseDate.getTime() - 86400000 * 10).toISOString(),
-    preDeliveryConfirmed: true, 
-    status: 'AVAILABLE',
-    isLocked: false,
-  });
-
-  // 2. Random Generation for Nation (25 units)
-  for (let i = 0; i < 25; i++) {
-    const brand = BRANDS[Math.floor(Math.random() * BRANDS.length)];
-    const model = MODELS[brand][Math.floor(Math.random() * (MODELS[brand]?.length || 1))];
-    const entryDate = new Date(baseDate);
-    entryDate.setDate(baseDate.getDate() - Math.floor(Math.random() * 60));
-
-    vehicles.push({
-      vin: `USD${5000 + i}NATION`,
-      plate: generateRandomPlate(),
-      brand,
-      model,
-      year: 2015 + Math.floor(Math.random() * 9),
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      km: 20000 + Math.floor(Math.random() * 120000),
-      type: 'USED',
-      locationId: 'loc_1_used_sf', 
-      entryDate: entryDate.toISOString(),
-      preDeliveryConfirmed: true, 
-      status: 'AVAILABLE',
-      isLocked: false,
-    });
-  }
-
-  // --- USED: ESCOBAR AUTOMOTORES (25 Units) ---
-  for (let i = 0; i < 25; i++) {
-    const brand = BRANDS[Math.floor(Math.random() * BRANDS.length)];
-    const model = MODELS[brand][Math.floor(Math.random() * (MODELS[brand]?.length || 1))];
-    const entryDate = new Date(baseDate);
-    entryDate.setDate(baseDate.getDate() - Math.floor(Math.random() * 60));
-
-    vehicles.push({
-      vin: `USD${6000 + i}ESCOBAR`,
-      plate: generateRandomPlate(),
-      brand,
-      model,
-      year: 2015 + Math.floor(Math.random() * 9),
-      color: COLORS[Math.floor(Math.random() * COLORS.length)],
-      km: 15000 + Math.floor(Math.random() * 100000),
-      type: 'USED',
-      locationId: 'loc_2_used_sf', 
-      entryDate: entryDate.toISOString(),
-      preDeliveryConfirmed: true, 
-      status: 'AVAILABLE',
-      isLocked: false,
+      brand, model, year: 2024, color: COLORS[Math.floor(Math.random() * 8)],
+      type: 'NEW', locationId: locationId, entryDate: baseDate.toISOString(),
+      preDeliveryConfirmed: i % 3 === 0, status: 'AVAILABLE', isLocked: false,
     });
   }
   return vehicles;
 };
 
-// --- MOCK CALENDAR EVENTS (0KM) ---
-// Generates events for Jan 2026, distributed per company.
-// LOGIC: Reference Date Jan 10, 2026.
-// RED (<48h): Jan 10, 11
-// YELLOW (48-72h): Jan 12, 13
-// GREEN (>72h): Jan 14+
-export const generateMockCalendarEvents = (): CalendarEvent[] => {
-  const events: CalendarEvent[] = [];
-  const baseYear = 2026;
-  const baseMonth = 0; // January
-
-  // Locations for Nation
-  const nationLocs = ['loc_1_pred', 'loc_1_rec', 'loc_1_raf', 'loc_1_par'];
-  // Locations for Escobar
-  const escobarLocs = ['loc_2_main', 'loc_2_par', 'loc_2_raf', 'loc_2_ros'];
-
-  // Create 60 events to ensure population (30 per company)
-  for (let i = 0; i < 60; i++) {
-    const mockVehicleIndex = i; 
-    const isNation = mockVehicleIndex % 2 === 0;
-    const vin = `8AJH${10000 + mockVehicleIndex}ARX`; // Matches partial vin of mock vehicles
-    
-    // Distribute dates to trigger all colors
-    // We want days around Jan 10th (Ref)
-    // Days 10, 11 -> Urgent (Red)
-    // Days 12, 13 -> Warning (Yellow)
-    // Days 14+ -> Normal (Green)
-    const day = (i % 20) + 1; // Cycle days 1 to 20
-    
-    events.push({
-      id: `EVT_MOCK_${i}`,
-      vehicleVin: vin, 
-      date: `${baseYear}-01-${day.toString().padStart(2, '0')}`,
-      time: `${(9 + (i % 8)).toString().padStart(2, '0')}:00`,
-      destinationId: isNation 
-        ? nationLocs[i % nationLocs.length] 
-        : escobarLocs[i % escobarLocs.length],
-      status: 'PROGRAMADO',
-      createdBy: 'sys_planner'
-    });
-  }
-  return events;
-};
-
 // --- PARTS MOCK GENERATOR ---
-const PARTS_CATALOG = [
+const PARTS_TEMPLATES = [
   { name: 'Pistón Motor', loc: 'Motor Delantero', price: 150000 },
   { name: 'Filtro de Aceite', loc: 'Motor', price: 12000 },
   { name: 'Amortiguador Del.', loc: 'Suspensión', price: 85000 },
@@ -367,44 +139,62 @@ const PARTS_CATALOG = [
 
 export const generateMockParts = (): Part[] => {
   const parts: Part[] = [];
-  // Generate for Nation (comp_1)
-  const locsNation = ['loc_1_pred', 'loc_1_sj', 'loc_1_rec', 'loc_1_raf', 'loc_1_par', 'loc_1_ros'];
-  // Generate for Escobar (comp_2)
-  const locsEscobar = ['loc_2_main', 'loc_2_deposit', 'loc_2_par', 'loc_2_raf', 'loc_2_ros'];
-
-  // 30 parts per company
-  [
-    { cid: 'comp_1', locs: locsNation, prefix: 'NT' }, 
-    { cid: 'comp_2', locs: locsEscobar, prefix: 'ES' }
-  ].forEach(companyData => {
-    for (let i = 0; i < 30; i++) {
-      const template = PARTS_CATALOG[i % PARTS_CATALOG.length];
+  MOCK_COMPANIES.forEach(company => {
+    for (let i = 0; i < 50; i++) {
+      const template = PARTS_TEMPLATES[i % PARTS_TEMPLATES.length];
       const stockMap: Record<string, number> = {};
-      
-      companyData.locs.forEach(l => {
-        stockMap[l] = Math.floor(Math.random() * 20); // 0 to 20 items per branch
+      company.locations.forEach(l => {
+        stockMap[l.id] = Math.floor(Math.random() * 15);
       });
-
       parts.push({
-        id: `PT-${companyData.prefix}-${i}`,
-        code: `RP${companyData.prefix}${1000 + i}`,
-        name: `${template.name} ${i % 2 === 0 ? 'Toyota' : 'Ford'}`,
-        brand: i % 2 === 0 ? 'Toyota' : 'Ford',
-        modelCompatibility: ['Hilux', 'Ranger', 'Corolla'],
+        id: `PT-${company.id.slice(-1)}-${i}`,
+        code: `RP-${company.name.slice(0,2).toUpperCase()}-${1000 + i}`,
+        name: `${template.name} ${company.id === 'comp_1' ? 'Toyota' : 'Ford'} Original`,
+        brand: company.id === 'comp_1' ? 'Toyota' : 'Ford',
+        modelCompatibility: company.id === 'comp_1' ? ['Hilux', 'Corolla'] : ['Ranger', 'Focus'],
         locationInCar: template.loc,
-        photoUrl: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=200&auto=format&fit=crop', // Generic part image
+        photoUrl: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?q=80&w=200&auto=format&fit=crop',
         stock: stockMap,
-        companyId: companyData.cid,
-        price: template.price + (Math.floor(Math.random() * 1000))
+        companyId: company.id,
+        price: template.price + (Math.floor(Math.random() * 5000))
       });
     }
   });
-
   return parts;
 };
 
 export const MOCK_PARTS: Part[] = generateMockParts();
-export const MOCK_CALENDAR_EVENTS: CalendarEvent[] = generateMockCalendarEvents();
+
+export const MOCK_CALENDAR_EVENTS: CalendarEvent[] = [
+  {
+    id: "ev-001",
+    vehicleVin: "8AJH10000",
+    date: "2026-01-20",
+    time: "10:00",
+    destinationId: "loc_1_pred",
+    status: "PROGRAMADO",
+    createdBy: "Sistema"
+  },
+  {
+    id: "ev-002",
+    vehicleVin: "8AJH10001",
+    date: "2026-01-22",
+    time: "14:30",
+    destinationId: "loc_1_rec",
+    status: "PROGRAMADO",
+    createdBy: "Sistema"
+  },
+  {
+    id: "ev-003",
+    vehicleVin: "8AJH10002",
+    date: "2026-01-25",
+    time: "08:00",
+    destinationId: "loc_1_sj",
+    status: "PROGRAMADO",
+    createdBy: "Sistema"
+  }
+];
+
 export const MOCK_MOVEMENTS: Movement[] = [];
 export const MOCK_CHATS: ChatMessage[] = [];
 
@@ -431,3 +221,519 @@ export const RESOURCES = {
     }
   }
 };
+
+export const MOCK_EVENTS = [
+  // --- NATION S.A. (comp_1) ---
+  {
+    id: "ev-nat-001",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-01-11",
+    time: "08:30",
+    creationDate: "2026-01-05T09:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_ALTA | Despacho urgente para entrega salón",
+    vehicleId: "8AJH10000",
+    vehicleVin: "8AJH10000",
+    destination: "Predio Sauce Viejo",
+    destinationId: "loc_1_pred",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-002",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-01-11",
+    time: "10:00",
+    creationDate: "2026-01-05T10:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_ALTA | Movimiento inter-sucursal",
+    vehicleId: "8AJH10002",
+    vehicleVin: "8AJH10002",
+    destination: "Depósito San Juan",
+    destinationId: "loc_1_sj",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-003",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-01-12",
+    time: "09:00",
+    creationDate: "2026-01-06T08:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_MEDIA | Traslado técnico para revisión",
+    vehicleId: "8AJH10004",
+    vehicleVin: "8AJH10004",
+    destination: "Nation Reconquista",
+    destinationId: "loc_1_rec",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-004",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-01-12",
+    time: "15:30",
+    creationDate: "2026-01-06T11:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_MEDIA | Stock preventivo sucursal",
+    vehicleId: "8AJH10006",
+    vehicleVin: "8AJH10006",
+    destination: "Nation Rafaela",
+    destinationId: "loc_1_raf",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-005",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-01-13",
+    time: "11:00",
+    creationDate: "2026-01-07T09:30:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Entrega programada cliente final",
+    vehicleId: "8AJH10008",
+    vehicleVin: "8AJH10008",
+    destination: "Nation Paraná",
+    destinationId: "loc_1_par",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-006",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-01-15",
+    time: "08:00",
+    creationDate: "2026-01-08T14:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Reposición de inventario",
+    vehicleId: "8AJH10010",
+    vehicleVin: "8AJH10010",
+    destination: "Nation Rosario",
+    destinationId: "loc_1_ros",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-007",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-01-18",
+    time: "10:30",
+    creationDate: "2026-01-10T10:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Movimiento interno depósito",
+    vehicleId: "8AJH10012",
+    vehicleVin: "8AJH10012",
+    destination: "Depósito San Juan",
+    destinationId: "loc_1_sj",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-008",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-01-20",
+    time: "14:00",
+    creationDate: "2026-01-12T09:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Alistamiento para salón",
+    vehicleId: "8AJH10014",
+    vehicleVin: "8AJH10014",
+    destination: "Predio Sauce Viejo",
+    destinationId: "loc_1_pred",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-009",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-01-22",
+    time: "09:30",
+    creationDate: "2026-01-14T08:30:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Distribución regional",
+    vehicleId: "8AJH10016",
+    vehicleVin: "8AJH10016",
+    destination: "Nation Reconquista",
+    destinationId: "loc_1_rec",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-010",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-01-25",
+    time: "17:00",
+    creationDate: "2026-01-15T12:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Traslado fin de mes",
+    vehicleId: "8AJH10018",
+    vehicleVin: "8AJH10018",
+    destination: "Nation Rafaela",
+    destinationId: "loc_1_raf",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-011",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-01-28",
+    time: "08:15",
+    creationDate: "2026-01-18T10:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Operativo entrega masiva",
+    vehicleId: "8AJH10020",
+    vehicleVin: "8AJH10020",
+    destination: "Nation Paraná",
+    destinationId: "loc_1_par",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-012",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-02-02",
+    time: "12:00",
+    creationDate: "2026-01-20T11:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Inicio operativo febrero",
+    vehicleId: "8AJH10022",
+    vehicleVin: "8AJH10022",
+    destination: "Nation Rosario",
+    destinationId: "loc_1_ros",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-013",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-02-05",
+    time: "16:45",
+    creationDate: "2026-01-22T09:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Movimiento técnico preventivo",
+    vehicleId: "8AJH10024",
+    vehicleVin: "8AJH10024",
+    destination: "Predio Sauce Viejo",
+    destinationId: "loc_1_pred",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-014",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-02-08",
+    time: "10:00",
+    creationDate: "2026-01-25T08:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Preparación showroom",
+    vehicleId: "8AJH10026",
+    vehicleVin: "8AJH10026",
+    destination: "Depósito San Juan",
+    destinationId: "loc_1_sj",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-nat-015",
+    companyId: "comp_1",
+    title: "Entrega Logística Programada",
+    date: "2026-02-10",
+    time: "14:30",
+    creationDate: "2026-01-28T14:30:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Cierre de quincena logística",
+    vehicleId: "8AJH10028",
+    vehicleVin: "8AJH10028",
+    destination: "Nation Reconquista",
+    destinationId: "loc_1_rec",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+
+  // --- ESCOBAR AUTOMOTORES (comp_2) ---
+  {
+    id: "ev-esc-001",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-01-11",
+    time: "09:00",
+    creationDate: "2026-01-05T08:30:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_ALTA | Despacho urgente Escobar Central",
+    vehicleId: "8AJH10001",
+    vehicleVin: "8AJH10001",
+    destination: "Predio Escobar (Central)",
+    destinationId: "loc_2_main",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-002",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-01-11",
+    time: "11:30",
+    creationDate: "2026-01-05T10:30:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_ALTA | Stock solicitado sucursal Rosario",
+    vehicleId: "8AJH10003",
+    vehicleVin: "8AJH10003",
+    destination: "Escobar Rosario",
+    destinationId: "loc_2_ros",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-003",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-01-12",
+    time: "08:00",
+    creationDate: "2026-01-06T09:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_MEDIA | Movimiento preventivo Rafaela",
+    vehicleId: "8AJH10005",
+    vehicleVin: "8AJH10005",
+    destination: "Escobar Rafaela",
+    destinationId: "loc_2_raf",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-004",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-01-12",
+    time: "14:00",
+    creationDate: "2026-01-06T13:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_MEDIA | Reposición depósito San Juan",
+    vehicleId: "8AJH10007",
+    vehicleVin: "8AJH10007",
+    destination: "Depósito San Juan",
+    destinationId: "loc_2_deposit",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-005",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-01-13",
+    time: "10:45",
+    creationDate: "2026-01-07T10:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Traslado rutinario Paraná",
+    vehicleId: "8AJH10009",
+    vehicleVin: "8AJH10009",
+    destination: "Escobar Paraná",
+    destinationId: "loc_2_par",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-006",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-01-16",
+    time: "09:00",
+    creationDate: "2026-01-09T08:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Ingreso stock nuevo Escobar",
+    vehicleId: "8AJH10011",
+    vehicleVin: "8AJH10011",
+    destination: "Predio Escobar (Central)",
+    destinationId: "loc_2_main",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-007",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-01-19",
+    time: "11:00",
+    creationDate: "2026-01-11T14:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Movimiento técnico",
+    vehicleId: "8AJH10013",
+    vehicleVin: "8AJH10013",
+    destination: "Escobar Rosario",
+    destinationId: "loc_2_ros",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-008",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-01-21",
+    time: "15:30",
+    creationDate: "2026-01-13T09:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Planilla de viajes semanal",
+    vehicleId: "8AJH10015",
+    vehicleVin: "8AJH10015",
+    destination: "Escobar Rafaela",
+    destinationId: "loc_2_raf",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-009",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-01-24",
+    time: "08:45",
+    creationDate: "2026-01-15T10:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Distribución Escobar",
+    vehicleId: "8AJH10017",
+    vehicleVin: "8AJH10017",
+    destination: "Depósito San Juan",
+    destinationId: "loc_2_deposit",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-010",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-01-27",
+    time: "16:00",
+    creationDate: "2026-01-18T11:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Traslado inter-plantas",
+    vehicleId: "8AJH10019",
+    vehicleVin: "8AJH10019",
+    destination: "Escobar Paraná",
+    destinationId: "loc_2_par",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-011",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-01-30",
+    time: "10:15",
+    creationDate: "2026-01-20T09:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Cierre logística enero",
+    vehicleId: "8AJH10021",
+    vehicleVin: "8AJH10021",
+    destination: "Predio Escobar (Central)",
+    destinationId: "loc_2_main",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-012",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-02-03",
+    time: "13:30",
+    creationDate: "2026-01-24T12:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Apertura logística febrero",
+    vehicleId: "8AJH10023",
+    vehicleVin: "8AJH10023",
+    destination: "Escobar Rosario",
+    destinationId: "loc_2_ros",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-013",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-02-06",
+    time: "09:00",
+    creationDate: "2026-01-27T08:30:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Reubicación de unidades",
+    vehicleId: "8AJH10025",
+    vehicleVin: "8AJH10025",
+    destination: "Escobar Rafaela",
+    destinationId: "loc_2_raf",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-014",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-02-09",
+    time: "11:45",
+    creationDate: "2026-01-30T10:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Preparación despachos",
+    vehicleId: "8AJH10027",
+    vehicleVin: "8AJH10027",
+    destination: "Depósito San Juan",
+    destinationId: "loc_2_deposit",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  },
+  {
+    id: "ev-esc-015",
+    companyId: "comp_2",
+    title: "Entrega Logística Programada",
+    date: "2026-02-12",
+    time: "15:00",
+    creationDate: "2026-02-01T09:00:00Z",
+    type: "MOVEMENT",
+    status: "PROGRAMADO",
+    details: "PRIORIDAD_BAJA | Control quincenal",
+    vehicleId: "8AJH10029",
+    vehicleVin: "8AJH10029",
+    destination: "Escobar Paraná",
+    destinationId: "loc_2_par",
+    createdBy: "SYSTEM",
+    createdById: "system"
+  }
+];

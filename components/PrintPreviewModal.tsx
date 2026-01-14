@@ -22,37 +22,42 @@ export const PrintPreviewModal: React.FC<Props> = ({ isOpen, onClose, title, chi
       {/* Global Print Isolation Styles */}
       <style>{`
         @media print {
-          /* Hide everything in the body by default */
+          /* Hide all elements by default */
           body * {
-            visibility: hidden;
+            visibility: hidden !important;
           }
           
-          /* Unhide the print container and its children */
+          /* Unhide the preview container and every child within it */
           #print-preview-container, #print-preview-container * {
-            visibility: visible;
+            visibility: visible !important;
           }
 
-          /* Position the print container at the top-left of the page */
+          /* Force the container to the top-left of the physical page */
           #print-preview-container {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            background: white;
+            position: absolute !important;
+            left: 0 !important;
+            top: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
           }
 
-          /* Ensure body background is white */
+          /* Ensure body doesn't add margins or backgrounds */
           body {
             background: white !important;
-            overflow: visible !important;
+            margin: 0 !important;
+            padding: 0 !important;
           }
 
-          /* Hide the toolbar specifically (redundant but safe) */
+          /* Explicitly hide the toolbar/UI of the modal */
           .no-print-toolbar {
             display: none !important;
           }
+          
+          /* Optimization for page breaks in tables */
+          table { page-break-inside: auto; }
+          tr { page-break-inside: avoid; page-break-after: auto; }
         }
       `}</style>
 
@@ -87,11 +92,8 @@ export const PrintPreviewModal: React.FC<Props> = ({ isOpen, onClose, title, chi
 
       {/* Document Canvas - Screen: Scrollable | Print: Full Page */}
       <div className="flex-1 overflow-y-auto overflow-x-hidden p-8 flex justify-center bg-slate-800/50 print:bg-white print:overflow-visible print:p-0">
-        <div id="print-preview-container" className="relative print:w-full">
-          {/* Paper Shadow Effect (Screen Only) */}
-          <div className="bg-white shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] print:shadow-none w-auto inline-block mx-auto transition-transform">
-            {children}
-          </div>
+        <div id="print-preview-container" className="relative print:w-full bg-white shadow-[0_0_50px_-12px_rgba(0,0,0,0.5)] print:shadow-none transition-transform">
+          {children}
         </div>
       </div>
     </div>

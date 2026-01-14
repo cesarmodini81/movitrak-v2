@@ -10,35 +10,15 @@ interface Props {
 
 export const TransferenciaRepuestosDocument: React.FC<Props> = ({ transfer, company, locations }) => {
   return (
-    <div id="print-root" className="w-full bg-white print:block">
+    <div className="w-full bg-white">
       <style>{`
         @page {
           size: A4 portrait;
           margin: 10mm 15mm;
         }
-        @media print {
-          html, body {
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-            height: auto;
-            overflow: visible;
-          }
-          body > * { display: none !important; }
-          #print-root {
-            display: block !important;
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-          }
-          #print-root * { visibility: visible !important; }
-        }
       `}</style>
 
-      <div className="w-[180mm] mx-auto font-sans text-slate-900 min-h-[270mm] flex flex-col justify-between">
+      <div className="w-[180mm] mx-auto font-sans text-slate-900 min-h-[270mm] flex flex-col justify-between p-2 bg-white">
         <div>
             <div className="border-b-4 border-slate-900 pb-4 mb-6 flex justify-between items-end">
                <div>
@@ -52,18 +32,18 @@ export const TransferenciaRepuestosDocument: React.FC<Props> = ({ transfer, comp
             </div>
             
             <div className="grid grid-cols-2 gap-6 mb-8">
-               <div className="border border-slate-300 p-3 rounded print:border-black">
+               <div className="border border-slate-300 p-3 rounded">
                   <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Origen</p>
                   <p className="font-bold text-sm">{locations.find(l => l.id === transfer.originId)?.name}</p>
                </div>
-               <div className="border border-slate-300 p-3 rounded print:border-black">
+               <div className="border border-slate-300 p-3 rounded">
                   <p className="text-[8px] font-black uppercase text-slate-400 tracking-widest">Destino</p>
                   <p className="font-bold text-sm">{locations.find(l => l.id === transfer.destinationId)?.name}</p>
                </div>
             </div>
 
             <table className="w-full text-left text-xs border-collapse">
-               <thead className="bg-slate-100 uppercase font-black text-[9px] print:bg-slate-200">
+               <thead className="bg-slate-100 uppercase font-black text-[9px]">
                   <tr>
                       <th className="p-2 border-b border-slate-300 w-24">Código</th>
                       <th className="p-2 border-b border-slate-300">Descripción</th>
