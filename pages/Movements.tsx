@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from 'react-i18next';
 import { LOCATION_MAP } from '../constants';
-import { Truck, Plus, X, ClipboardList, MapPin, Info, Search, CheckCircle, Printer, ArrowLeft } from 'lucide-react';
+import { Truck, Plus, X, ClipboardList, MapPin, Info, Search, CheckCircle, Printer, ArrowLeft, PlusCircle } from 'lucide-react';
 import { Movement, Vehicle } from '../types';
 import { RemitoDocument } from '../components/RemitoDocument';
 
@@ -35,7 +35,7 @@ export const Movements: React.FC = () => {
   const [truckPlate, setTruckPlate] = useState(() => localStorage.getItem(STORAGE_KEYS.TRUCK) || '');
   const [trailerPlate, setTrailerPlate] = useState(() => localStorage.getItem(STORAGE_KEYS.TRAILER) || '');
   
-  const [availableTransporters] = useState<string[]>(() => {
+  const [availableTransporters, setAvailableTransporters] = useState<string[]>(() => {
     const saved = localStorage.getItem(STORAGE_KEYS.CUSTOM_TRANSPORTERS);
     return saved ? JSON.parse(saved) : DEFAULT_TRANSPORTERS;
   });
@@ -55,6 +55,16 @@ export const Movements: React.FC = () => {
 
   const [showPdiWarning, setShowPdiWarning] = useState(false);
   const [successMovement, setSuccessMovement] = useState<Movement | null>(null);
+
+  // New Transport Modal State
+  const [isAddTransportOpen, setIsAddTransportOpen] = useState(false);
+  const [newTransport, setNewTransport] = useState({
+    name: '',
+    driver: '',
+    dni: '',
+    truck: '',
+    trailer: ''
+  });
 
   const companyLocations = useMemo(() => currentCompany?.locations || [], [currentCompany]);
 
@@ -77,6 +87,7 @@ export const Movements: React.FC = () => {
   useEffect(() => localStorage.setItem(STORAGE_KEYS.VINS, JSON.stringify(selectedVins)), [selectedVins]);
   useEffect(() => localStorage.setItem(STORAGE_KEYS.OBS_UNIT, JSON.stringify(unitObservations)), [unitObservations]);
   useEffect(() => localStorage.setItem(STORAGE_KEYS.OBS_GEN, generalObservations), [generalObservations]);
+  useEffect(() => localStorage.setItem(STORAGE_KEYS.CUSTOM_TRANSPORTERS, JSON.stringify(availableTransporters)), [availableTransporters]);
 
   useEffect(() => {
     if (searchTerm.length > 1) {
@@ -148,6 +159,23 @@ export const Movements: React.FC = () => {
 
   const handleReset = () => {
     setSuccessMovement(null);
+  };
+
+  const handleAddNewTransport = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTransport.name.trim()) return;
+
+    if (!availableTransporters.includes(newTransport.name)) {
+      setAvailableTransporters(prev => [...prev, newTransport.name]);
+    }
+    setTransporter(newTransport.name);
+    setDriverName(newTransport.driver);
+    setDriverDni(newTransport.dni);
+    setTruckPlate(newTransport.truck.toUpperCase());
+    setTrailerPlate(newTransport.trailer.toUpperCase());
+    
+    setIsAddTransportOpen(false);
+    setNewTransport({ name: '', driver: '', dni: '', truck: '', trailer: '' });
   };
 
   const remitoVehicles = useMemo(() => 
@@ -282,7 +310,16 @@ export const Movements: React.FC = () => {
                
                <div className="space-y-6">
                   <div className="space-y-2">
-                     <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest">Empresa de Transporte</label>
+                     <div className="flex justify-between items-center mb-1">
+                        <label className="text-[9px] font-black uppercase text-slate-500 tracking-widest">Empresa de Transporte</label>
+                        <button 
+                           onClick={() => setIsAddTransportOpen(true)}
+                           className="bg-emerald-600 hover:bg-emerald-700 text-white p-1 rounded-full shadow-lg transition-all"
+                           title="Agregar nuevo transporte"
+                        >
+                           <PlusCircle size={14} />
+                        </button>
+                     </div>
                      <select value={transporter} onChange={(e) => setTransporter(e.target.value)} className="w-full px-4 py-3 bg-white/10 border border-white/10 rounded-xl text-white font-bold outline-none">
                         <option value="" className="text-slate-900">-- Seleccionar --</option>
                         {availableTransporters.map(t => <option key={t} value={t} className="text-slate-900">{t}</option>)}
@@ -344,6 +381,97 @@ export const Movements: React.FC = () => {
                    <ArrowLeft size={18} /> Volver a Operaciones
                  </button>
               </div>
+           </div>
+        </div>
+      )}
+
+      {/* Add New Transport Modal */}
+      {isAddTransportOpen && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
+           <div className="bg-white w-full max-w-md rounded-3xl shadow-2xl p-8 border border-slate-200 animate-in zoom-in-95 duration-300">
+              <div className="flex justify-between items-center mb-6">
+                 <div className="flex items-center gap-3">
+                    <div className="p-2 bg-emerald-100 text-emerald-600 rounded-lg">
+                       <Plus size={20} strokeWidth={3} />
+                    </div>
+                    <h3 className="text-xl font-black text-slate-900 uppercase tracking-tight">Alta de Transporte</h3>
+                 </div>
+                 <button onClick={() => setIsAddTransportOpen(false)} className="text-slate-400 hover:text-red-500 transition-colors">
+                    <X size={24} />
+                 </button>
+              </div>
+
+              <form onSubmit={handleAddNewTransport} className="space-y-4">
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Empresa Carrier *</label>
+                    <input 
+                       required
+                       type="text" 
+                       value={newTransport.name}
+                       onChange={e => setNewTransport({...newTransport, name: e.target.value})}
+                       className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none font-bold text-slate-800"
+                       placeholder="Ej: Logística Central"
+                    />
+                 </div>
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Nombre Chofer</label>
+                    <input 
+                       type="text" 
+                       value={newTransport.driver}
+                       onChange={e => setNewTransport({...newTransport, driver: e.target.value})}
+                       className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none font-bold text-slate-800"
+                       placeholder="Nombre y Apellido"
+                    />
+                 </div>
+                 <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">DNI</label>
+                    <input 
+                       type="text" 
+                       value={newTransport.dni}
+                       onChange={e => setNewTransport({...newTransport, dni: e.target.value})}
+                       className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none font-bold text-slate-800"
+                       placeholder="Documento"
+                    />
+                 </div>
+                 <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Patente Tractor</label>
+                       <input 
+                          type="text" 
+                          value={newTransport.truck}
+                          onChange={e => setNewTransport({...newTransport, truck: e.target.value.toUpperCase()})}
+                          className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none font-bold text-slate-800 uppercase text-center"
+                          placeholder="AAA 000"
+                       />
+                    </div>
+                    <div className="space-y-1">
+                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Patente Acoplado</label>
+                       <input 
+                          type="text" 
+                          value={newTransport.trailer}
+                          onChange={e => setNewTransport({...newTransport, trailer: e.target.value.toUpperCase()})}
+                          className="w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-emerald-500 outline-none font-bold text-slate-800 uppercase text-center"
+                          placeholder="BBB 111"
+                       />
+                    </div>
+                 </div>
+
+                 <div className="flex gap-4 pt-4">
+                    <button 
+                       type="button"
+                       onClick={() => setIsAddTransportOpen(false)}
+                       className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-black text-xs uppercase tracking-widest hover:bg-slate-200 transition-all"
+                    >
+                       Cancelar
+                    </button>
+                    <button 
+                       type="submit"
+                       className="flex-1 py-4 bg-emerald-600 text-white rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-emerald-100 hover:bg-emerald-700 transition-all active:scale-95"
+                    >
+                       Agregar Transporte
+                    </button>
+                 </div>
+              </form>
            </div>
         </div>
       )}

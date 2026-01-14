@@ -9,6 +9,7 @@ import {
   GripVertical
 } from 'lucide-react';
 import { PrintPreviewModal } from '../components/PrintPreviewModal';
+import { PlanillaViajesDocument } from '../components/PlanillaViajesDocument';
 import { Vehicle } from '../types';
 
 type SortDirection = 'asc' | 'desc';
@@ -17,7 +18,6 @@ interface SortConfig {
   direction: SortDirection;
 }
 
-// Helper interface for the display data
 interface TravelSheetItem extends Vehicle {
   deliveryDate: string;
   deliveryLocationName: string;
@@ -31,11 +31,9 @@ export const TravelSheet: React.FC = () => {
   const [selectedVins, setSelectedVins] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   
-  // State for the ordered list (allows Drag & Drop)
   const [orderedItems, setOrderedItems] = useState<TravelSheetItem[]>([]);
   const [sortConfig, setSortConfig] = useState<SortConfig | null>(null);
   
-  // Drag & Drop Refs
   const dragItem = useRef<number | null>(null);
   const dragOverItem = useRef<number | null>(null);
 
@@ -48,30 +46,20 @@ export const TravelSheet: React.FC = () => {
     return id;
   };
 
-  // 1. Merge Context Data (Source of Truth - Integration Logic)
   const sourceData = useMemo(() => {
     return vehicles
       .filter(v => {
-        // Exclude if explicitly archived/removed
         if (historicalTravelSheetList.includes(v.vin)) return false;
-
-        // Visibility Rules:
-        // 1. Used Units: Always visible (no restrictions)
         if (v.type === 'USED') return true;
-        
-        // 2. New Units: Only if PDI is confirmed
         if (v.type === 'NEW' && v.preDeliveryConfirmed) return true;
-
         return false;
       }) 
       .map(v => {
-        // Integrate Calendar Data (Priority to Event)
         const event = calendarEvents.find(e => e.vehicleVin === v.vin && e.status === 'PROGRAMADO');
         
         let deliveryDate = event?.date;
         let deliveryLocationName = event ? getLocationName(event.destinationId) : '';
 
-        // Fallback logic if no calendar event (Mock Data resilience)
         if (!deliveryDate) {
            const vinSum = v.vin.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
            const mockDate = new Date();
@@ -90,22 +78,17 @@ export const TravelSheet: React.FC = () => {
       });
   }, [vehicles, historicalTravelSheetList, calendarEvents, companies]);
 
-  // 2. Sync Source Data with Ordered State
   useEffect(() => {
     setOrderedItems(prev => {
-      // New items coming from PDI or Reception
       const newItems = sourceData.filter(s => !prev.some(p => p.vin === s.vin));
-      // Existing items (keep manual order)
       const existingItems = prev.filter(p => sourceData.some(s => s.vin === p.vin)).map(p => {
         const fresh = sourceData.find(s => s.vin === p.vin);
         return fresh ? { ...fresh } : p;
       });
-      
       return [...existingItems, ...newItems];
     });
   }, [sourceData]);
 
-  // 3. Filtering
   const filteredData = useMemo(() => {
     if (!searchTerm) return orderedItems;
     const lowerTerm = searchTerm.toLowerCase();
@@ -118,7 +101,6 @@ export const TravelSheet: React.FC = () => {
     );
   }, [orderedItems, searchTerm]);
 
-  // 4. Sorting Handlers
   const handleSort = (key: keyof TravelSheetItem) => {
     let direction: SortDirection = 'asc';
     if (sortConfig && sortConfig.key === key && sortConfig.direction === 'asc') {
@@ -136,7 +118,6 @@ export const TravelSheet: React.FC = () => {
     setOrderedItems(sorted);
   };
 
-  // 5. Drag & Drop Handlers
   const handleDragStart = (e: React.DragEvent<HTMLTableRowElement>, index: number) => {
     dragItem.current = index;
     e.dataTransfer.effectAllowed = "move";
@@ -158,7 +139,6 @@ export const TravelSheet: React.FC = () => {
     dragOverItem.current = null;
   };
 
-  // Selection Logic
   const toggleSelect = (vin: string) => {
     setSelectedVins(prev => prev.includes(vin) ? prev.filter(v => v !== vin) : [...prev, vin]);
   };
@@ -183,54 +163,6 @@ export const TravelSheet: React.FC = () => {
       ? <ArrowUp size={14} className="text-brand-400 ml-2" /> 
       : <ArrowDown size={14} className="text-brand-400 ml-2" />;
   };
-
-  // Printable Component
-  const PrintableTable = () => (
-    <div className="bg-white p-12 text-slate-900 font-sans min-h-[297mm]">
-      <div className="p-8 border-b-4 border-slate-900 mb-8">
-         <div className="flex justify-between items-end">
-           <div>
-             <h1 className="text-2xl font-black uppercase tracking-tighter leading-none mb-2">Planilla de Viajes</h1>
-             <p className="text-sm font-bold text-slate-500 uppercase tracking-[0.2em]">Orden de Carga Logística</p>
-           </div>
-           <div className="text-right">
-             <p className="text-[10px] uppercase font-bold text-slate-400">{currentCompany?.name}</p>
-             <p className="text-xs font-mono">{new Date().toLocaleString()}</p>
-           </div>
-         </div>
-      </div>
-      <table className="w-full text-left text-xs border-collapse border-t-2 border-slate-900">
-        <thead className="bg-slate-50 uppercase font-black">
-          <tr>
-            <th className="p-3 border-b-2 border-slate-900 w-10 text-center">#</th>
-            <th className="p-3 border-b-2 border-slate-900">VIN / Chasis</th>
-            <th className="p-3 border-b-2 border-slate-900">Unidad</th>
-            <th className="p-3 border-b-2 border-slate-900">Fecha Entrega</th>
-            <th className="p-3 border-b-2 border-slate-900">Ubicación Entrega</th>
-            <th className="p-3 border-b-2 border-slate-900">Obs. Técnicas</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-200">
-          {filteredData.map((v, idx) => (
-            <tr key={v.vin}>
-              <td className="p-3 font-bold text-center text-slate-400">{idx + 1}</td>
-              <td className="p-3 font-mono font-bold align-top">
-                {v.vin}
-                {v.type === 'USED' && <span className="ml-2 text-[9px] bg-amber-100 text-amber-800 px-1 rounded">USADO</span>}
-              </td>
-              <td className="p-3 align-top">
-                <div className="font-bold uppercase">{v.brand} {v.model}</div>
-                <div className="text-[10px] text-slate-500 uppercase">{v.color}</div>
-              </td>
-              <td className="p-3 align-top font-mono">{new Date(v.deliveryDate).toLocaleDateString()}</td>
-              <td className="p-3 align-top uppercase font-bold text-xs">{v.deliveryLocationName}</td>
-              <td className="p-3 align-top italic text-slate-600">{v.pdiComment || (v.type === 'USED' ? 'Unidad Usada' : 'Validado sin observaciones.')}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
 
   return (
     <div className="space-y-6 animate-in fade-in duration-500 min-h-screen">
@@ -317,7 +249,7 @@ export const TravelSheet: React.FC = () => {
                   return (
                     <tr 
                       key={v.vin} 
-                      draggable={!searchTerm && !sortConfig} // Disable drag if filtering/sorting
+                      draggable={!searchTerm && !sortConfig}
                       onDragStart={(e) => handleDragStart(e, index)}
                       onDragEnter={(e) => handleDragEnter(e, index)}
                       onDragEnd={handleDragEnd}
@@ -395,7 +327,7 @@ export const TravelSheet: React.FC = () => {
         onClose={() => setIsPreviewOpen(false)} 
         title="Planilla de Viajes Operativa"
       >
-        <PrintableTable />
+        <PlanillaViajesDocument items={filteredData} company={currentCompany!} />
       </PrintPreviewModal>
     </div>
   );
