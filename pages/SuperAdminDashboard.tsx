@@ -36,7 +36,8 @@ export const SuperAdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 font-sans p-8 animate-in fade-in duration-500">
+    // PADDING TOP AUMENTADO (pt-24) y ajuste de padding horizontal/inferior
+    <div className="min-h-screen bg-slate-50 font-sans px-8 pb-8 pt-24 animate-in fade-in duration-500">
       
       {/* Header Global */}
       <div className="max-w-7xl mx-auto mb-12 flex flex-col md:flex-row items-center justify-between gap-6">

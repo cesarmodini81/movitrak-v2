@@ -61,7 +61,8 @@ export const ConfirmMovements: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20 pt-20 md:pt-24">
       {/* Header */}
       <div className="flex items-center gap-4 mb-8">
         <div className="p-4 bg-emerald-600 text-white rounded-2xl shadow-xl shadow-emerald-200">

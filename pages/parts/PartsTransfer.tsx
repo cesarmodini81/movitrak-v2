@@ -60,7 +60,8 @@ export const PartsTransfer: React.FC = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-20">
+    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
+    <div className="max-w-4xl mx-auto space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-20 pt-20 md:pt-24">
       <div className="flex items-center gap-4">
         <div className="p-3 lg:p-4 bg-slate-900 text-white rounded-2xl shadow-xl">
            <ArrowRightLeft size={28} className="lg:w-8 lg:h-8" />

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import { ShieldAlert } from 'lucide-react';
@@ -8,7 +9,8 @@ export const AuditLogs: React.FC = () => {
   const { t } = useTranslation();
 
   return (
-    <div className="space-y-6">
+    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
+    <div className="space-y-6 pt-20 md:pt-24">
       <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
         <ShieldAlert className="text-brand-600" />
         {t('audit_logs')}

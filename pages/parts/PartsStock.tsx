@@ -10,7 +10,8 @@ export const PartsStock: React.FC = () => {
   const locations = currentCompany?.locations || [];
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+    // Padding aumentado
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20 pt-24">
       <div className="flex justify-between items-center mb-8">
         <div className="flex items-center gap-4">
           <div className="p-4 bg-indigo-600 text-white rounded-2xl shadow-lg shadow-indigo-200">
@@ -46,7 +47,6 @@ export const PartsStock: React.FC = () => {
             </thead>
             <tbody className="divide-y divide-slate-100">
                {companyParts.map(part => {
-                  // Explicitly cast Object.values to number[] to fix reduce type error
                   const total = (Object.values(part.stock) as number[]).reduce((a: number, b: number) => a + b, 0);
                   return (
                     <tr key={part.id} className="hover:bg-slate-50 transition-colors">

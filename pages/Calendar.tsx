@@ -135,7 +135,8 @@ export const CalendarPage: React.FC = () => {
   const monthLabel = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
 
   return (
-    <div className="flex flex-col h-[calc(100vh-140px)] min-h-[550px] lg:min-h-[750px] bg-white rounded-[2rem] lg:rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden no-print animate-in fade-in duration-500">
+    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
+    <div className="flex flex-col h-[calc(100vh-140px)] min-h-[550px] lg:min-h-[750px] bg-white rounded-[2rem] lg:rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden no-print animate-in fade-in duration-500 pt-20 md:pt-24">
       
       {/* HEADER: UX ENTERPRISE */}
       <header className="px-6 py-4 lg:px-10 lg:py-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50 shrink-0">

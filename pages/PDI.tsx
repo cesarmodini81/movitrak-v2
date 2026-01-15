@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from 'react-i18next';
@@ -23,7 +24,8 @@ export const PDI: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
+    <div className="space-y-6 pt-20 md:pt-24">
       <div className="flex items-center justify-between">
          <h2 className="text-2xl font-bold text-slate-800 flex items-center gap-3">
            <FileText className="text-brand-600" /> 
@@ -58,7 +60,7 @@ export const PDI: React.FC = () => {
                     <input 
                       type="text" 
                       placeholder="Sin novedades..."
-                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none"
+                      className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-50 outline-none"
                       onChange={(e) => setComments({...comments, [v.vin]: e.target.value})}
                     />
                   </td>

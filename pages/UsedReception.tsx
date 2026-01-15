@@ -72,7 +72,8 @@ export const UsedReceptionPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8 pb-20 animate-in fade-in duration-500">
+    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
+    <div className="max-w-7xl mx-auto space-y-6 lg:space-y-8 pb-20 pt-20 md:pt-24 animate-in fade-in duration-500">
       <div className="bg-white border-t-8 border-slate-900 p-6 lg:p-8 rounded-b-3xl shadow-xl space-y-6 lg:space-y-8">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-100 pb-6">
            <div className="flex items-center gap-5">

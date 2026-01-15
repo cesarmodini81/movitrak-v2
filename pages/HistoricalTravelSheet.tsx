@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from 'react-i18next';
@@ -118,7 +119,8 @@ export const HistoricalTravelSheet: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 animate-in fade-in duration-500 min-h-screen">
+    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
+    <div className="space-y-6 animate-in fade-in duration-500 min-h-screen pt-20 md:pt-24">
       <div className="flex flex-col md:flex-row items-center justify-between gap-6 bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
         <div className="flex items-center gap-4 w-full md:w-auto">
           <div className="p-3 bg-slate-900 text-white rounded-xl shadow-lg shrink-0">

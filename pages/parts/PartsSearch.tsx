@@ -39,7 +39,8 @@ export const PartsSearch: React.FC = () => {
     : 0;
 
   return (
-    <div className="space-y-6 lg:space-y-8 animate-in fade-in duration-500">
+    // Padding top aumentado (pt-24) para compensar Topbar fija
+    <div className="space-y-6 lg:space-y-8 animate-in fade-in duration-500 pt-24 pb-12">
       <div className="flex items-center gap-4 mb-6 lg:mb-8">
         <div className="p-3 lg:p-4 bg-emerald-500 text-white rounded-2xl shadow-lg shadow-emerald-200">
           <Search size={28} className="lg:w-8 lg:h-8" />
@@ -52,12 +53,15 @@ export const PartsSearch: React.FC = () => {
 
       {/* SEARCH BAR */}
       <div className="relative max-w-2xl">
+        <div className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-400">
+           <Search size={24} />
+        </div>
         <input 
           type="text" 
           value={searchTerm}
           onChange={(e) => { setSearchTerm(e.target.value); if(!e.target.value) setSelectedPart(null); }}
           placeholder="Ingrese Código, Nombre o Modelo compatible..."
-          className="w-full pl-6 pr-4 py-4 lg:py-5 bg-white border-2 border-slate-100 rounded-2xl focus:border-emerald-500 outline-none text-lg lg:text-xl font-bold text-slate-800 shadow-sm transition-all"
+          className="w-full pl-16 pr-4 py-4 lg:py-6 bg-white border-2 border-slate-100 rounded-2xl focus:border-emerald-500 outline-none text-lg lg:text-xl font-bold text-slate-800 shadow-lg shadow-slate-100 transition-all"
           autoFocus
         />
         {suggestions.length > 0 && (
@@ -66,7 +70,7 @@ export const PartsSearch: React.FC = () => {
               <button 
                 key={s.id}
                 onClick={() => handleSelect(s)}
-                className="w-full text-left p-4 hover:bg-slate-50 border-b border-slate-50 flex items-center justify-between group"
+                className="w-full text-left p-4 hover:bg-slate-50 border-b border-slate-50 flex items-center justify-between group transition-colors"
               >
                 <div>
                   <p className="font-mono font-black text-slate-900 text-sm">{s.code}</p>
@@ -81,7 +85,7 @@ export const PartsSearch: React.FC = () => {
 
       {/* RESULT CARD */}
       {selectedPart ? (
-        <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden flex flex-col md:flex-row">
+        <div className="bg-white rounded-[2.5rem] shadow-xl border border-slate-100 overflow-hidden flex flex-col md:flex-row mt-8">
            <div className="w-full md:w-1/3 bg-slate-50 relative min-h-[250px] lg:min-h-[300px]">
               <img src={selectedPart.photoUrl} alt={selectedPart.name} className="w-full h-full object-cover" />
               <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-6 lg:p-8">
@@ -138,11 +142,15 @@ export const PartsSearch: React.FC = () => {
            </div>
         </div>
       ) : (
-        <div className="p-10 lg:p-20 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200">
-           <div className="flex flex-col items-center gap-4 opacity-40">
-              <Search size={60} className="text-slate-300" />
-              <p className="text-xl font-black uppercase text-slate-900">Inicie una búsqueda</p>
-              <p className="text-sm font-bold uppercase text-slate-400 tracking-widest">Ingrese el código de la pieza para ver detalles</p>
+        <div className="p-10 lg:p-24 text-center bg-white rounded-3xl border-2 border-dashed border-slate-200 mt-8">
+           <div className="flex flex-col items-center gap-6 opacity-40">
+              <div className="bg-slate-50 p-6 rounded-full">
+                 <Search size={60} className="text-slate-300" />
+              </div>
+              <div>
+                 <p className="text-xl font-black uppercase text-slate-900 tracking-tight">Inicie una búsqueda</p>
+                 <p className="text-sm font-bold uppercase text-slate-400 tracking-widest mt-2">Ingrese el código de la pieza para ver detalles</p>
+              </div>
            </div>
         </div>
       )}

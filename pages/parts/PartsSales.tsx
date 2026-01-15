@@ -22,7 +22,6 @@ export const PartsSales: React.FC = () => {
     e.preventDefault();
     const part = companyParts.find(p => p.code === currentCode);
     if (part) {
-       // Check if already exists to update qty or add new
        const existingIdx = items.findIndex(i => i.code === part.code);
        if (existingIdx >= 0) {
          const newItems = [...items];
@@ -75,7 +74,8 @@ export const PartsSales: React.FC = () => {
   };
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-20">
+    // Padding superior ajustado
+    <div className="max-w-6xl mx-auto space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-20 pt-24">
       <div className="flex items-center gap-4">
         <div className="p-3 lg:p-4 bg-emerald-600 text-white rounded-2xl shadow-xl shadow-emerald-200">
            <ShoppingCart size={28} className="lg:w-8 lg:h-8" />
@@ -145,7 +145,7 @@ export const PartsSales: React.FC = () => {
 
             {/* Total / Checkout */}
             <div className="lg:col-span-1">
-               <div className="bg-slate-900 text-white p-6 lg:p-8 rounded-[2.5rem] shadow-2xl sticky top-24">
+               <div className="bg-slate-900 text-white p-6 lg:p-8 rounded-[2.5rem] shadow-2xl sticky top-32">
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-6 border-b border-slate-700 pb-4">Resumen</p>
                   
                   <div className="flex justify-between items-center mb-2">

@@ -9,7 +9,7 @@ import { useNavigate } from 'react-router-dom';
 export const Login: React.FC = () => {
   const { login, allUsers } = useApp();
   const navigate = useNavigate();
-  // Campos vacíos por defecto según requerimiento
+  
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -24,8 +24,10 @@ export const Login: React.FC = () => {
     setError('');
     setIsLoggingIn(true);
 
+    // Simulación de delay de red para UX
     await new Promise(resolve => setTimeout(resolve, 600));
 
+    // 1. Validación de Contraseña Global (Enterprise Standard: 1234)
     if (password !== '1234') {
       setError('Credenciales inválidas. Por favor intente de nuevo.');
       setIsLoggingIn(false);
@@ -34,29 +36,41 @@ export const Login: React.FC = () => {
 
     const targetUser = allUsers.find(u => u.username === username);
 
-    // 2FA EXCLUSIVAMENTE para SuperAdmin
-    if (targetUser?.role === Role.SUPER_ADMIN) {
+    if (!targetUser) {
+      setError('El usuario no existe o no tiene permisos de acceso.');
+      setIsLoggingIn(false);
+      return;
+    }
+
+    // 2. Lógica de Seguridad Diferenciada
+    // CASO A: SuperAdmin requiere 2FA obligatorio
+    if (targetUser.role === Role.SUPER_ADMIN) {
       setIs2FAModalOpen(true);
       setIsLoggingIn(false);
       return;
     } 
 
-    // Login directo para otros roles (sin 2FA)
+    // CASO B: Operadores de Repuestos (repuestos_nation, etc.) y Resto de Roles
+    // Ingreso directo con contraseña única, sin fricción de 2FA.
     const success = await login(username, password);
+    
     if (success) {
-      if (targetUser?.role === Role.PARTS_OPERATOR) {
+      // Redirección inteligente basada en Rol
+      if (targetUser.role === Role.PARTS_OPERATOR || username.startsWith('repuestos_')) {
+        // El context ya activó isPartsMode en la función login(), ahora redirigimos
         navigate('/repuestos');
       } else {
         navigate('/');
       }
     } else {
-      setError('El usuario no existe o no tiene permisos de acceso.');
+      setError('Error de sistema al iniciar sesión.');
       setIsLoggingIn(false);
     }
   };
 
   const handleVerify2FA = async (code: string) => {
     setAuthError('');
+    // Validación 2FA Mock para SuperAdmin
     if (code === '123456') {
       const success = await login(username, password);
       if (success) {

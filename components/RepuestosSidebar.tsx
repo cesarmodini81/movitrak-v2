@@ -3,7 +3,7 @@ import React from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   Search, Package, ShoppingCart, ShieldAlert, 
-  Settings, LogOut
+  Settings, LogOut, ArrowRightLeft
 } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 
@@ -14,8 +14,9 @@ export const RepuestosSidebar: React.FC = () => {
 
   if (!user) return null;
 
-  const isActive = (path: string) => location.pathname === path 
-    ? 'bg-slate-800 text-white border-l-4 border-emerald-500' 
+  // Función para determinar si la ruta está activa
+  const isActive = (path: string) => location.pathname === path
+    ? 'bg-slate-800 text-white border-l-4 border-emerald-500 shadow-lg' 
     : 'text-slate-400 hover:bg-slate-800 hover:text-white border-l-4 border-transparent';
 
   const NavItem = ({ to, icon: Icon, label }: any) => (
@@ -54,6 +55,7 @@ export const RepuestosSidebar: React.FC = () => {
         <div className="px-6 py-2 text-[10px] font-bold text-slate-700 uppercase tracking-widest">Catálogo & Stock</div>
         <NavItem to="/parts/search" icon={Search} label="Buscador de Piezas" />
         <NavItem to="/parts/stock" icon={Package} label="Control Inventario" />
+        <NavItem to="/parts/transfer" icon={ArrowRightLeft} label="Transferencias" />
         
         <div className="px-6 py-2 text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-6">Comercial</div>
         <NavItem to="/parts/sales" icon={ShoppingCart} label="Nueva Venta" />

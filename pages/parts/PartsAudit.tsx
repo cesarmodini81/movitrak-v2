@@ -13,7 +13,8 @@ export const PartsAudit: React.FC = () => {
   );
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
+    // Padding aumentado
+    <div className="space-y-8 animate-in fade-in duration-500 pt-24 pb-12">
       <div className="flex items-center gap-4">
         <div className="p-4 bg-orange-500 text-white rounded-2xl shadow-lg shadow-orange-200">
            <ShieldAlert size={32} />

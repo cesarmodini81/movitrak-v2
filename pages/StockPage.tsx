@@ -59,7 +59,8 @@ export const StockPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20 pt-20 md:pt-24">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">

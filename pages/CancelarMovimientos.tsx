@@ -5,7 +5,7 @@ import { LOCATION_MAP } from '../constants';
 import { Ban, CheckSquare, Square, AlertTriangle, X, Search } from 'lucide-react';
 
 export const CancelarMovimientos: React.FC = () => {
-  const { movements, availableVehicles, cancelMovements, currentCompany } = useApp();
+  const { movements, availableVehicles, cancelMovements, currentCompany, user } = useApp();
   
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -55,9 +55,25 @@ export const CancelarMovimientos: React.FC = () => {
     setIsModalOpen(true);
   };
 
-  const handleConfirmCancel = () => {
+  const handleConfirmCancel = async () => {
     if (!cancelReason.trim()) return;
     
+    // Attempt API Call
+    try {
+      await fetch('/api/movements', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          ids: selectedIds, 
+          reason: cancelReason,
+          username: user?.username 
+        })
+      });
+    } catch (e) {
+      console.warn("API Cancel failed, local fallback");
+    }
+
+    // Context Update
     cancelMovements(selectedIds, cancelReason);
     
     // Toast Success
@@ -81,7 +97,8 @@ export const CancelarMovimientos: React.FC = () => {
   };
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500 pb-20">
+    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
+    <div className="space-y-8 animate-in fade-in duration-500 pb-20 pt-20 md:pt-24">
       
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
