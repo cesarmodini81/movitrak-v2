@@ -53,15 +53,15 @@ export const RepuestosSidebar: React.FC = () => {
 
       <nav className="flex-1 overflow-y-auto py-4 space-y-1">
         <div className="px-6 py-2 text-[10px] font-bold text-slate-700 uppercase tracking-widest">Catálogo & Stock</div>
-        <NavItem to="/parts/search" icon={Search} label="Buscador de Piezas" />
-        <NavItem to="/parts/stock" icon={Package} label="Control Inventario" />
-        <NavItem to="/parts/transfer" icon={ArrowRightLeft} label="Transferencias" />
+        <NavItem to="/repuestos/buscador" icon={Search} label="Buscador de Piezas" />
+        <NavItem to="/repuestos/inventario" icon={Package} label="Control Inventario" />
+        <NavItem to="/repuestos/transferencias" icon={ArrowRightLeft} label="Transferencias" />
         
         <div className="px-6 py-2 text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-6">Comercial</div>
-        <NavItem to="/parts/sales" icon={ShoppingCart} label="Nueva Venta" />
+        <NavItem to="/repuestos/venta" icon={ShoppingCart} label="Nueva Venta" />
         
         <div className="px-6 py-2 text-[10px] font-bold text-slate-700 uppercase tracking-widest mt-6">Administración</div>
-        <NavItem to="/parts/audit" icon={ShieldAlert} label="Auditoría" />
+        <NavItem to="/repuestos/auditoria" icon={ShieldAlert} label="Auditoría" />
       </nav>
 
       <div className="p-4 border-t border-slate-800">

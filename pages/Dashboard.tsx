@@ -32,7 +32,7 @@ export const Dashboard: React.FC = () => {
       setIsPartsAuthOpen(false);
       setPartsPin('');
       setPinError(false);
-      navigate('/parts/search');
+      navigate('/repuestos/buscador');
     } else {
       setPinError(true);
       setPartsPin('');
@@ -116,7 +116,6 @@ export const Dashboard: React.FC = () => {
   );
 
   return (
-    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
     <div className="space-y-6 lg:space-y-8 relative pt-20 md:pt-24">
       
       {/* Super Admin Back Button */}

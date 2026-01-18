@@ -38,31 +38,25 @@ const AppRoutes: React.FC = () => {
       <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
       <Route path="/" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       
-      {/* Alias para Repuestos */}
+      {/* Módulo Repuestos - Rutas Oficiales */}
       <Route path="/repuestos" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><Dashboard /></ProtectedRoute>} />
+      <Route path="/repuestos/buscador" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsSearch /></ProtectedRoute>} />
+      <Route path="/repuestos/inventario" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsStock /></ProtectedRoute>} />
+      <Route path="/repuestos/transferencias" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsTransfer /></ProtectedRoute>} />
+      <Route path="/repuestos/venta" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsSales /></ProtectedRoute>} />
+      <Route path="/repuestos/auditoria" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsAudit /></ProtectedRoute>} />
       
+      {/* Módulo Logística */}
       <Route path="/used-reception" element={<ProtectedRoute allowedRoles={[Role.USED_OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><UsedReceptionPage /></ProtectedRoute>} />
       <Route path="/programming" element={<ProtectedRoute allowedRoles={[Role.PROGRAMADOR, Role.ADMIN, Role.SUPER_ADMIN]}><ProgrammingPage /></ProtectedRoute>} />
       <Route path="/calendar" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.PROGRAMADOR]}><CalendarPage /></ProtectedRoute>} />
       <Route path="/stock" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.PROGRAMADOR]}><StockPage /></ProtectedRoute>} />
-      
-      {/* Planilla Logística Unificada */}
       <Route path="/planilla-logistica" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><PlanillaLogistica /></ProtectedRoute>} />
-      
-      {/* Histórica Logística */}
       <Route path="/historica-logistica" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><HistoricalLogistica /></ProtectedRoute>} />
-      
       <Route path="/movements" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.USED_OPERATOR]}><Movements /></ProtectedRoute>} />
       <Route path="/confirm-movements" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><ConfirmMovements /></ProtectedRoute>} />
       <Route path="/movements/cancelar" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><CancelarMovimientos /></ProtectedRoute>} />
       <Route path="/audit" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.SUPER_ADMIN]}><AuditLogs /></ProtectedRoute>} />
-      
-      {/* Parts Module Routes */}
-      <Route path="/parts/search" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsSearch /></ProtectedRoute>} />
-      <Route path="/parts/stock" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsStock /></ProtectedRoute>} />
-      <Route path="/parts/transfer" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsTransfer /></ProtectedRoute>} />
-      <Route path="/parts/sales" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsSales /></ProtectedRoute>} />
-      <Route path="/parts/audit" element={<ProtectedRoute allowedRoles={[Role.ADMIN, Role.OPERATOR, Role.SUPER_ADMIN, Role.PARTS_OPERATOR]}><PartsAudit /></ProtectedRoute>} />
     </Routes>
   );
 }
