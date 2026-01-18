@@ -12,12 +12,12 @@ import { PreDeliveryDocument } from '../components/PreDeliveryDocument';
 import { PrintPreviewModal } from '../components/PrintPreviewModal';
 import { Vehicle } from '../types';
 
-interface PdiItem extends Vehicle {
+type PdiItem = Vehicle & {
   deliveryDateStr: string;
   deliveryLocationName: string;
   hasEvent: boolean;
   sortingDate: number; // Timestamp for easier sorting
-}
+};
 
 type SortDirection = 'asc' | 'desc';
 interface SortConfig {
@@ -54,10 +54,19 @@ export const OperationalPreDelivery: React.FC = () => {
       .filter(v => pdiQueue.includes(v.vin) && v.type === 'NEW')
       .map(v => {
         const event = calendarEvents.find(e => e.vehicleVin === v.vin && e.status === 'PROGRAMADO');
-        const deliveryDateStr = event 
-          ? new Date(event.date + 'T12:00:00').toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit'})
-          : '-';
-        const deliveryLocationName = event ? getLocationName(event.destinationId) : '-';
+        
+        // FORCE DATE DISPLAY: Si no hay fecha, mostrar 'SIN FECHA'
+        let deliveryDateStr = 'SIN FECHA';
+        if (event && event.date) {
+            deliveryDateStr = new Date(event.date + 'T12:00:00').toLocaleDateString('es-AR', {day: '2-digit', month: '2-digit'});
+        }
+
+        // FORCE LOCATION DISPLAY: Si no hay destino, mostrar 'SIN DESTINO'
+        let deliveryLocationName = 'SIN DESTINO';
+        if (event && event.destinationId) {
+            deliveryLocationName = getLocationName(event.destinationId);
+        }
+
         const sortingDate = event ? new Date(event.date).getTime() : 0;
 
         return {
@@ -277,8 +286,8 @@ export const OperationalPreDelivery: React.FC = () => {
                     </td>
                     <td className="p-6 text-center">
                       <div className={`inline-flex flex-col items-center justify-center border rounded-lg px-3 py-2 w-full ${v.hasEvent ? 'bg-white border-slate-200' : 'bg-slate-50 border-transparent'}`}>
-                         <Calendar size={14} className="text-slate-400 mb-1" />
-                         <span className="font-black text-slate-800 text-xs">{v.deliveryDateStr}</span>
+                         <Calendar size={14} className={v.hasEvent ? "text-slate-400 mb-1" : "text-slate-300 mb-1"} />
+                         <span className={`font-black text-xs ${v.hasEvent ? "text-slate-800" : "text-slate-400"}`}>{v.deliveryDateStr}</span>
                       </div>
                     </td>
                     <td className="p-6">
@@ -304,8 +313,8 @@ export const OperationalPreDelivery: React.FC = () => {
                       </div>
                     </td>
                     <td className="p-6">
-                      <div className="text-brand-600 font-black text-[10px] uppercase tracking-tight flex items-center gap-2">
-                        {v.deliveryLocationName !== '-' && <ArrowRight size={12} className="text-brand-400" />}
+                      <div className={`font-black text-[10px] uppercase tracking-tight flex items-center gap-2 ${v.hasEvent ? 'text-brand-600' : 'text-slate-400'}`}>
+                        <ArrowRight size={12} className={v.hasEvent ? "text-brand-400" : "text-slate-300"} />
                         {v.deliveryLocationName}
                       </div>
                     </td>

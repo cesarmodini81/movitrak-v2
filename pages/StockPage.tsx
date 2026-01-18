@@ -3,12 +3,13 @@ import React, { useState, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { 
   Package, MapPin, Search, CheckCircle, 
-  AlertCircle, Car, Calendar, Tag, Filter
+  AlertCircle, Car, Calendar, Tag, Filter, Clock
 } from 'lucide-react';
 import { LOCATION_MAP } from '../constants';
+import { Vehicle } from '../types';
 
 export const StockPage: React.FC = () => {
-  const { availableVehicles, currentCompany, calendarEvents, companies } = useApp();
+  const { availableVehicles, currentCompany, calendarEvents, companies, movements } = useApp();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('all');
@@ -22,6 +23,49 @@ export const StockPage: React.FC = () => {
       if (loc) return loc.name;
     }
     return id;
+  };
+
+  // Lógica de cálculo de Estadía (Días en ubicación actual)
+  const getStayInfo = (vehicle: Vehicle) => {
+    // 1. Buscar último movimiento completado donde el destino fue la ubicación actual
+    const lastMovement = movements
+      .filter(m => 
+        m.vehicleVins.includes(vehicle.vin) && 
+        m.status === 'COMPLETED' && 
+        m.destinationId === vehicle.locationId
+      )
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
+
+    // 2. Definir fecha de referencia (Movimiento o Ingreso original)
+    const entryDateStr = lastMovement ? lastMovement.date : vehicle.entryDate;
+    
+    if (!entryDateStr) return { label: '-', color: 'text-slate-300', bg: 'bg-transparent', rawDate: 'N/A' };
+
+    const entryDate = new Date(entryDateStr);
+    const today = new Date();
+    const diffTime = today.getTime() - entryDate.getTime();
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
+    // 3. Formato y Semáforo de Alerta
+    let color = 'text-emerald-700';
+    let bg = 'bg-emerald-50 border-emerald-100';
+    
+    if (diffDays > 30) {
+      color = 'text-red-700 font-black';
+      bg = 'bg-red-50 border-red-100';
+    } else if (diffDays >= 15) {
+      color = 'text-amber-700';
+      bg = 'bg-amber-50 border-amber-100';
+    }
+
+    const label = diffDays < 1 ? '< 1 día' : `${diffDays} ${diffDays === 1 ? 'día' : 'días'}`;
+
+    return { 
+      label, 
+      color, 
+      bg, 
+      rawDate: entryDate.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' }) 
+    };
   };
 
   // Filter Logic
@@ -59,7 +103,6 @@ export const StockPage: React.FC = () => {
   };
 
   return (
-    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
     <div className="space-y-8 animate-in fade-in duration-500 pb-20 pt-20 md:pt-24">
       
       {/* Header */}
@@ -131,68 +174,81 @@ export const StockPage: React.FC = () => {
                 <th className="p-6">Identificación</th>
                 <th className="p-6">Unidad</th>
                 <th className="p-6">Ubicación Actual</th>
+                <th className="p-6">Estadía</th>
                 <th className="p-6">Programación Entrega</th>
                 <th className="p-6 text-center">Estado PDI</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredVehicles.length > 0 ? (
-                filteredVehicles.map(v => (
-                  <tr key={v.vin} className="hover:bg-slate-50 transition-colors group">
-                    <td className="p-6">
-                       <div className="flex flex-col gap-1">
-                          <span className="font-mono font-black text-slate-900 text-sm tracking-widest">{v.vin}</span>
-                          {v.plate ? (
-                            <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded w-fit border border-slate-200">{v.plate}</span>
-                          ) : (
-                            <span className="text-[10px] font-bold text-slate-300 italic">Sin Patente</span>
-                          )}
-                       </div>
-                    </td>
-                    <td className="p-6">
-                       <div className="font-black text-slate-800 text-sm uppercase">{v.brand} {v.model}</div>
-                       <div className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wide">{v.color} • {v.year}</div>
-                    </td>
-                    <td className="p-6">
-                       <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase">
-                          <MapPin size={14} className="text-brand-500" />
-                          {getLocationName(v.locationId)}
-                       </div>
-                    </td>
-                    <td className="p-6">
-                       <div className="text-xs font-black text-slate-700 uppercase flex items-center gap-2">
-                          {getDeliveryPlace(v.vin) !== '-' ? (
-                             <>
-                               <Calendar size={14} className="text-brand-600" />
-                               {getDeliveryPlace(v.vin)}
-                             </>
-                          ) : (
-                             <span className="text-slate-300 font-bold">-</span>
-                          )}
-                       </div>
-                    </td>
-                    <td className="p-6 text-center">
-                       {v.type === 'NEW' ? (
-                          v.preDeliveryConfirmed ? (
-                             <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest border border-emerald-200">
-                                <CheckCircle size={12} /> Certificado
-                             </div>
-                          ) : (
-                             <div className="inline-flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest border border-red-100">
-                                <AlertCircle size={12} /> Pendiente
-                             </div>
-                          )
-                       ) : (
-                          <div className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-500 px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">
-                             Usado OK
-                          </div>
-                       )}
-                    </td>
-                  </tr>
-                ))
+                filteredVehicles.map(v => {
+                  const stay = getStayInfo(v);
+                  return (
+                    <tr key={v.vin} className="hover:bg-slate-50 transition-colors group">
+                      <td className="p-6">
+                        <div className="flex flex-col gap-1">
+                            <span className="font-mono font-black text-slate-900 text-sm tracking-widest">{v.vin}</span>
+                            {v.plate ? (
+                              <span className="text-[10px] font-black text-slate-500 bg-slate-100 px-2 py-0.5 rounded w-fit border border-slate-200">{v.plate}</span>
+                            ) : (
+                              <span className="text-[10px] font-bold text-slate-300 italic">Sin Patente</span>
+                            )}
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div className="font-black text-slate-800 text-sm uppercase">{v.brand} {v.model}</div>
+                        <div className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-wide">{v.color} • {v.year}</div>
+                      </td>
+                      <td className="p-6">
+                        <div className="flex items-center gap-2 text-xs font-bold text-slate-600 uppercase">
+                            <MapPin size={14} className="text-brand-500" />
+                            {getLocationName(v.locationId)}
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div 
+                          className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border text-[10px] font-black uppercase tracking-widest transition-all ${stay.bg} ${stay.color}`}
+                          title={`Ingreso a sucursal: ${stay.rawDate}`}
+                        >
+                            <Clock size={12} />
+                            {stay.label}
+                        </div>
+                      </td>
+                      <td className="p-6">
+                        <div className="text-xs font-black text-slate-700 uppercase flex items-center gap-2">
+                            {getDeliveryPlace(v.vin) !== '-' ? (
+                              <>
+                                <Calendar size={14} className="text-brand-600" />
+                                {getDeliveryPlace(v.vin)}
+                              </>
+                            ) : (
+                              <span className="text-slate-300 font-bold">-</span>
+                            )}
+                        </div>
+                      </td>
+                      <td className="p-6 text-center">
+                        {v.type === 'NEW' ? (
+                            v.preDeliveryConfirmed ? (
+                              <div className="inline-flex items-center gap-1.5 bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest border border-emerald-200">
+                                  <CheckCircle size={12} /> Certificado
+                              </div>
+                            ) : (
+                              <div className="inline-flex items-center gap-1.5 bg-red-50 text-red-600 px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest border border-red-100">
+                                  <AlertCircle size={12} /> Pendiente
+                              </div>
+                            )
+                        ) : (
+                            <div className="inline-flex items-center gap-1.5 bg-slate-100 text-slate-500 px-3 py-1 rounded-full font-black text-[9px] uppercase tracking-widest">
+                              Usado OK
+                            </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })
               ) : (
                 <tr>
-                  <td colSpan={5} className="p-20 text-center">
+                  <td colSpan={6} className="p-20 text-center">
                     <div className="flex flex-col items-center gap-4 opacity-40">
                        <Package size={60} className="text-slate-300" />
                        <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">No se encontraron unidades en stock</p>

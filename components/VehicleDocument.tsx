@@ -102,7 +102,7 @@ export const VehicleDocument: React.FC<Props> = ({ vehicle, movements, company }
                 <tr className="bg-slate-900 text-white text-left uppercase text-[10px] font-black tracking-wider">
                   <th className="p-4">Fecha</th>
                   <th className="p-4">Operación ID</th>
-                  <th className="p-4">Logística Origen > Destino</th>
+                  <th className="p-4">Logística Origen &gt; Destino</th>
                   <th className="p-4">Transporte / Chofer</th>
                   <th className="p-4 text-center">Estado</th>
                 </tr>

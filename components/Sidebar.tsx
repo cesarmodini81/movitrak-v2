@@ -7,7 +7,7 @@ import {
   LayoutDashboard, Calendar, FileCheck, Truck, 
   Search, ShieldAlert, Globe, ChevronDown, ChevronRight,
   ClipboardList, Map, FileText, CalendarPlus, Car, PenTool,
-  History, Package, Ban
+  History, Package, Ban, FileInput
 } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -88,15 +88,17 @@ export const Sidebar: React.FC<{ onQueryClick: () => void }> = ({ onQueryClick }
         {(isOperator || isAdmin) && (
           <div className="mt-6">
             <div className="px-6 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest">Operativo</div>
-            <NavItem to="/pdi" icon={FileCheck} label={t('pdi_sheet')} />
+            
+            {/* FUSIÓN: Planilla Logística */}
+            <NavItem to="/planilla-logistica" icon={FileInput} label="Planilla Logística" />
+            
             <div className="bg-slate-900/40 pb-2">
-              <NavItem to="/travel-sheet" icon={FileText} label={t('travel_sheet')} />
               <Link 
-                to="/historical-travel-sheet" 
-                className={`flex items-center gap-3 px-12 py-2 transition-all ${isActive('/historical-travel-sheet')}`}
+                to="/historica-logistica" 
+                className={`flex items-center gap-3 px-12 py-2 transition-all ${isActive('/historica-logistica')}`}
               >
                 <History size={14} />
-                <span className="text-[10px] font-bold uppercase tracking-widest">Histórica Viajes</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest">Histórica Logística</span>
               </Link>
             </div>
 

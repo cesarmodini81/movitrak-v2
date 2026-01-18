@@ -6,7 +6,7 @@ import { LOCATION_MAP } from '../constants';
 import { 
   X, Search, MapPin, Truck, Database, 
   ArrowRight, ShieldCheck, ShieldAlert, 
-  Printer, Calendar, FileText, Activity, Loader2
+  Printer, Calendar, FileText, Activity, Loader2, Info
 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { RemitoDocument } from './RemitoDocument';
@@ -84,6 +84,32 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
       .filter(m => m.vehicleVins.includes(selectedVehicle.vin))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [selectedVehicle, movements]);
+
+  // Helper para generar observación mock por unidad (Satisfaciendo requerimiento "Si no existe, agregar campo mock")
+  // Esto asegura que cada unidad tenga una observación "particular" visualmente distinta en el historial
+  const getUnitSpecificObservation = (movement: Movement, vin: string) => {
+    // 1. Intentar obtener dato real si existiera en estructura extendida (simulado con any)
+    const realObs = (movement as any).unitObservations?.[vin];
+    if (realObs) return realObs;
+
+    // 2. Generar Mock Determinista basado en VIN + ID Movimiento para consistencia visual
+    const hash = (movement.id + vin).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const mocks = [
+      "Unidad verificada sin novedades.",
+      "Sin observaciones particulares.",
+      "Revisar alfombras delanteras.",
+      "Detalle mínimo en paragolpes tras.",
+      "OK - Recepción conforme.",
+      "Sin novedades.",
+      "Kit de seguridad incompleto.",
+      "Unidad sucia exterior."
+    ];
+    
+    // Si es un movimiento completado, tendemos a poner OK.
+    if (movement.status === 'COMPLETED' && hash % 2 === 0) return "Recepción OK - Sin novedades";
+    
+    return mocks[hash % mocks.length];
+  };
 
   const handleSelect = (v: Vehicle) => {
     setSelectedVehicle(v);
@@ -280,7 +306,7 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
                            <th className="px-6 py-4">Fecha</th>
                            <th className="px-6 py-4">Origen</th>
                            <th className="px-6 py-4">Destino</th>
-                           <th className="px-6 py-4">Observaciones Operador</th>
+                           <th className="px-6 py-4 w-1/4">Observaciones Unidad</th>
                            <th className="px-6 py-4 text-center">Estado PDI</th>
                            <th className="px-6 py-4 text-center">Acciones</th>
                          </tr>
@@ -288,6 +314,8 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
                        <tbody className="divide-y divide-slate-100">
                          {vehicleHistory.length > 0 ? vehicleHistory.map((m) => {
                            const isCompleted = m.status === 'COMPLETED';
+                           const unitObs = getUnitSpecificObservation(m, selectedVehicle.vin);
+                           
                            return (
                              <tr key={m.id} className="hover:bg-slate-50 transition-colors group">
                                <td className="px-6 py-4 font-mono font-black text-slate-900 text-xs">
@@ -305,8 +333,15 @@ export const VehicleQueryModal: React.FC<Props> = ({ isOpen, onClose }) => {
                                <td className="px-6 py-4 text-xs font-black text-slate-800 uppercase">
                                  {LOCATION_MAP[m.destinationId] || m.destinationId}
                                </td>
-                               <td className="px-6 py-4 text-xs font-medium text-slate-500 italic max-w-xs truncate">
-                                 {m.observations || 'Sin observaciones.'}
+                               <td className="px-6 py-4 text-xs font-medium text-slate-600 max-w-xs truncate cursor-help relative group/tooltip">
+                                 {/* OBSERVACIÓN ESPECÍFICA DE UNIDAD */}
+                                 <div className="flex items-center gap-1.5">
+                                    <Info size={12} className="text-slate-300 shrink-0" />
+                                    <span className="truncate">{unitObs}</span>
+                                 </div>
+                                 <div className="absolute bottom-full left-0 mb-2 w-max max-w-xs bg-slate-800 text-white text-[10px] p-2 rounded shadow-lg opacity-0 group-hover/tooltip:opacity-100 transition-opacity pointer-events-none z-20">
+                                    {unitObs}
+                                 </div>
                                </td>
                                <td className="px-6 py-4 text-center">
                                  {isCompleted ? (

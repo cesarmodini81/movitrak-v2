@@ -3,9 +3,13 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useApp } from '../context/AppContext';
 import { useTranslation } from 'react-i18next';
 import { LOCATION_MAP } from '../constants';
-import { Truck, Plus, X, ClipboardList, MapPin, Info, Search, CheckCircle, Printer, ArrowLeft, PlusCircle, Box, Loader2 } from 'lucide-react';
-import { Movement, Vehicle } from '../types';
+import { 
+  Truck, Plus, X, ClipboardList, MapPin, Info, Search, 
+  CheckCircle, Printer, ArrowLeft, PlusCircle, Box, Loader2 
+} from 'lucide-react';
+import { Movement, Vehicle, CalendarEvent } from '../types';
 import { RemitoDocument } from '../components/RemitoDocument';
+import { PrintPreviewModal } from '../components/PrintPreviewModal';
 
 const STORAGE_KEYS = {
   ORIGIN: 'mov_origin',
@@ -21,10 +25,10 @@ const STORAGE_KEYS = {
   CUSTOM_TRANSPORTERS: 'mov_custom_transporters'
 };
 
-const DEFAULT_TRANSPORTERS = ['Logística Nation', 'TransCarga S.A.'];
+const DEFAULT_TRANSPORTERS = ['Logística Nation', 'Logística Escobar', 'Logística Tercerizada'];
 
 export const Movements: React.FC = () => {
-  const { availableVehicles, currentCompany, createMovement } = useApp();
+  const { availableVehicles, currentCompany, createMovement, calendarEvents } = useApp();
   const { t } = useTranslation();
 
   const [origin, setOrigin] = useState(() => localStorage.getItem(STORAGE_KEYS.ORIGIN) || '');
@@ -56,69 +60,64 @@ export const Movements: React.FC = () => {
   const [showPdiWarning, setShowPdiWarning] = useState(false);
   const [successMovement, setSuccessMovement] = useState<Movement | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   // New Transport Modal State
   const [isAddTransportOpen, setIsAddTransportOpen] = useState(false);
-  const [newTransport, setNewTransport] = useState({
-    name: '',
-    driver: '',
-    dni: '',
-    truck: '',
-    trailer: ''
-  });
+  const [newTransportName, setNewTransportName] = useState('');
 
   const companyLocations = useMemo(() => currentCompany?.locations || [], [currentCompany]);
 
   useEffect(() => {
-    if (companyLocations.length > 0) {
-      const isOriginValid = companyLocations.some(l => l.id === origin);
-      const isDestValid = companyLocations.some(l => l.id === destination);
-      if (origin && !isOriginValid) setOrigin('');
-      if (destination && !isDestValid) setDestination('');
-    }
-  }, [companyLocations, origin, destination]);
+    localStorage.setItem(STORAGE_KEYS.ORIGIN, origin);
+    localStorage.setItem(STORAGE_KEYS.DEST, destination);
+    localStorage.setItem(STORAGE_KEYS.TRANS, transporter);
+    localStorage.setItem(STORAGE_KEYS.DRIVER, driverName);
+    localStorage.setItem(STORAGE_KEYS.DNI, driverDni);
+    localStorage.setItem(STORAGE_KEYS.TRUCK, truckPlate);
+    localStorage.setItem(STORAGE_KEYS.TRAILER, trailerPlate);
+    localStorage.setItem(STORAGE_KEYS.VINS, JSON.stringify(selectedVins));
+    localStorage.setItem(STORAGE_KEYS.OBS_UNIT, JSON.stringify(unitObservations));
+    localStorage.setItem(STORAGE_KEYS.OBS_GEN, generalObservations);
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_TRANSPORTERS, JSON.stringify(availableTransporters));
+  }, [origin, destination, transporter, driverName, driverDni, truckPlate, trailerPlate, selectedVins, unitObservations, generalObservations, availableTransporters]);
 
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.ORIGIN, origin), [origin]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.DEST, destination), [destination]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.TRANS, transporter), [transporter]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.DRIVER, driverName), [driverName]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.DNI, driverDni), [driverDni]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.TRUCK, truckPlate), [truckPlate]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.TRAILER, trailerPlate), [trailerPlate]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.VINS, JSON.stringify(selectedVins)), [selectedVins]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.OBS_UNIT, JSON.stringify(unitObservations)), [unitObservations]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.OBS_GEN, generalObservations), [generalObservations]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.CUSTOM_TRANSPORTERS, JSON.stringify(availableTransporters)), [availableTransporters]);
-
+  // FILTRADO OPTIMIZADO PARA BUSCADOR VIN/PATENTE
   useEffect(() => {
-    if (searchTerm.length > 1) {
-      const lowerTerm = searchTerm.toLowerCase();
+    if (searchTerm.trim().length > 1) {
+      const lowerTerm = searchTerm.toLowerCase().replace(/\s/g, '');
       const filtered = availableVehicles.filter(v => {
         const isAvailable = v.status === 'AVAILABLE' && !v.isLocked;
-        const matchesOrigin = !origin || v.locationId === origin;
         const isNotSelected = !selectedVins.includes(v.vin);
         
         const matchesVin = v.vin.toLowerCase().includes(lowerTerm);
-        const matchesPlate = v.plate && v.plate.toLowerCase().replace(/\s/g, '').includes(lowerTerm.replace(/\s/g, ''));
+        const matchesPlate = v.plate && v.plate.toLowerCase().replace(/\s/g, '').includes(lowerTerm);
         const matchesModel = v.model.toLowerCase().includes(lowerTerm);
 
-        return isAvailable && matchesOrigin && isNotSelected && (matchesVin || matchesPlate || matchesModel);
+        return isAvailable && isNotSelected && (matchesVin || matchesPlate || matchesModel);
       });
       setSuggestions(filtered.slice(0, 6));
     } else {
       setSuggestions([]);
     }
-  }, [searchTerm, availableVehicles, origin, selectedVins]);
+  }, [searchTerm, availableVehicles, selectedVins]);
 
   const handleAddVehicle = (vehicle: Vehicle) => {
+    const event = calendarEvents.find(e => e.vehicleVin === vehicle.vin && e.status === 'PROGRAMADO');
     if (!origin) setOrigin(vehicle.locationId);
+    if (!destination && event) setDestination(event.destinationId);
     setSelectedVins([...selectedVins, vehicle.vin]);
     setSearchTerm('');
     setSuggestions([]);
   };
 
   const handleRemoveVehicle = (vin: string) => {
-    setSelectedVins(selectedVins.filter(v => v !== vin));
+    const newSelected = selectedVins.filter(v => v !== vin);
+    setSelectedVins(newSelected);
+    if (newSelected.length === 0) {
+      setOrigin('');
+      setDestination('');
+    }
     const newObs = { ...unitObservations };
     delete newObs[vin];
     setUnitObservations(newObs);
@@ -148,23 +147,17 @@ export const Movements: React.FC = () => {
       observations: generalObservations,
     };
 
-    // Attempt DB Sync
     try {
-      const res = await fetch('/api/movements', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newMovement)
-      });
-      if (!res.ok) throw new Error('API_ERROR');
-    } catch (e) {
-      console.warn('API Offline, saving locally via AppContext');
+      createMovement(newMovement);
+      setSuccessMovement(newMovement);
+      setShowPdiWarning(false);
+      handleClearStorage();
+      setIsPreviewOpen(true);
+    } catch (err) {
+      console.error("Error al emitir remito:", err);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    createMovement(newMovement);
-    setSuccessMovement(newMovement);
-    setShowPdiWarning(false);
-    handleClearStorage();
-    setIsSubmitting(false);
   };
 
   const handleClearStorage = () => {
@@ -174,25 +167,14 @@ export const Movements: React.FC = () => {
     Object.values(STORAGE_KEYS).forEach(key => { if (key !== STORAGE_KEYS.CUSTOM_TRANSPORTERS) localStorage.removeItem(key); });
   };
 
-  const handleReset = () => {
-    setSuccessMovement(null);
-  };
-
-  const handleAddNewTransport = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTransport.name.trim()) return;
-
-    if (!availableTransporters.includes(newTransport.name)) {
-      setAvailableTransporters(prev => [...prev, newTransport.name]);
+  const handleAddNewTransport = () => {
+    if (!newTransportName.trim()) return;
+    if (!availableTransporters.includes(newTransportName)) {
+      setAvailableTransporters(prev => [...prev, newTransportName]);
     }
-    setTransporter(newTransport.name);
-    setDriverName(newTransport.driver);
-    setDriverDni(newTransport.dni);
-    setTruckPlate(newTransport.truck.toUpperCase());
-    setTrailerPlate(newTransport.trailer.toUpperCase());
-    
+    setTransporter(newTransportName);
     setIsAddTransportOpen(false);
-    setNewTransport({ name: '', driver: '', dni: '', truck: '', trailer: '' });
+    setNewTransportName('');
   };
 
   const remitoVehicles = useMemo(() => 
@@ -211,56 +193,49 @@ export const Movements: React.FC = () => {
   );
 
   return (
-    // PADDING TOP AUMENTADO (pt-20 md:pt-24) para evitar solapamiento con Topbar
-    <div className="space-y-8 lg:space-y-10 animate-in slide-in-from-bottom-4 duration-500 pb-24 pt-20 md:pt-24">
+    <div className="space-y-6 lg:space-y-8 animate-in fade-in duration-500 pb-24 pt-20 md:pt-24 max-w-[1400px] mx-auto px-4">
       
-      {/* Page Title */}
-      <div className="flex items-center gap-5 no-print">
-        <div className="p-4 bg-slate-800 text-white rounded-xl shadow-lg">
-          <ClipboardList size={28} />
+      {/* HEADER PRINCIPAL */}
+      <div className="flex items-center gap-5 no-print mb-6">
+        <div className="p-4 bg-slate-900 text-white rounded-xl shadow-xl">
+          <ClipboardList size={36} />
         </div>
         <div>
-          <h2 className="text-2xl lg:text-3xl font-bold text-slate-800 tracking-tight uppercase">Emisión de Traslado</h2>
-          <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mt-1">Protocolo de Despacho Logístico</p>
+          <h2 className="text-2xl lg:text-3xl font-bold text-slate-800 tracking-tight uppercase leading-none">EMISIÓN DE TRASLADO</h2>
+          <p className="text-slate-500 text-xs font-semibold uppercase tracking-widest mt-1">PROTOCOLO DE DESPACHO LOGÍSTICO</p>
         </div>
       </div>
 
       {!successMovement ? (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 no-print">
           
-          {/* COLUMNA IZQUIERDA (8) */}
+          {/* COLUMNA IZQUIERDA: I y II */}
           <div className="lg:col-span-8 space-y-8">
             
-            {/* I. RUTA DE TRÁFICO */}
-            <div className="bg-white p-6 lg:p-8 rounded-xl border border-gray-600 shadow-lg">
-              <div className="flex items-center gap-3 mb-6 border-b border-gray-200 pb-3">
-                 <div className="p-1.5 bg-slate-800 text-white rounded">
-                    <MapPin size={18} />
-                 </div>
-                 <h3 className="text-xl font-bold text-slate-800">I. Ruta de Tráfico</h3>
+            {/* SECCIÓN I: RUTA DE TRÁFICO */}
+            <div className="bg-white p-6 lg:p-8 rounded-xl border border-gray-300 shadow-lg relative">
+              <div className="flex items-center gap-4 mb-10 border-b border-gray-100 pb-4">
+                 <MapPin size={32} className="text-slate-900" strokeWidth={2.5} />
+                 <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight">I. Ruta de Tráfico</h3>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-600 uppercase ml-1">
-                     Planta / Sucursal de Origen
-                  </label>
+                  <label className="text-xs font-bold text-gray-600 uppercase tracking-widest ml-1">PLANTA / SUCURSAL DE ORIGEN</label>
                   <select 
                     value={origin}
                     onChange={(e) => { setOrigin(e.target.value); setSelectedVins([]); }}
-                    className="w-full px-4 py-3 bg-white border border-gray-400 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none text-slate-900 font-semibold transition-all cursor-pointer shadow-sm"
+                    className="w-full px-4 py-3 border-gray-400 border rounded-lg focus:border-blue-600 outline-none text-slate-900 font-semibold shadow-sm transition-all bg-white"
                   >
                     <option value="">-- Seleccionar Planta --</option>
                     {companyLocations.map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
                   </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-bold text-gray-600 uppercase ml-1">
-                     Sucursal Destino Final
-                  </label>
+                  <label className="text-xs font-bold text-gray-600 uppercase tracking-widest ml-1">SUCURSAL DESTINO FINAL</label>
                   <select 
                     value={destination}
                     onChange={(e) => setDestination(e.target.value)}
-                    className="w-full px-4 py-3 bg-white border border-gray-400 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none text-slate-900 font-semibold transition-all cursor-pointer shadow-sm"
+                    className="w-full px-4 py-3 border-gray-400 border rounded-lg focus:border-blue-600 outline-none text-slate-900 font-semibold shadow-sm transition-all bg-white"
                   >
                     <option value="">-- Seleccionar Arribo --</option>
                     {companyLocations.filter(l => l.id !== origin).map(l => <option key={l.id} value={l.id}>{l.name}</option>)}
@@ -269,41 +244,39 @@ export const Movements: React.FC = () => {
               </div>
             </div>
 
-            {/* II. MANIFIESTO DE UNIDADES */}
-            <div className="bg-white p-6 lg:p-8 rounded-xl border border-gray-600 shadow-lg">
-              <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-3">
-                 <div className="flex items-center gap-3">
-                    <div className="p-1.5 bg-slate-800 text-white rounded">
-                       <Box size={18} />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-800">II. Manifiesto de Unidades</h3>
+            {/* SECCIÓN II: MANIFIESTO DE UNIDADES */}
+            <div className="bg-white p-6 lg:p-8 rounded-xl border border-gray-300 shadow-lg relative">
+              <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-4">
+                 <div className="flex items-center gap-4">
+                    <Box size={32} className="text-slate-900" strokeWidth={2.5} />
+                    <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight">II. Manifiesto de Unidades</h3>
                  </div>
-                 <span className="text-xs font-bold text-gray-500 bg-gray-100 px-3 py-1 rounded-full border border-gray-300">
+                 <div className="bg-slate-100 border border-slate-200 text-slate-900 px-4 py-1.5 rounded-full font-bold text-xs uppercase tracking-widest shadow-sm">
                     {selectedVins.length} Unidades
-                 </span>
+                 </div>
               </div>
 
-              <div className="relative mb-8">
+              <div className="relative mb-8 group">
                 <div className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400">
-                   <Search size={20} />
+                   <Search size={24} />
                 </div>
                 <input 
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Escanee VIN o ingrese Patente..."
-                  className="w-full pl-12 pr-4 py-4 bg-white border border-gray-400 rounded-lg focus:border-blue-600 focus:ring-2 focus:ring-blue-100 outline-none text-lg font-bold text-slate-900 transition-all shadow-sm"
+                  className="w-full pl-14 pr-6 py-4 border border-gray-400 rounded-lg focus:border-blue-600 outline-none text-lg font-semibold text-slate-900 transition-all shadow-sm bg-white"
                 />
                 
                 {suggestions.length > 0 && (
-                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-300 rounded-lg shadow-2xl overflow-hidden z-40">
+                  <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-300 rounded-xl shadow-2xl overflow-hidden z-40">
                     {suggestions.map(s => (
                       <button key={s.vin} onClick={() => handleAddVehicle(s)} className="w-full text-left p-4 hover:bg-blue-50 border-b border-gray-100 last:border-0 flex justify-between items-center group transition-colors">
-                        <div>
-                          <p className="font-mono font-bold text-slate-900 text-base">{s.plate || s.vin.slice(-8)}</p>
-                          <p className="text-xs font-semibold text-gray-500 uppercase">{s.brand} {s.model} • {s.color}</p>
+                        <div className="flex-1">
+                          <p className="font-mono font-bold text-slate-900 text-base tracking-wider">{s.plate || s.vin}</p>
+                          <p className="text-[10px] font-semibold text-gray-500 uppercase tracking-widest">{s.brand} {s.model} • {s.color}</p>
                         </div>
-                        <Plus size={18} className="text-blue-600 opacity-0 group-hover:opacity-100 transition-all" />
+                        <Plus size={20} className="text-blue-600 group-hover:scale-110 transition-transform" />
                       </button>
                     ))}
                   </div>
@@ -311,125 +284,114 @@ export const Movements: React.FC = () => {
               </div>
 
               {selectedVins.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {selectedVins.map(vin => {
+                <div className="space-y-4">
+                  {selectedVins.map((vin, idx) => {
                     const v = availableVehicles.find(av => av.vin === vin);
                     return (
-                      <div key={vin} className="bg-gray-50 p-5 rounded-lg border border-gray-300 relative group animate-in zoom-in-95 shadow-sm hover:shadow-md transition-shadow">
-                        <button onClick={() => handleRemoveVehicle(vin)} className="absolute top-4 right-4 text-gray-400 hover:text-red-600 transition-colors p-1 rounded-full hover:bg-white"><X size={18} /></button>
-                        <p className="font-mono font-bold text-slate-900 text-sm mb-1">{v?.plate || vin}</p>
-                        <p className="text-xs font-bold text-gray-600 uppercase mb-3">{v?.brand} {v?.model}</p>
-                        <textarea 
-                          placeholder="Observaciones de la unidad..."
-                          value={unitObservations[vin] || ''}
-                          onChange={(e) => setUnitObservations({...unitObservations, [vin]: e.target.value})}
-                          className="w-full p-3 bg-white border border-gray-300 rounded-md text-xs font-medium text-slate-700 focus:border-blue-500 outline-none transition-all resize-none h-16"
-                        />
+                      <div key={vin} className="bg-slate-50 p-6 rounded-xl border border-gray-200 relative group animate-in zoom-in-95 hover:border-gray-400 transition-all">
+                        <button onClick={() => handleRemoveVehicle(vin)} className="absolute top-4 right-4 text-gray-400 hover:text-red-600 transition-colors">
+                          <X size={24} />
+                        </button>
+                        <div className="flex items-center gap-5 mb-4">
+                           <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center border border-gray-200 text-slate-900 font-bold shadow-sm text-lg">
+                              {idx + 1}
+                           </div>
+                           <div>
+                              <p className="font-mono font-bold text-slate-900 text-lg tracking-widest leading-none">{v?.plate || vin}</p>
+                              <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wider mt-1">{v?.brand} {v?.model} — {v?.color}</p>
+                           </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-bold uppercase text-gray-500 ml-1">OBSERVACIONES ESPECÍFICAS DE LA UNIDAD</label>
+                          <textarea 
+                            placeholder="Reportar estado estético, llaves faltantes, etc..."
+                            value={unitObservations[vin] || ''}
+                            onChange={(e) => setUnitObservations({...unitObservations, [vin]: e.target.value})}
+                            className="w-full p-4 bg-white border border-gray-300 rounded-lg text-sm font-semibold text-slate-800 focus:border-blue-600 outline-none transition-all resize-none h-20 shadow-inner"
+                          />
+                        </div>
                       </div>
                     );
                   })}
                 </div>
               ) : (
-                <div className="text-center py-10 border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-                   <p className="text-sm font-bold text-gray-400 uppercase">Lista vacía</p>
+                <div className="text-center py-20 border-2 border-dashed border-gray-200 rounded-xl bg-slate-50">
+                   <p className="text-base font-bold text-gray-300 uppercase tracking-[0.2em]">LISTA VACÍA</p>
                 </div>
               )}
             </div>
           </div>
 
-          {/* COLUMNA DERECHA (4) */}
+          {/* COLUMNA DERECHA: III y Observaciones */}
           <div className="lg:col-span-4 space-y-8">
             
-            {/* III. LOGÍSTICA */}
-            <div className="bg-white p-6 lg:p-8 rounded-xl border border-gray-600 shadow-lg">
-               <div className="flex items-center gap-3 mb-6 border-b border-gray-200 pb-3">
-                  <div className="p-1.5 bg-slate-800 text-white rounded">
-                     <Truck size={18} />
-                  </div>
-                  <h3 className="text-xl font-bold text-slate-800">III. Logística</h3>
+            {/* SECCIÓN III: LOGÍSTICA */}
+            <div className="bg-white p-6 lg:p-8 rounded-xl border border-gray-300 shadow-lg relative">
+               <div className="flex items-center gap-4 mb-8 border-b border-gray-100 pb-4">
+                  <Truck size={32} className="text-slate-900" strokeWidth={2.5} />
+                  <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight">III. Logística</h3>
                </div>
                
-               <div className="space-y-5">
-                  <div className="space-y-1.5">
+               <div className="space-y-6">
+                  <div className="space-y-2">
                      <div className="flex justify-between items-center mb-1">
-                        <label className="text-xs font-bold uppercase text-gray-600">Empresa de Transporte</label>
+                        <label className="text-xs font-bold text-gray-600 uppercase tracking-widest ml-1">EMPRESA DE TRANSPORTE</label>
                         <button 
                            onClick={() => setIsAddTransportOpen(true)}
-                           className="text-blue-600 hover:text-blue-800 transition-colors"
-                           title="Agregar nuevo transporte"
+                           className="text-blue-600 hover:text-blue-800 p-1 bg-blue-50 rounded-full transition-all hover:scale-110"
                         >
-                           <PlusCircle size={16} />
+                           <PlusCircle size={22} />
                         </button>
                      </div>
                      <select 
                        value={transporter} 
                        onChange={(e) => setTransporter(e.target.value)} 
-                       className="w-full px-4 py-3 bg-white border border-gray-400 rounded-lg text-slate-900 font-semibold outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 shadow-sm"
+                       className="w-full px-4 py-3 border border-gray-400 rounded-lg text-slate-900 font-semibold outline-none focus:border-blue-600 shadow-sm bg-white"
                      >
                         <option value="">-- Seleccionar --</option>
                         {availableTransporters.map(t => <option key={t} value={t}>{t}</option>)}
                      </select>
                   </div>
                   
-                  <div className="space-y-1.5">
-                     <label className="text-xs font-bold uppercase text-gray-600">Datos del Chofer</label>
-                     <input 
-                       type="text" 
-                       placeholder="Nombre Completo" 
-                       value={driverName} 
-                       onChange={(e) => setDriverName(e.target.value)} 
-                       className="w-full px-4 py-3 bg-white border border-gray-400 rounded-lg text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 mb-2 shadow-sm text-sm font-medium" 
-                     />
-                     <input 
-                       type="text" 
-                       placeholder="DNI" 
-                       value={driverDni} 
-                       onChange={(e) => setDriverDni(e.target.value)} 
-                       className="w-full px-4 py-3 bg-white border border-gray-400 rounded-lg text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 shadow-sm text-sm font-medium" 
-                     />
+                  <div className="space-y-4 pt-4 border-t border-gray-100">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">DATOS DEL CHOFER</label>
+                    <input type="text" placeholder="Nombre Completo" value={driverName} onChange={(e) => setDriverName(e.target.value)} className="w-full px-4 py-3 border border-gray-400 rounded-lg text-slate-900 font-semibold outline-none focus:border-blue-600 shadow-sm bg-white" />
+                    <input type="text" placeholder="DNI" value={driverDni} onChange={(e) => setDriverDni(e.target.value)} className="w-full px-4 py-3 border border-gray-400 rounded-lg text-slate-900 font-semibold outline-none focus:border-blue-600 shadow-sm bg-white" />
                   </div>
-                  
-                  <div className="space-y-1.5">
-                     <label className="text-xs font-bold uppercase text-gray-600">Patentes</label>
-                     <div className="grid grid-cols-2 gap-3">
-                        <input 
-                          type="text" 
-                          placeholder="Tractor" 
-                          value={truckPlate} 
-                          onChange={(e) => setTruckPlate(e.target.value.toUpperCase())} 
-                          className="px-4 py-3 bg-white border border-gray-400 rounded-lg text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 uppercase text-center font-bold shadow-sm" 
-                        />
-                        <input 
-                          type="text" 
-                          placeholder="Acoplado" 
-                          value={trailerPlate} 
-                          onChange={(e) => setTrailerPlate(e.target.value.toUpperCase())} 
-                          className="px-4 py-3 bg-white border border-gray-400 rounded-lg text-slate-900 outline-none focus:border-blue-600 focus:ring-2 focus:ring-blue-100 uppercase text-center font-bold shadow-sm" 
-                        />
-                     </div>
+
+                  <div className="space-y-2 pt-4">
+                    <label className="text-xs font-bold text-gray-500 uppercase tracking-widest ml-1">PATENTES</label>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div className="space-y-1">
+                          <input type="text" placeholder="TRACTOR" value={truckPlate} onChange={(e) => setTruckPlate(e.target.value.toUpperCase())} className="w-full px-3 py-3 border border-gray-400 rounded-lg uppercase text-center font-bold shadow-sm focus:border-blue-600 outline-none bg-white placeholder:text-gray-300" />
+                       </div>
+                       <div className="space-y-1">
+                          <input type="text" placeholder="ACOPLADO" value={trailerPlate} onChange={(e) => setTrailerPlate(e.target.value.toUpperCase())} className="w-full px-3 py-3 border border-gray-400 rounded-lg uppercase text-center font-bold shadow-sm focus:border-blue-600 outline-none bg-white placeholder:text-gray-300" />
+                       </div>
+                    </div>
                   </div>
                </div>
             </div>
 
-            {/* OBSERVACIONES Y ACCIONES */}
-            <div className="bg-white p-6 lg:p-8 rounded-xl border border-gray-600 shadow-lg">
-               <div className="mb-6">
-                 <label className="text-xs font-bold text-gray-600 uppercase mb-2 block">Observaciones Generales</label>
+            {/* SECCIÓN OBSERVACIONES GENERALES Y BOTÓN EMITIR */}
+            <div className="bg-white p-6 lg:p-8 rounded-xl border border-gray-300 shadow-lg space-y-6">
+               <div className="space-y-2">
+                 <label className="text-xs font-bold text-gray-600 uppercase block tracking-widest ml-1">OBSERVACIONES GENERALES</label>
                  <textarea 
                    value={generalObservations} 
                    onChange={(e) => setGeneralObservations(e.target.value)} 
                    placeholder="Instrucciones adicionales para el remito..." 
-                   className="w-full p-4 bg-white border border-gray-400 rounded-lg text-sm font-medium text-slate-800 focus:border-blue-600 outline-none transition-all resize-none h-32 shadow-sm" 
+                   className="w-full p-4 border border-gray-400 rounded-lg text-sm font-semibold focus:border-blue-600 outline-none resize-none h-40 shadow-inner bg-white" 
                  />
                </div>
 
                {showPdiWarning && (
-                 <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-500 mb-6 animate-in shake flex gap-3">
-                    <Info size={20} className="text-red-600 shrink-0" />
+                 <div className="bg-red-50 p-4 rounded-lg border-l-4 border-red-600 flex gap-3 animate-in slide-in-from-left">
+                    <Info size={24} className="text-red-600 shrink-0 mt-0.5" />
                     <div>
-                       <p className="text-sm font-bold text-red-700 uppercase mb-1">¡PDI Pendiente Detectado!</p>
-                       <p className="text-xs text-red-600 mb-3">Hay unidades nuevas sin validación técnica confirmada.</p>
-                       <button onClick={handleEmitRemito} className="px-4 py-2 bg-red-600 text-white rounded font-bold text-xs uppercase shadow-md hover:bg-red-700 w-full">Emitir Igual (Bajo Responsabilidad)</button>
+                       <p className="text-sm font-bold text-red-700 uppercase">¡PDI Pendiente!</p>
+                       <p className="text-[10px] font-semibold text-red-600 mb-2 leading-tight">Existen unidades en el manifiesto sin validación técnica certificada.</p>
+                       <button onClick={handleEmitRemito} className="px-3 py-1.5 bg-red-600 text-white rounded-lg font-bold text-[10px] uppercase tracking-widest w-full hover:bg-red-700 transition-colors shadow-md">EMITIR BAJO RESPONSABILIDAD</button>
                     </div>
                  </div>
                )}
@@ -437,134 +399,75 @@ export const Movements: React.FC = () => {
                <button 
                  onClick={handleEmitRemito}
                  disabled={selectedVins.length === 0 || !origin || !destination || !transporter || isSubmitting}
-                 className="w-full py-4 bg-slate-900 text-white rounded-xl font-bold text-sm uppercase tracking-widest shadow-xl hover:bg-slate-800 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:shadow-none flex justify-center items-center gap-2"
+                 className="w-full py-5 bg-slate-900 text-white rounded-xl font-bold text-sm uppercase tracking-[0.15em] shadow-2xl hover:bg-slate-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex justify-center items-center gap-3 transform active:scale-[0.98]"
                >
-                 {isSubmitting && <Loader2 size={18} className="animate-spin" />}
-                 {isSubmitting ? 'Procesando...' : 'Emitir Remito Oficial'}
+                 {isSubmitting ? <Loader2 size={20} className="animate-spin" /> : null}
+                 {isSubmitting ? 'PROCESANDO...' : 'EMITIR REMITO OFICIAL'}
                </button>
             </div>
           </div>
         </div>
       ) : (
-        /* SUCCESS SCREEN */
-        <div className="max-w-3xl mx-auto text-center py-10 animate-in zoom-in-95 no-print">
-           <div className="bg-white rounded-3xl shadow-2xl p-12 border border-gray-300">
-              <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
-                 <CheckCircle size={54} className="text-green-600" />
+        /* VISTA DE ÉXITO POST-EMISIÓN */
+        <div className="max-w-3xl mx-auto text-center py-12 animate-in zoom-in-95 no-print">
+           <div className="bg-white rounded-[2rem] shadow-2xl p-12 border border-gray-200">
+              <div className="w-24 h-24 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-8 shadow-inner">
+                 <CheckCircle size={56} className="text-emerald-600" />
               </div>
-              <h2 className="text-4xl font-black text-slate-900 uppercase tracking-tight mb-2">Remito Nº {successMovement.id}</h2>
-              <p className="text-sm font-bold text-gray-500 uppercase tracking-widest mb-12">Emitido correctamente por {successMovement.createdBy}</p>
+              <h2 className="text-4xl font-bold text-slate-900 uppercase tracking-tight mb-2">REMITO Nº {successMovement.id}</h2>
+              <p className="text-base font-bold text-gray-400 uppercase tracking-widest mb-10 italic">Operación registrada con éxito por {successMovement.createdBy}</p>
               
-              <div className="flex flex-col gap-4 px-12">
-                <button 
-                  onClick={() => window.print()}
-                  className="bg-blue-900 hover:bg-blue-800 text-white font-bold py-5 px-8 rounded-xl shadow-xl text-lg uppercase tracking-wide flex items-center justify-center gap-3 transition-all active:scale-95"
-                >
-                  <Printer size={24} /> IMPRIMIR DOCUMENTO
-                </button>
+              <div className="grid grid-cols-1 gap-4 max-w-md mx-auto">
+                  <button 
+                      className="w-full bg-blue-900 hover:bg-blue-950 text-white font-bold py-5 rounded-xl shadow-xl text-lg uppercase tracking-widest flex items-center justify-center gap-4 transition-all hover:scale-[1.02] active:scale-[0.98]"
+                      onClick={() => setIsPreviewOpen(true)}
+                  >
+                      <Printer size={28} />
+                      IMPRIMIR REMITO
+                  </button>
 
-                 <button onClick={handleReset} className="w-full py-5 bg-white border-2 border-gray-200 text-gray-500 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-gray-50 hover:text-gray-700 transition-all flex items-center justify-center gap-3">
-                   <ArrowLeft size={18} /> Volver a Operaciones
+                 <button onClick={() => setSuccessMovement(null)} className="w-full py-4 bg-slate-50 border border-gray-300 text-slate-600 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-white hover:border-slate-900 hover:text-slate-900 transition-all flex items-center justify-center gap-2">
+                   <ArrowLeft size={18} /> Volver a Nueva Operación
                  </button>
               </div>
            </div>
         </div>
       )}
 
-      {/* Add New Transport Modal */}
+      {/* MODAL ALTA DE TRANSPORTE RÁPIDO */}
       {isAddTransportOpen && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-300">
-           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 border border-gray-300 animate-in zoom-in-95 duration-300">
-              <div className="flex justify-between items-center mb-6 border-b border-gray-100 pb-4">
-                 <div className="flex items-center gap-3">
-                    <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                       <Plus size={20} strokeWidth={3} />
-                    </div>
-                    <h3 className="text-xl font-bold text-slate-900 uppercase">Alta de Transporte</h3>
-                 </div>
+        <div className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm z-[100] flex items-center justify-center p-4">
+           <div className="bg-white w-full max-w-md rounded-2xl shadow-2xl p-8 border border-gray-200 animate-in zoom-in-95">
+              <div className="flex justify-between items-center mb-8 border-b border-gray-100 pb-4">
+                 <h3 className="text-xl font-bold text-slate-900 uppercase tracking-tight flex items-center gap-3">
+                    <PlusCircle size={28} className="text-blue-600" />
+                    Alta de Transporte
+                 </h3>
                  <button onClick={() => setIsAddTransportOpen(false)} className="text-gray-400 hover:text-red-500 transition-colors">
-                    <X size={24} />
+                    <X size={28} />
                  </button>
               </div>
-
-              <form onSubmit={handleAddNewTransport} className="space-y-5">
-                 <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500 uppercase ml-1">Empresa Carrier *</label>
-                    <input 
-                       required
-                       type="text" 
-                       value={newTransport.name}
-                       onChange={e => setNewTransport({...newTransport, name: e.target.value})}
-                       className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:border-blue-500 outline-none font-semibold text-slate-800"
-                       placeholder="Ej: Logística Central"
-                    />
+              <div className="space-y-5">
+                 <div>
+                    <label className="text-[11px] font-bold uppercase text-gray-500 ml-1 tracking-widest">RAZÓN SOCIAL / NOMBRE</label>
+                    <input type="text" value={newTransportName} onChange={e => setNewTransportName(e.target.value)} className="w-full p-4 border border-gray-300 rounded-lg font-bold outline-none focus:border-blue-600 focus:bg-slate-50 transition-all text-lg" placeholder="Nombre de la empresa" />
                  </div>
-                 <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500 uppercase ml-1">Nombre Chofer</label>
-                    <input 
-                       type="text" 
-                       value={newTransport.driver}
-                       onChange={e => setNewTransport({...newTransport, driver: e.target.value})}
-                       className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:border-blue-500 outline-none font-semibold text-slate-800"
-                       placeholder="Nombre y Apellido"
-                    />
-                 </div>
-                 <div className="space-y-1.5">
-                    <label className="text-xs font-bold text-gray-500 uppercase ml-1">DNI</label>
-                    <input 
-                       type="text" 
-                       value={newTransport.dni}
-                       onChange={e => setNewTransport({...newTransport, dni: e.target.value})}
-                       className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:border-blue-500 outline-none font-semibold text-slate-800"
-                       placeholder="Documento"
-                    />
-                 </div>
-                 <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-1.5">
-                       <label className="text-xs font-bold text-gray-500 uppercase ml-1">Patente Tractor</label>
-                       <input 
-                          type="text" 
-                          value={newTransport.truck}
-                          onChange={e => setNewTransport({...newTransport, truck: e.target.value.toUpperCase()})}
-                          className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:border-blue-500 outline-none font-semibold text-slate-800 uppercase text-center"
-                          placeholder="AAA 000"
-                       />
-                    </div>
-                    <div className="space-y-1.5">
-                       <label className="text-xs font-bold text-gray-500 uppercase ml-1">Patente Acoplado</label>
-                       <input 
-                          type="text" 
-                          value={newTransport.trailer}
-                          onChange={e => setNewTransport({...newTransport, trailer: e.target.value.toUpperCase()})}
-                          className="w-full p-3 bg-white border border-gray-300 rounded-lg focus:border-blue-500 outline-none font-semibold text-slate-800 uppercase text-center"
-                          placeholder="BBB 111"
-                       />
-                    </div>
-                 </div>
-
                  <div className="flex gap-4 pt-4">
-                    <button 
-                       type="button"
-                       onClick={() => setIsAddTransportOpen(false)}
-                       className="flex-1 py-3 bg-gray-100 text-gray-600 rounded-lg font-bold text-xs uppercase hover:bg-gray-200 transition-all"
-                    >
-                       Cancelar
-                    </button>
-                    <button 
-                       type="submit"
-                       className="flex-1 py-3 bg-blue-600 text-white rounded-lg font-bold text-xs uppercase shadow-lg hover:bg-blue-700 transition-all active:scale-95"
-                    >
-                       Guardar
-                    </button>
+                    <button onClick={() => setIsAddTransportOpen(false)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-gray-200 transition-colors">CANCELAR</button>
+                    <button onClick={handleAddNewTransport} className="flex-1 py-4 bg-blue-600 text-white rounded-lg font-bold text-xs uppercase tracking-widest shadow-lg hover:bg-blue-700 transition-colors">GUARDAR ALTA</button>
                  </div>
-              </form>
+              </div>
            </div>
         </div>
       )}
 
-      {/* Hidden Remito Container for Native Print */}
+      {/* MODAL DE VISTA PREVIA E IMPRESIÓN OFICIAL */}
       {successMovement && (
-        <div className="hidden print:block">
+        <PrintPreviewModal 
+          isOpen={isPreviewOpen} 
+          onClose={() => setIsPreviewOpen(false)}
+          title={`Remito Oficial Nº ${successMovement.id}`}
+        >
           <RemitoDocument 
             movement={successMovement}
             company={currentCompany!}
@@ -576,7 +479,7 @@ export const Movements: React.FC = () => {
             trailerPlate={trailerPlate}
             unitObservations={unitObservations}
           />
-        </div>
+        </PrintPreviewModal>
       )}
     </div>
   );

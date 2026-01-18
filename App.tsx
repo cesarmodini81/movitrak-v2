@@ -5,12 +5,11 @@ import { AppProvider, useApp } from './context/AppContext';
 import { Login } from './pages/Login';
 import { Dashboard } from './pages/Dashboard';
 import { CalendarPage } from './pages/Calendar';
-import { OperationalPreDelivery } from './pages/OperationalPreDelivery';
+import { PlanillaLogistica } from './pages/PlanillaLogistica';
 import { Movements } from './pages/Movements';
 import { ConfirmMovements } from './pages/ConfirmMovements';
 import { CancelarMovimientos } from './pages/CancelarMovimientos';
-import { TravelSheet } from './pages/TravelSheet';
-import { HistoricalTravelSheet } from './pages/HistoricalTravelSheet';
+import { HistoricalLogistica } from './pages/HistoricalLogistica';
 import { ProgrammingPage } from './pages/Programming';
 import { AuditLogs } from './pages/AuditLogs';
 import { UsedReceptionPage } from './pages/UsedReception';
@@ -46,9 +45,13 @@ const AppRoutes: React.FC = () => {
       <Route path="/programming" element={<ProtectedRoute allowedRoles={[Role.PROGRAMADOR, Role.ADMIN, Role.SUPER_ADMIN]}><ProgrammingPage /></ProtectedRoute>} />
       <Route path="/calendar" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.PROGRAMADOR]}><CalendarPage /></ProtectedRoute>} />
       <Route path="/stock" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.PROGRAMADOR]}><StockPage /></ProtectedRoute>} />
-      <Route path="/pdi" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><OperationalPreDelivery /></ProtectedRoute>} />
-      <Route path="/travel-sheet" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><TravelSheet /></ProtectedRoute>} />
-      <Route path="/historical-travel-sheet" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><HistoricalTravelSheet /></ProtectedRoute>} />
+      
+      {/* Planilla Logística Unificada */}
+      <Route path="/planilla-logistica" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><PlanillaLogistica /></ProtectedRoute>} />
+      
+      {/* Histórica Logística */}
+      <Route path="/historica-logistica" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><HistoricalLogistica /></ProtectedRoute>} />
+      
       <Route path="/movements" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN, Role.USED_OPERATOR]}><Movements /></ProtectedRoute>} />
       <Route path="/confirm-movements" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><ConfirmMovements /></ProtectedRoute>} />
       <Route path="/movements/cancelar" element={<ProtectedRoute allowedRoles={[Role.OPERATOR, Role.ADMIN, Role.SUPER_ADMIN]}><CancelarMovimientos /></ProtectedRoute>} />

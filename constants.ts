@@ -3,7 +3,7 @@ import { Role, User, Company, Vehicle, CalendarEvent, Movement, ChatMessage, Par
 // --- LOCATION MAPPING ---
 export const LOCATION_MAP: Record<string, string> = {
   'loc_1_pred': 'Predio Sauce Viejo',
-  'loc_1_port': 'Puerto Sauce Viejo',
+  'loc_1_sfe': 'Nation Santa Fe',
   'loc_1_yard': 'Taller Chapa y Pintura',
   'loc_1_ds': 'DS Store Nation',
   'loc_1_rec': 'Nation Reconquista',
@@ -14,7 +14,7 @@ export const LOCATION_MAP: Record<string, string> = {
   'loc_1_used_sf': 'Usados Santa Fe',
   'loc_1_sj': 'Depósito San Juan', 
   
-  'loc_2_main': 'Predio Escobar (Central)',
+  'loc_2_main': 'Predio Sauce Viejo',
   'loc_2_sf': 'Escobar Santa Fe',
   'loc_2_paint': 'Taller Escobar',
   'loc_2_deposit': 'Depósito San Juan',
@@ -493,7 +493,7 @@ export const MOCK_EVENTS = [
     details: "PRIORIDAD_ALTA | Despacho urgente Escobar Central",
     vehicleId: "8AJH10001",
     vehicleVin: "8AJH10001",
-    destination: "Predio Escobar (Central)",
+    destination: "Predio Sauce Viejo",
     destinationId: "loc_2_main",
     createdBy: "SYSTEM",
     createdById: "system"
@@ -578,7 +578,7 @@ export const MOCK_EVENTS = [
     details: "PRIORIDAD_BAJA | Ingreso stock nuevo Escobar",
     vehicleId: "8AJH10011",
     vehicleVin: "8AJH10011",
-    destination: "Predio Escobar (Central)",
+    destination: "Predio Sauce Viejo",
     destinationId: "loc_2_main",
     createdBy: "SYSTEM",
     createdById: "system"
@@ -663,7 +663,7 @@ export const MOCK_EVENTS = [
     details: "PRIORIDAD_BAJA | Cierre logística enero",
     vehicleId: "8AJH10021",
     vehicleVin: "8AJH10021",
-    destination: "Predio Escobar (Central)",
+    destination: "Predio Sauce Viejo",
     destinationId: "loc_2_main",
     createdBy: "SYSTEM",
     createdById: "system"
