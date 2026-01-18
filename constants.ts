@@ -1,3 +1,4 @@
+
 import { Role, User, Company, Vehicle, CalendarEvent, Movement, ChatMessage, Part } from './types';
 
 // --- LOCATION MAPPING ---
@@ -112,12 +113,27 @@ export const generateMockVehicles = (): Vehicle[] => {
     const isNation = i % 2 === 0;
     const brand = isNation ? 'Toyota' : 'Ford'; 
     const model = MODELS[brand][Math.floor(Math.random() * (MODELS[brand]?.length || 1))];
-    const locationId = isNation ? 'loc_1_pred' : 'loc_2_main';
+    
+    // RESTAURACIÓN DE LÓGICA DE USADOS (1 de cada 5 son usados)
+    const isUsed = i % 5 === 0;
+    const locationId = isUsed 
+      ? (isNation ? 'loc_1_used_sf' : 'loc_2_used_sf')
+      : (isNation ? 'loc_1_pred' : 'loc_2_main');
+
     vehicles.push({
       vin: `8AJH${10000 + i}ARX${Math.floor(Math.random()*90)+10}`,
-      brand, model, year: 2024, color: COLORS[Math.floor(Math.random() * 8)],
-      type: 'NEW', locationId: locationId, entryDate: baseDate.toISOString(),
-      preDeliveryConfirmed: i % 3 === 0, status: 'AVAILABLE', isLocked: false,
+      brand, 
+      model, 
+      year: isUsed ? 2018 + (i % 6) : 2024, 
+      color: COLORS[Math.floor(Math.random() * 8)],
+      type: isUsed ? 'USED' : 'NEW', 
+      locationId: locationId, 
+      entryDate: baseDate.toISOString(),
+      preDeliveryConfirmed: isUsed ? true : (i % 3 === 0), 
+      status: 'AVAILABLE', 
+      isLocked: false,
+      km: isUsed ? 22000 + (i * 350) : undefined,
+      plate: isUsed ? `AA ${100 + i} BB` : undefined
     });
   }
   return vehicles;
