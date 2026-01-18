@@ -11,7 +11,7 @@ import {
 import { DayUnitsModal } from '../components/DayUnitsModal';
 
 // Tipos de Prioridad para la lógica de UX
-type Priority = 'URGENTE' | 'ALERTA' | 'NORMAL';
+type Priority = 'URGENTE' | 'ALERTA' | 'NORMAL' | 'VENCIDO';
 
 export interface CalendarModalItem {
   vehicle: Vehicle;
@@ -33,19 +33,35 @@ export const CalendarPage: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
 
   // --- Lógica de Prioridad Semáforo (Basado en Horas Restantes) ---
-  const getPriority = (dateStr: string, timeStr: string): Priority => {
+  const getPriorityData = (dateStr: string, timeStr: string) => {
     const eventDate = new Date(`${dateStr}T${timeStr}:00`);
     const diffMs = eventDate.getTime() - NOW_REF.getTime();
-    const diffHours = diffMs / (1000 * 60 * 60);
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
 
-    if (diffHours < 48) return 'URGENTE'; // Rojo: Menos de 48h (Crítico)
-    if (diffHours <= 72) return 'ALERTA';  // Amarillo: 48-72h (Atención)
-    return 'NORMAL';                      // Verde: Más de 72h (Programado)
+    let color = 'bg-green-500';
+    let label = 'en tiempo';
+    let priority: Priority = 'NORMAL';
+    
+    if (diffHours < 0) {
+      color = 'bg-red-800';
+      label = 'vencido';
+      priority = 'VENCIDO';
+    } else if (diffHours < 48) {
+      color = 'bg-red-600';
+      label = 'urgencia alta';
+      priority = 'URGENTE';
+    } else if (diffHours <= 72) {
+      color = 'bg-orange-500';
+      label = 'prioridad media';
+      priority = 'ALERTA';
+    }
+    
+    return { color, label, hours: diffHours, priority };
   };
 
   // --- Integración de Mocks y Filtrado por Empresa ---
   const calendarData = useMemo(() => {
-    const data: Record<string, { type: 'ENTREGA' | 'DESPACHO', ref: any, vehicle: Vehicle, priority: Priority }[]> = {};
+    const data: Record<string, { type: 'ENTREGA' | 'DESPACHO', ref: any, vehicle: Vehicle, pData: any }[]> = {};
     
     // Identificar Empresa Activa
     const activeCompId = currentCompany?.id || user?.companyId;
@@ -86,7 +102,7 @@ export const CalendarPage: React.FC = () => {
           type: evt.type === 'MOVEMENT' ? 'DESPACHO' : 'ENTREGA',
           ref: evt,
           vehicle,
-          priority: getPriority(evt.date, evt.time)
+          pData: getPriorityData(evt.date, evt.time)
         });
       }
     });
@@ -128,14 +144,13 @@ export const CalendarPage: React.FC = () => {
       time: item.ref.time,
       eventId: item.ref.id,
       type: item.type,
-      priority: item.priority
+      priority: item.pData.priority
     }));
   };
 
   const monthLabel = currentDate.toLocaleDateString('es-ES', { month: 'long', year: 'numeric' });
 
   return (
-    // PADDING TOP AUMENTADO (pt-20 md:pt-24)
     <div className="flex flex-col h-[calc(100vh-140px)] min-h-[550px] lg:min-h-[750px] bg-white rounded-[2rem] lg:rounded-[2.5rem] shadow-2xl border border-slate-200 overflow-hidden no-print animate-in fade-in duration-500 pt-20 md:pt-24">
       
       {/* HEADER: UX ENTERPRISE */}
@@ -217,25 +232,27 @@ export const CalendarPage: React.FC = () => {
                   {items.slice(0, 3).map((item, i) => (
                     <div 
                       key={i}
-                      className={`h-1.5 lg:h-2 w-full rounded-full transition-all flex items-center px-1 lg:px-1.5 gap-1.5 group/badge ${
-                        item.priority === 'URGENTE' ? 'bg-red-500 shadow-[0_2px_8px_rgba(239,68,68,0.4)]' :
-                        item.priority === 'ALERTA' ? 'bg-amber-400' : 'bg-emerald-500'
-                      } hover:scale-y-110`}
-                      title={`${item.vehicle.brand} ${item.vehicle.model} | ${item.ref.time}hs | VIN: ${item.vehicle.vin.slice(-6)}`}
+                      className="flex items-center gap-1.5 py-1 px-2 rounded hover:bg-slate-50 transition-colors w-full"
+                      title={`Quedan ${item.pData.hours} horas – ${item.pData.label}`}
                     >
-                       <div className="hidden xl:block truncate text-[7px] font-black text-white uppercase tracking-tighter">
+                       {/* PRIORIDAD PUNTO */}
+                       <div className={`w-2 h-2 rounded-full shrink-0 shadow-sm ${item.pData.color}`}></div>
+                       
+                       <div className="hidden xl:block truncate text-[7.5px] font-black text-slate-700 uppercase tracking-tighter">
                           {item.ref.time} - {item.vehicle.model}
                        </div>
+                       
+                       {/* Indicador visual móvil */}
+                       <div className={`xl:hidden h-1.5 w-full rounded-full ${item.pData.color}`}></div>
                     </div>
                   ))}
                   {items.length > 3 && (
-                    <div className="text-[8px] font-black text-slate-400 pl-1 uppercase tracking-widest mt-1 hidden lg:block">
+                    <div className="text-[8px] font-black text-slate-400 pl-2 uppercase tracking-widest mt-1 hidden lg:block">
                       + {items.length - 3} pendientes
                     </div>
                   )}
                 </div>
                 
-                {/* Indicador de actividad mensual */}
                 {dayObj.isCurrentMonth && items.length > 0 && (
                    <div className="absolute bottom-1 right-1 lg:bottom-2 lg:right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <div className="p-0.5 lg:p-1 bg-slate-900 text-white rounded-md">
@@ -253,16 +270,20 @@ export const CalendarPage: React.FC = () => {
       <footer className="px-6 py-3 lg:px-10 lg:py-5 bg-slate-950 border-t border-slate-800 flex items-center justify-between text-white shrink-0">
           <div className="flex items-center gap-4 lg:gap-10">
             <div className="flex items-center gap-2 lg:gap-3">
-              <div className="w-2 h-2 lg:w-3 lg:h-3 rounded-full bg-red-500 ring-2 lg:ring-4 ring-red-500/20 shadow-[0_0_10px_rgba(239,68,68,0.5)]"></div>
+              <div className="w-2 h-2 lg:w-3 lg:h-3 rounded-full bg-red-800 ring-2 lg:ring-4 ring-red-800/20"></div>
+              <span className="text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Vencido</span>
+            </div>
+            <div className="flex items-center gap-2 lg:gap-3">
+              <div className="w-2 h-2 lg:w-3 lg:h-3 rounded-full bg-red-600 ring-2 lg:ring-4 ring-red-600/20"></div>
               <span className="text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Crítico (&lt;48h)</span>
             </div>
             <div className="flex items-center gap-2 lg:gap-3">
-              <div className="w-2 h-2 lg:w-3 lg:h-3 rounded-full bg-amber-400 ring-2 lg:ring-4 ring-amber-400/20 shadow-[0_0_10px_rgba(251,191,36,0.5)]"></div>
+              <div className="w-2 h-2 lg:w-3 lg:h-3 rounded-full bg-orange-500 ring-2 lg:ring-4 ring-orange-500/20"></div>
               <span className="text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Atención (48-72h)</span>
             </div>
             <div className="hidden md:flex items-center gap-2 lg:gap-3">
-              <div className="w-2 h-2 lg:w-3 lg:h-3 rounded-full bg-emerald-500 ring-2 lg:ring-4 ring-emerald-500/20 shadow-[0_0_10px_rgba(16,185,129,0.5)]"></div>
-              <span className="text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 italic">Normal (&gt;72h)</span>
+              <div className="w-2 h-2 lg:w-3 lg:h-3 rounded-full bg-green-500 ring-2 lg:ring-4 ring-green-500/20"></div>
+              <span className="text-[8px] lg:text-[9px] font-black uppercase tracking-[0.2em] text-slate-400 italic">En Tiempo (&gt;72h)</span>
             </div>
           </div>
           
@@ -272,7 +293,7 @@ export const CalendarPage: React.FC = () => {
                 <span className="text-[7px] lg:text-[8px] font-bold uppercase tracking-widest leading-none">Datos Filtrados por Empresa Activa</span>
              </div>
              <div className="w-px h-3 bg-slate-800 mx-2 hidden lg:block"></div>
-             <span className="hidden lg:inline text-[8px] font-bold text-slate-600 uppercase tracking-widest">v2.8.5 STABLE</span>
+             <span className="hidden lg:inline text-[8px] font-bold text-slate-600 uppercase tracking-widest">v2.9.0 STABLE</span>
           </div>
       </footer>
 
