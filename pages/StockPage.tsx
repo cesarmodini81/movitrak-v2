@@ -6,10 +6,10 @@ import {
   AlertCircle, Car, Calendar, Tag, Filter, Clock
 } from 'lucide-react';
 import { LOCATION_MAP } from '../constants';
-import { Vehicle } from '../types';
+import { Vehicle, Role } from '../types';
 
 export const StockPage: React.FC = () => {
-  const { availableVehicles, currentCompany, calendarEvents, companies, movements } = useApp();
+  const { vehicles, user, currentCompany, calendarEvents, companies, movements } = useApp();
   
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('all');
@@ -27,7 +27,6 @@ export const StockPage: React.FC = () => {
 
   // Lógica de cálculo de Estadía (Días en ubicación actual)
   const getStayInfo = (vehicle: Vehicle) => {
-    // 1. Buscar último movimiento completado donde el destino fue la ubicación actual
     const lastMovement = movements
       .filter(m => 
         m.vehicleVins.includes(vehicle.vin) && 
@@ -36,7 +35,6 @@ export const StockPage: React.FC = () => {
       )
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())[0];
 
-    // 2. Definir fecha de referencia (Movimiento o Ingreso original)
     const entryDateStr = lastMovement ? lastMovement.date : vehicle.entryDate;
     
     if (!entryDateStr) return { label: '-', color: 'text-slate-300', bg: 'bg-transparent', rawDate: 'N/A' };
@@ -46,7 +44,6 @@ export const StockPage: React.FC = () => {
     const diffTime = today.getTime() - entryDate.getTime();
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    // 3. Formato y Semáforo de Alerta
     let color = 'text-emerald-700';
     let bg = 'bg-emerald-50 border-emerald-100';
     
@@ -68,9 +65,19 @@ export const StockPage: React.FC = () => {
     };
   };
 
-  // Filter Logic
+  // Lógica de filtrado por empresa (Ignorando restricciones de tipo de vehículo por rol en esta pantalla)
+  const companyVehicles = useMemo(() => {
+    if (user?.role === Role.SUPER_ADMIN && !currentCompany) return vehicles;
+    if (currentCompany) {
+      const validLocationIds = currentCompany.locations.map(l => l.id);
+      return vehicles.filter(v => validLocationIds.includes(v.locationId));
+    }
+    return [];
+  }, [vehicles, currentCompany, user]);
+
+  // Filter Logic final
   const filteredVehicles = useMemo(() => {
-    return availableVehicles.filter(v => {
+    return companyVehicles.filter(v => {
       // 1. Tab Filter
       if (activeTab === 'NEW' && v.type !== 'NEW') return false;
       if (activeTab === 'USED' && v.type !== 'USED') return false;
@@ -91,9 +98,8 @@ export const StockPage: React.FC = () => {
 
       return true;
     });
-  }, [availableVehicles, activeTab, selectedLocation, searchTerm]);
+  }, [companyVehicles, activeTab, selectedLocation, searchTerm]);
 
-  // Determine "Lugar de Entrega" based on programming
   const getDeliveryPlace = (vin: string) => {
     const event = calendarEvents.find(e => e.vehicleVin === vin && e.status === 'PROGRAMADO');
     if (event) {

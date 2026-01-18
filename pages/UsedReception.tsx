@@ -36,7 +36,7 @@ export const UsedReceptionPage: React.FC = () => {
 
   const [reception, setReception] = useState(initialReception);
   const [vehicleData, setVehicleData] = useState<Partial<Vehicle>>({
-    vin: '', brand: BRANDS[0], model: MODELS[BRANDS[0]][0], year: 2020, color: COLORS[0], type: 'USED'
+    vin: '', brand: 'Toyota', model: 'Corolla', year: 2020, color: 'Blanco', type: 'USED'
   });
 
   const handleSave = (status: 'INGRESADO' | 'CONFIRMADO') => {
@@ -107,23 +107,47 @@ export const UsedReceptionPage: React.FC = () => {
                   <div className="grid grid-cols-2 gap-4 col-span-full">
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Marca</label>
-                      <select value={vehicleData.brand} onChange={(e) => setVehicleData({...vehicleData, brand: e.target.value, model: MODELS[e.target.value]?.[0] || ''})} className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" disabled={formState !== 'IDLE'}>
-                        {BRANDS.map(b => <option key={b} value={b}>{b}</option>)}
-                      </select>
+                      <input 
+                        type="text" 
+                        value={vehicleData.brand} 
+                        onChange={(e) => setVehicleData({...vehicleData, brand: e.target.value.toUpperCase()})} 
+                        className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none font-bold text-sm lg:text-base transition-all uppercase placeholder:normal-case" 
+                        placeholder="Ingresar marca"
+                        disabled={formState !== 'IDLE'} 
+                      />
                     </div>
                     <div className="space-y-2">
                       <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Modelo</label>
-                      <select value={vehicleData.model} onChange={(e) => setVehicleData({...vehicleData, model: e.target.value})} className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" disabled={formState !== 'IDLE'}>
-                        {MODELS[vehicleData.brand || 'Toyota']?.map(m => <option key={m} value={m}>{m}</option>)}
-                      </select>
+                      <input 
+                        type="text" 
+                        value={vehicleData.model} 
+                        onChange={(e) => setVehicleData({...vehicleData, model: e.target.value.toUpperCase()})} 
+                        className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none font-bold text-sm lg:text-base transition-all uppercase placeholder:normal-case" 
+                        placeholder="Ingresar modelo"
+                        disabled={formState !== 'IDLE'} 
+                      />
                     </div>
                   </div>
                   <div className="grid grid-cols-3 gap-4 col-span-full">
-                    <input type="number" value={vehicleData.year} onChange={(e) => setVehicleData({...vehicleData, year: parseInt(e.target.value)})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" placeholder="Año" disabled={formState !== 'IDLE'} />
-                    <select value={vehicleData.color} onChange={(e) => setVehicleData({...vehicleData, color: e.target.value})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" disabled={formState !== 'IDLE'}>
-                       {COLORS.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
-                    <input type="number" value={reception.kmReception} onChange={(e) => setReception({...reception, kmReception: parseInt(e.target.value)})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" placeholder="Kilometraje" disabled={formState !== 'IDLE'} />
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest ml-1">Año</label>
+                      <input type="number" value={vehicleData.year} onChange={(e) => setVehicleData({...vehicleData, year: parseInt(e.target.value)})} className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base focus:bg-white focus:border-slate-900 outline-none transition-all" placeholder="Año" disabled={formState !== 'IDLE'} />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest ml-1">Color</label>
+                      <input 
+                        type="text" 
+                        value={vehicleData.color} 
+                        onChange={(e) => setVehicleData({...vehicleData, color: e.target.value.toUpperCase()})} 
+                        className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:bg-white focus:border-slate-900 outline-none font-bold text-sm lg:text-base transition-all uppercase placeholder:normal-case" 
+                        placeholder="Ingresar color"
+                        disabled={formState !== 'IDLE'} 
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-black text-slate-300 uppercase tracking-widest ml-1">KM</label>
+                      <input type="number" value={reception.kmReception} onChange={(e) => setReception({...reception, kmReception: parseInt(e.target.value)})} className="w-full p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base focus:bg-white focus:border-slate-900 outline-none transition-all" placeholder="Kilometraje" disabled={formState !== 'IDLE'} />
+                    </div>
                   </div>
                </div>
             </section>
@@ -133,9 +157,9 @@ export const UsedReceptionPage: React.FC = () => {
                   <h3 className="text-[11px] font-black text-slate-900 uppercase tracking-widest">II. Titular Registral</h3>
                </div>
                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 lg:gap-6">
-                  <input type="text" value={reception.clientName} onChange={(e) => setReception({...reception, clientName: e.target.value})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold col-span-full text-sm lg:text-base" placeholder="Nombre y Apellido Titular *" disabled={formState !== 'IDLE'} />
-                  <input type="text" value={reception.clientDni} onChange={(e) => setReception({...reception, clientDni: e.target.value})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" placeholder="DNI / CUIT" disabled={formState !== 'IDLE'} />
-                  <input type="text" value={reception.clientPhone} onChange={(e) => setReception({...reception, clientPhone: e.target.value})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base" placeholder="Teléfono" disabled={formState !== 'IDLE'} />
+                  <input type="text" value={reception.clientName} onChange={(e) => setReception({...reception, clientName: e.target.value})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold col-span-full text-sm lg:text-base focus:bg-white focus:border-slate-900 outline-none transition-all" placeholder="Nombre y Apellido Titular *" disabled={formState !== 'IDLE'} />
+                  <input type="text" value={reception.clientDni} onChange={(e) => setReception({...reception, clientDni: e.target.value})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base focus:bg-white focus:border-slate-900 outline-none transition-all" placeholder="DNI / CUIT" disabled={formState !== 'IDLE'} />
+                  <input type="text" value={reception.clientPhone} onChange={(e) => setReception({...reception, clientPhone: e.target.value})} className="p-3 lg:p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold text-sm lg:text-base focus:bg-white focus:border-slate-900 outline-none transition-all" placeholder="Teléfono" disabled={formState !== 'IDLE'} />
                </div>
             </section>
 
